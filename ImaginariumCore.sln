@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29201.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imaginarium", "Imaginarium\Imaginarium.csproj", "{E61502D7-5525-4680-B9E0-38EBA370FAE4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2E261C34-752F-4334-A31C-A28944776F78}"
+	ProjectSection(SolutionItems) = preProject
+		CatSAT\CatSAT.dll = CatSAT\CatSAT.dll
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{539B614A-373F-4D8B-9910-3054F4B5B8B5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E61502D7-5525-4680-B9E0-38EBA370FAE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E61502D7-5525-4680-B9E0-38EBA370FAE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E61502D7-5525-4680-B9E0-38EBA370FAE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E61502D7-5525-4680-B9E0-38EBA370FAE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{539B614A-373F-4D8B-9910-3054F4B5B8B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{539B614A-373F-4D8B-9910-3054F4B5B8B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{539B614A-373F-4D8B-9910-3054F4B5B8B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{539B614A-373F-4D8B-9910-3054F4B5B8B5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {401A6F62-4FBB-40B2-9372-40ECF31DC8FB}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E61502D7-5525-4680-B9E0-38EBA370FAE4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Imaginarium</RootNamespace>
+    <AssemblyName>Imaginarium</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CatSAT">
+      <HintPath>..\CatSAT\CatSAT.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Driver\DataFiles.cs" />
+    <Compile Include="Driver\Driver.cs" />
+    <Compile Include="Driver\LogFile.cs" />
+    <Compile Include="Generator\Generator.cs" />
+    <Compile Include="Generator\Invention.cs" />
+    <Compile Include="Ontology\Adjective.cs" />
+    <Compile Include="Ontology\CommonNoun.cs" />
+    <Compile Include="Ontology\Concept.cs" />
+    <Compile Include="Ontology\Individual.cs" />
+    <Compile Include="Ontology\MonadicConcept.cs" />
+    <Compile Include="Ontology\MonadicConceptLiteral.cs" />
+    <Compile Include="Ontology\NameCollisionException.cs" />
+    <Compile Include="Ontology\Noun.cs" />
+    <Compile Include="Ontology\Ontology.cs" />
+    <Compile Include="Ontology\Part.cs" />
+    <Compile Include="Ontology\ProperNoun.cs" />
+    <Compile Include="Ontology\Property.cs" />
+    <Compile Include="Ontology\Referent.cs" />
+    <Compile Include="Ontology\Test.cs" />
+    <Compile Include="Ontology\TokenTrie.cs" />
+    <Compile Include="Ontology\Verb.cs" />
+    <Compile Include="Parsing\AP.cs" />
+    <Compile Include="Parsing\ClosedClassSegment.cs" />
+    <Compile Include="Parsing\ClosedClassSegmentWithValue.cs" />
+    <Compile Include="Parsing\Constituents.cs" />
+    <Compile Include="Parsing\Extensions.cs" />
+    <Compile Include="Parsing\GrammaticalError.cs" />
+    <Compile Include="Parsing\Inflection.cs" />
+    <Compile Include="Parsing\NP.cs" />
+    <Compile Include="Parsing\Parser.cs" />
+    <Compile Include="Parsing\QuantifyingDeterminer.cs" />
+    <Compile Include="Parsing\ReferringExpression.cs" />
+    <Compile Include="Parsing\ReferringExpressionList.cs" />
+    <Compile Include="Parsing\Segment.cs" />
+    <Compile Include="Parsing\SentencePattern.cs" />
+    <Compile Include="Parsing\SimpleClosedClassSegment.cs" />
+    <Compile Include="Parsing\SpreadSheet.cs" />
+    <Compile Include="Parsing\StandardSentencePatterns.cs" />
+    <Compile Include="Parsing\Tokenizer.cs" />
+    <Compile Include="Parsing\TokenString.cs" />
+    <Compile Include="Parsing\UserException.cs" />
+    <Compile Include="Parsing\VerbSegment.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Inflections\Irregular nouns.txt" />
+    <Content Include="Inflections\Regular nouns.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Inflections\Irregular verbs.csv" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
