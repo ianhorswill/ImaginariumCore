@@ -29,12 +29,25 @@ using System.Linq;
 
 namespace Imaginarium.Parsing
 {
+    /// <summary>
+    /// A closed-class segment that can denote a value of type T
+    /// Note: in practice this is used for types that are not Concepts but rather
+    /// things like numbers.
+    /// </summary>
+    /// <typeparam name="T">Type of the denoted value</typeparam>
     public class ClosedClassSegmentWithValue<T> : ClosedClassSegment
     {
+        /// <summary>
+        /// The value denoted by the matched phrase
+        /// </summary>
         public T Value;
 
+        /// <summary>
+        /// Allowable token strings that can be matched, along with the values they denote.
+        /// </summary>
         public readonly KeyValuePair<string[], T>[] PossibleMatches;
 
+        /// <inheritdoc />
         public ClosedClassSegmentWithValue(Parser parser, params KeyValuePair<object, T>[] possibleMatches) : base(parser)
         {
             PossibleMatches = possibleMatches.Select(m =>
@@ -54,6 +67,7 @@ namespace Imaginarium.Parsing
             IsPossibleStart = token => PossibleBeginnings.Contains(token);
         }
 
+        /// <inheritdoc />
         public override bool ScanTo(Func<string, bool> endPredicate)
         {
             if (!IsPossibleStart(CurrentToken))
@@ -74,6 +88,7 @@ namespace Imaginarium.Parsing
             return !EndOfInput && endPredicate(CurrentToken);
         }
 
+        /// <inheritdoc />
         public override bool ScanTo(string token)
         {
             if (EndOfInput || !IsPossibleStart(CurrentToken))
@@ -94,6 +109,7 @@ namespace Imaginarium.Parsing
             return !EndOfInput && CurrentToken == token;
         }
 
+        /// <inheritdoc />
         public override bool ScanToEnd(bool failOnConjunction = true)
         {
             if (!IsPossibleStart(CurrentToken))
@@ -114,6 +130,7 @@ namespace Imaginarium.Parsing
             return EndOfInput;
         }
 
+        /// <inheritdoc />
         public override IEnumerable<string> Keywords
         {
             get

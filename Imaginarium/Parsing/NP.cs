@@ -326,6 +326,7 @@ namespace Imaginarium.Parsing
             ForceCommonNoun = false;
         }
 
+        /// <inheritdoc />
         public NP(Parser parser) : base(parser)
         {
         }

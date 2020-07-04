@@ -63,9 +63,14 @@ namespace Imaginarium.Parsing
             "towards", "toward", "from", "of",  "about"
         };
 
+        /// <summary>
+        /// True if the word can be used as a preposition
+        /// </summary>
         public static bool IsPreposition(string word) => Prepositions.Contains(word);
 
-
+        /// <summary>
+        /// The plural form of a singular noun
+        /// </summary>
         public static string[] PluralOfNoun(string[] singular)
         {
             var plural = new string[singular.Length];
@@ -75,6 +80,9 @@ namespace Imaginarium.Parsing
             return plural;
         }
 
+        /// <summary>
+        /// The plural form of a one-word singular noun
+        /// </summary>
         public static string PluralOfNoun(string singular)
         {
             if (IrregularPlurals.TryGetValue(singular, out string plural))
@@ -86,6 +94,10 @@ namespace Imaginarium.Parsing
                 $"In this context, the term '<i>{singular}</i>' appears to be a singular noun, but I can't find a plural inflection for it");
         }
 
+
+        /// <summary>
+        /// The singular form of a one-word plural noun
+        /// </summary>
         public static string SingularOfNoun(string plural)
         {
             if (IrregularSingulars.TryGetValue(plural, out string singular))
@@ -97,6 +109,9 @@ namespace Imaginarium.Parsing
                 $"In this context, the term '<i>{plural}</i>' appears to be a plural noun, but I can't find a singular inflection for it");
         }
 
+        /// <summary>
+        /// The singular form of a plural noun
+        /// </summary>
         public static string[] SingularOfNoun(string[] plural)
         {
             var singular = new string[plural.Length];
@@ -106,6 +121,9 @@ namespace Imaginarium.Parsing
             return singular;
         }
 
+        /// <summary>
+        /// Heuristically guess is this one-word noun is in plural form
+        /// </summary>
         public static bool NounAppearsPlural(string plural)
         {
             if (IrregularSingulars.ContainsKey(plural))
@@ -116,17 +134,26 @@ namespace Imaginarium.Parsing
             return false;
         }
 
+        /// <summary>
+        /// Heuristically guess is this noun is in plural form
+        /// </summary>
         public static bool NounAppearsPlural(string[] plural)
         {
             return NounAppearsPlural(plural[plural.Length-1]);
         }
 
+        /// <summary>
+        /// The singular form of a plural form verb
+        /// </summary>
         public static string[] SingularOfVerb(string[] plural)
         {
             if (ContainsCopula(plural))
                 return ReplaceCopula(plural, "is");        return PluralOfNoun(plural);
         }
 
+        /// <summary>
+        /// The plural form of a singular form verb
+        /// </summary>
         public static string[] PluralOfVerb(string[] singular)
         {
             if (ContainsCopula(singular))
@@ -134,9 +161,17 @@ namespace Imaginarium.Parsing
             return SingularOfNoun(singular);
         }
 
+        /// <summary>
+        /// Heuristically guess if this verb is in gerund form
+        /// </summary>
         public static bool IsGerund(string[] verbal) =>
             ContainsCopula(verbal) || verbal[0].EndsWith("ing");
 
+        /// <summary>
+        /// Enumerate every potential gerund form of a (third person) plural verb
+        /// It's hard to know algorithmically which is correct, so we just allow
+        /// all of them.
+        /// </summary>
         public static IEnumerable<string[]> GerundsOfVerb(string[] plural)
         {
             if (ContainsCopula(plural))
@@ -153,6 +188,11 @@ namespace Imaginarium.Parsing
             }
         }
 
+        /// <summary>
+        /// Enumerate every possible gerund form of a single-word verb.
+        /// It's hard to know algorithmically which one is correct, so we allow
+        /// all of them.
+        /// </summary>
         private static IEnumerable<string> RegularGerundsOfWord(string s)
         {
             if (EndsWithVowel(s))
@@ -170,6 +210,9 @@ namespace Imaginarium.Parsing
             }
         }
 
+        /// <summary>
+        /// Convert the gerund form of a verb to its base form
+        /// </summary>
         public static string[] BaseFormOfGerund(string[] gerund)
         {
             if (gerund.Contains("being"))
@@ -221,6 +264,9 @@ namespace Imaginarium.Parsing
         private static readonly string[] CopularForms = {"is", "are", "being", "be" };
         private static bool ContainsCopula(string[] tokens) => tokens.Any(word => CopularForms.Contains(word));
 
+        /// <summary>
+        /// Replace any occurence of the copula (e.g. is/are/be/being) with the specified replacement
+        /// </summary>
         public static string[] ReplaceCopula(string[] tokens, string replacement) => tokens.Select(word => CopularForms.Contains(word) ? replacement : word).ToArray();
 
         private static IEnumerable<T> Replace<T>(this IEnumerable<T> seq, T from, T to) =>
@@ -259,6 +305,9 @@ namespace Imaginarium.Parsing
             }
         }
 
+        /// <summary>
+        /// Determine the passive participle of a verb given its base form
+        /// </summary>
         public static string[] PassiveParticiple(string[] baseForm)
         {
             if (baseForm.Length == 1 && IrregularVerbs.LookupOrNull(baseForm[0], "Passive participle") is string irregular)

@@ -29,15 +29,22 @@ using System.Linq;
 
 namespace Imaginarium.Parsing
 {
+    /// <summary>
+    /// A segment that can match one of a fixed, predefined set of phrases.
+    /// </summary>
     public class SimpleClosedClassSegment : ClosedClassSegment
     {
+        /// <summary>
+        /// Specific phrases this segment is allowed to match
+        /// </summary>
         public string[][] PossibleMatches;
 
         /// <summary>
         /// This constituent is always optional; it can match the empty string.
         /// </summary>
         public bool Optional;
-    
+
+        /// <inheritdoc />
         public SimpleClosedClassSegment(Parser parser, params object[] possibleMatches) : base(parser)
         {
             PossibleMatches = possibleMatches.Select(m =>
@@ -57,6 +64,7 @@ namespace Imaginarium.Parsing
             IsPossibleStart = token => PossibleBeginnings.Contains(token);
         }
 
+        /// <inheritdoc />
         public override bool ScanTo(Func<string, bool> endPredicate)
         {
             if (!Optional && !IsPossibleStart(CurrentToken))
@@ -77,6 +85,7 @@ namespace Imaginarium.Parsing
             return Optional || (MatchedText != null && !EndOfInput && CurrentToken != "'" && endPredicate(CurrentToken));
         }
 
+        /// <inheritdoc />
         public override bool ScanTo(string token)
         {
             if (!Optional && (EndOfInput || !IsPossibleStart(CurrentToken)))
@@ -96,6 +105,7 @@ namespace Imaginarium.Parsing
             return Optional || (!EndOfInput && CurrentToken == token);
         }
 
+        /// <inheritdoc />
         public override bool ScanToEnd(bool failOnConjunction = true)
         {
             if (!Optional && !IsPossibleStart(CurrentToken))
@@ -115,8 +125,10 @@ namespace Imaginarium.Parsing
             return EndOfInput;
         }
 
+        /// <inheritdoc />
         public override string[] Text => MatchedText;
 
+        /// <inheritdoc />
         public override IEnumerable<string> Keywords
         {
             get

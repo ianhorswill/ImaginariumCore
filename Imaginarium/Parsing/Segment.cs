@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+#pragma warning disable 1591
 
 namespace Imaginarium.Parsing
 {
@@ -43,8 +44,8 @@ namespace Imaginarium.Parsing
         protected bool EndOfInput => Parser.EndOfInput;
         protected string CurrentToken => Parser.CurrentToken;
         protected List<string> Input => Parser.Input;
-        protected Parser.ScannerState State => Parser.State;
-        protected void ResetTo(Parser.ScannerState s) => Parser.ResetTo(s);
+        internal Parser.ScannerState State => Parser.State;
+        internal void ResetTo(Parser.ScannerState s) => Parser.ResetTo(s);
         protected void SkipToken() => Parser.SkipToken();
         protected void Backup() => Parser.Backup();
 
@@ -175,7 +176,7 @@ namespace Imaginarium.Parsing
         public virtual void ParseModifiers()
         { }
 
-        protected void SetText(Parser.ScannerState from)
+        internal void SetText(Parser.ScannerState from)
         {
             SetText(from, State);
         }

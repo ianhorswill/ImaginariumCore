@@ -36,6 +36,8 @@ namespace Imaginarium.Parsing
         /// Rich text version of the error message
         /// </summary>
         public readonly string RichText;
+
+        /// <inheritdoc />
         protected UserException(string message, string richText) : base(message)
         {
             RichText = richText;

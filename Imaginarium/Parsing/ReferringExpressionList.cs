@@ -95,6 +95,7 @@ namespace Imaginarium.Parsing
             return token => overallTerminator(token) || token == "," || ListConjunction(token);
         }
 
+        /// <inheritdoc />
         public override bool ScanTo(string token) => ScanTo(t => t == token);
 
         /// <summary>
@@ -194,6 +195,7 @@ namespace Imaginarium.Parsing
             return true;
         }
 
+        /// <inheritdoc />
         public ReferringExpressionList(Parser parser, Func<TE> factory) : base(parser)
         {
             referringExpressionFactory = factory;

@@ -29,13 +29,19 @@ using Imaginarium.Parsing;
 namespace Imaginarium.Ontology
 {
     /// <summary>
-    /// An object within the ontology (e.g. a Concept or Individual)
+    /// An object within an ontology (e.g. a Concept or Individual)
     /// </summary>
     [DebuggerDisplay("{" + nameof(Text) + "}")]
     public abstract class Referent
     {
+        /// <summary>
+        /// The ontology to which this belongs
+        /// </summary>
         public readonly Ontology Ontology;
 
+        /// <summary>
+        /// Make a new referent.
+        /// </summary>
         protected Referent(Ontology ontology, string[] name)
         {
             Ontology = ontology;

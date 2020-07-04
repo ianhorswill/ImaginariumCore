@@ -33,6 +33,7 @@ namespace Imaginarium.Ontology
     /// </summary>
     public class Adjective : MonadicConcept
     {
+        /// <inheritdoc />
         public override string Description
         {
             get
@@ -42,9 +43,10 @@ namespace Imaginarium.Ontology
             }
         }
 
+        /// <inheritdoc />
         protected override string DictionaryStylePartOfSpeech => "adj.";
 
-        public Adjective(Ontology ontology, string[] name) : base(ontology, name)
+        internal Adjective(Ontology ontology, string[] name) : base(ontology, name)
         {
             Name = name;
             Ontology.AllAdjectives[name] = this;

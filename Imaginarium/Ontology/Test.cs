@@ -35,13 +35,28 @@ namespace Imaginarium.Ontology
     /// </summary>
     public class Test
     {
+        /// <summary>
+        /// The kind that ought to exist or not exist
+        /// </summary>
         public readonly CommonNoun Noun;
+        /// <summary>
+        /// Any additional attributes it should have
+        /// </summary>
         public readonly MonadicConceptLiteral[] Modifiers;
+        /// <summary>
+        ///  Whether this is a test that the Noun+Modifiers does exist, or a test that it doesn't.
+        /// </summary>
         public readonly bool ShouldExist;
+        /// <summary>
+        /// Message to print if the test succeeds
+        /// </summary>
         public readonly string SucceedMessage;
+        /// <summary>
+        /// Message to print if it fails
+        /// </summary>
         public readonly string FailMessage;
 
-        public Test(CommonNoun noun, IEnumerable<MonadicConceptLiteral> modifiers, bool shouldExist, string succeedMessage, string failMessage)
+        internal Test(CommonNoun noun, IEnumerable<MonadicConceptLiteral> modifiers, bool shouldExist, string succeedMessage, string failMessage)
         {
             Noun = noun;
             ShouldExist = shouldExist;
@@ -50,6 +65,10 @@ namespace Imaginarium.Ontology
             Modifiers = modifiers.ToArray();
         }
 
+        /// <summary>
+        /// Run this test
+        /// </summary>
+        /// <returns>Whether it succeeded and the example/counter-example that was generated (or null, if nothing was generated)</returns>
         public (bool success, Invention example) Run()
         {
             var example = TestExistence();

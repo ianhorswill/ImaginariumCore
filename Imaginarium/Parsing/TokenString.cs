@@ -41,6 +41,9 @@ namespace Imaginarium.Parsing
         // ReSharper disable once IdentifierTypo
         private readonly string[] downcased;
 
+        /// <summary>
+        /// Make a token string
+        /// </summary>
         public TokenString(params string[] tokens)
         {
             Tokens = tokens;
@@ -49,6 +52,7 @@ namespace Imaginarium.Parsing
                 downcased[i] = Tokens[i].ToLowerInvariant();
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             var hash = 0;
@@ -57,6 +61,7 @@ namespace Imaginarium.Parsing
             return hash;
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             if (!(obj is TokenString))
@@ -70,18 +75,30 @@ namespace Imaginarium.Parsing
             return true;
         }
 
+        /// <summary>
+        /// Text contained in this token string, converted to one string and downcased.
+        /// </summary>
         public string Text => downcased.ToString();
 
+        /// <summary>
+        /// Implicit conversion string[] -> TokenString
+        /// </summary>
         public static implicit operator TokenString(string[] tokens)
         {
             return new TokenString(tokens);
         }
 
+        /// <summary>
+        /// Implicit conversion string -> TokenString
+        /// </summary>
         public static implicit operator TokenString(string word)
         {
             return new TokenString(word);
         }
 
+        /// <summary>
+        /// Implicit conversion TokenString -> string[]
+        /// </summary>
         public static implicit operator string[](TokenString t)
         {
             return t.Tokens;

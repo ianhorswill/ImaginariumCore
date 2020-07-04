@@ -38,6 +38,7 @@ namespace Imaginarium.Parsing
     /// </summary>
     public partial class Parser
     {
+        /// <inheritdoc />
         public Parser(Ontology.Ontology o, params Func<Parser, IEnumerable<SentencePattern>>[] commandSets)
         {
             Ontology = o;
@@ -51,16 +52,25 @@ namespace Imaginarium.Parsing
                 SentencePatterns.AddRange(set(this));
         }
 
+        /// <summary>
+        /// Ontology into which this parser loads new content
+        /// </summary>
         public readonly Ontology.Ontology Ontology;
     
-        public static bool SingularDeterminer(string word) => word == "a" || word == "an";
+        internal static bool SingularDeterminer(string word) => word == "a" || word == "an";
 
         /// <summary>
         /// Grammatical number feature
         /// </summary>
         public enum Number
         {
+            /// <summary>
+            /// The noun or verb is in its singular form
+            /// </summary>
             Singular,
+            /// <summary>
+            /// The noun or verb is in its plural form
+            /// </summary>
             Plural
         }
 
@@ -99,6 +109,9 @@ namespace Imaginarium.Parsing
         /// </summary>
         public static SentencePattern RuleTriggeringException;
 
+        /// <summary>
+        /// When parsing throws an exception, the specific sentence being parsed at the time can be found here.
+        /// </summary>
         public static string InputTriggeringException;
 
         /// <summary>
@@ -268,7 +281,7 @@ namespace Imaginarium.Parsing
         private static readonly string[] NumberWords =
             { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
     
-        public static int? IntFromWord(string s)
+        internal static int? IntFromWord(string s)
         {
             var value = Array.IndexOf(NumberWords, s);
             if (value >= 0 || Int32.TryParse(s, out value))
@@ -373,8 +386,11 @@ namespace Imaginarium.Parsing
         /// <summary>
         /// Current state of the parser.
         /// </summary>
-        public ScannerState State => new ScannerState(currentTokenIndex);
+        internal ScannerState State => new ScannerState(currentTokenIndex);
 
+        /// <summary>
+        /// The words from the current sentence that have not yet been matched by the sentence pattern currently being tried.
+        /// </summary>
         public string RemainingInput
         {
             get
@@ -390,24 +406,39 @@ namespace Imaginarium.Parsing
             }
         }
 
-        public struct ScannerState
+        /// <summary>
+        /// Saved position within the input sentence being parsed
+        /// </summary>
+        internal struct ScannerState
         {
+            /// <summary>
+            /// Save index within TokenStream of the token that was currently being matched
+            /// </summary>
             public readonly int CurrentTokenIndex;
 
-            public ScannerState(int currentTokenIndex)
+            internal ScannerState(int currentTokenIndex)
             {
                 CurrentTokenIndex = currentTokenIndex;
             }
         }
 
-        public void ResetTo(ScannerState s)
+        /// <summary>
+        /// Back up to the specified position in the input
+        /// </summary>
+        /// <param name="s"></param>
+        internal void ResetTo(ScannerState s)
         {
             currentTokenIndex = s.CurrentTokenIndex;
         }
 
 
-
+        /// <summary>
+        /// Sentence currently being parsed
+        /// </summary>
         public readonly List<string> TokenStream = new List<string>();
+        /// <summary>
+        /// Index
+        /// </summary>
         public int CurrentTokenIndex;
 
         #endregion
@@ -424,10 +455,10 @@ namespace Imaginarium.Parsing
             return DefinitionFilePath(fileName);
         }
 
-        public static bool NameIsValidFilename(Referent referent) =>
+        internal static bool NameIsValidFilename(Referent referent) =>
             NameIsValidFilename(referent.Text);
 
-        public static bool NameIsValidFilename(string fileName) =>
+        internal static bool NameIsValidFilename(string fileName) =>
             fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
 
         /// <summary>
@@ -467,6 +498,12 @@ namespace Imaginarium.Parsing
             LoadDefinitions(path);
         }
 
+        /// <summary>
+        /// Load the definitions found in the specified file
+        /// </summary>
+        /// <param name="path">Path to the file to load</param>
+        /// <param name="throwOnErrors">True if errors should throw exceptions.  False, if list of exceptions should be returned instead</param>
+        /// <returns>List of exceptions if throwOnErrors is false and there were exceptions.  Otherwise null.</returns>
         public List<Exception> LoadDefinitions(string path, bool throwOnErrors = true)
         {
             var downCased = path.ToLower();

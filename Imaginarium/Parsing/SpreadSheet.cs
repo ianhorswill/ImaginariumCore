@@ -31,15 +31,32 @@ using System.Text;
 
 namespace Imaginarium.Parsing
 {
+    /// <summary>
+    /// Represents the contents of a CSV file
+    /// </summary>
     public class Spreadsheet
     {
+        /// <summary>
+        /// Path from which it was read.
+        /// </summary>
         public readonly string Path;
+        /// <summary>
+        /// Row/column data
+        /// </summary>
         public readonly object[][] Data;
+        /// <summary>
+        /// Index of the column used as an id for rows, if any.
+        /// </summary>
         private readonly int idColumnIndex;
 
+        /// <summary>
+        /// Make a Spreadsheet object from a CSV file
+        /// </summary>
+        /// <param name="path">Path to the file</param>
+        /// <param name="idColumnName">Name of the column (as it appears in the header row) used for the names of rows</param>
         public Spreadsheet(string path, string idColumnName)
         {
-            Data = Read(path, ',');
+            Data = Read(path);
             idColumnIndex = ColumnIndex(idColumnName);
             Path = path;
         }
@@ -49,13 +66,20 @@ namespace Imaginarium.Parsing
             return System.Array.IndexOf(Data[0], columnName);
         }
 
+        /// <summary>
+        /// The header row of the spreadsheet
+        /// </summary>
         public string[] Header => Data[0].Cast<string>().ToArray();
 
-        public object[] this[object key]
-        {
-            get => Data.First(row => row[idColumnIndex].Equals(key));
-        }
+        /// <summary>
+        /// The row containing the specified key in the column specified as the ID column for this Spreadsheet.
+        /// </summary>
+        /// <param name="key"></param>
+        public object[] this[object key] => Data.First(row => row[idColumnIndex].Equals(key));
 
+        /// <summary>
+        /// The contents of the cell from the row with the specified key and the specified column.
+        /// </summary>
         public object this[object key, string column]
         {
             get => this[key][ColumnIndex(column)];
@@ -72,9 +96,19 @@ namespace Imaginarium.Parsing
             return row?[ColumnIndex(column)];
         }
 
+        /// <summary>
+        /// True if some row has the specified key in its ID column
+        /// </summary>
         public bool ContainsKey(object key) => Data.FirstOrDefault(r => r[idColumnIndex].Equals(key)) != null;
 
-        public static object[][] Read(string path, char delimiter)
+        /// <summary>
+        /// Read a CSV file from the specified path using the specified delimiter character (default = ',')
+        /// Return it as a raw array-of-arrays rather than as a Spreadsheet object
+        /// </summary>
+        /// <param name="path">Path to the CSV file</param>
+        /// <param name="delimiter">Delimiter to use between values in rows</param>
+        /// <returns></returns>
+        public static object[][] Read(string path, char delimiter = ',')
         {
             using (TextReader r = File.OpenText(path))
             {
@@ -118,7 +152,7 @@ namespace Imaginarium.Parsing
             }
         }
 
-        static string ReadItem(TextReader input, char delimiter, StringBuilder b)
+        private static string ReadItem(TextReader input, char delimiter, StringBuilder b)
         {
             bool quoted = false;
             b.Clear();
@@ -169,16 +203,17 @@ namespace Imaginarium.Parsing
             return b.ToString();
         }
 
+        /// <summary>
+        /// Overwrite any strings that happen to look like numbers in the specified array of arrays to
+        /// the actual numbers (ints or floats)
+        /// </summary>
         public static object[][] ConvertAllNumbers(object[][] spreadsheet)
         {
-            for (int i = 0; i < spreadsheet.Length; i++)
+            foreach (var row in spreadsheet)
             {
-                object[] row = spreadsheet[i];
-                for (int j = 0; j < row.Length; j++)
+                for (var j = 0; j < row.Length; j++)
                 {
-                    string s = row[j] as string;
-                    double parsed;
-                    if (s != null && double.TryParse(s, out parsed))
+                    if (row[j] is string s && double.TryParse(s, out var parsed))
                         row[j] = parsed;
                 }
             }
@@ -186,15 +221,18 @@ namespace Imaginarium.Parsing
             return spreadsheet;
         }
 
+        /// <summary>
+        /// Remove trailing whitespace from strings in raw array-of-arrays
+        /// </summary>
+        /// <param name="spreadsheet"></param>
+        /// <returns></returns>
         public static object[][] TrimWhitespace(object[][] spreadsheet)
         {
-            for (int i = 0; i < spreadsheet.Length; i++)
+            foreach (var row in spreadsheet)
             {
-                object[] row = spreadsheet[i];
-                for (int j = 0; j < row.Length; j++)
+                for (var j = 0; j < row.Length; j++)
                 {
-                    string s = row[j] as string;
-                    if (s != null)
+                    if (row[j] is string s)
                         row[j] = s.Trim();
                 }
             }
@@ -202,13 +240,18 @@ namespace Imaginarium.Parsing
             return spreadsheet;
         }
 
-        public static void Write(IList rows, string path, char delimiter)
+        /// <summary>
+        /// Write a raw list-of-lists to a CSV file
+        /// </summary>
+        /// <param name="rows">Rows to write</param>
+        /// <param name="path">Path to CSV file</param>
+        /// <param name="delimiter">Delimiter to use between items in rows</param>
+        public static void Write(IList rows, string path, char delimiter = ',')
         {
-            List<IList> data = new List<IList>(rows.Count);
-            foreach (IList l in rows)
-                data.Add(l);
+            var data = new List<IList>(rows.Count);
+            data.AddRange(rows.Cast<IList>());
 
-            StringBuilder b = new StringBuilder();
+            var b = new StringBuilder();
             File.WriteAllLines(path, data.Select((l, i) => Format(l, delimiter, b)));
         }
 
@@ -222,10 +265,10 @@ namespace Imaginarium.Parsing
                     b.Append(delimiter);
                 else
                     firstOne = false;
-                if (item is string)
+                if (item is string s)
                 {
                     b.Append('\"');
-                    b.Append(((string) item).Replace("\"", "\"\""));
+                    b.Append(s.Replace("\"", "\"\""));
                     b.Append('\"');
                 }
                 else
@@ -235,9 +278,12 @@ namespace Imaginarium.Parsing
             return b.ToString();
         }
 
+        /// <summary>
+        /// Save the modified data back to the original file.
+        /// </summary>
         public void Save()
         {
-            Write(Data, Path, ',');
+            Write(Data, Path);
         }
     }
 }

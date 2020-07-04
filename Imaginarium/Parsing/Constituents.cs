@@ -126,7 +126,13 @@ namespace Imaginarium.Parsing
         /// </summary>
         public NP Object;
 
+        /// <summary>
+        /// The verb matched in a sentence pattern, if any
+        /// </summary>
         public VerbSegment Verb;
+        /// <summary>
+        /// The second verb matched in a sentence pattern, if any
+        /// </summary>
         public VerbSegment Verb2;
 
         /// <summary>
@@ -159,6 +165,9 @@ namespace Imaginarium.Parsing
         /// </summary>
         public Segment Text;
 
+        /// <summary>
+        /// Matches an English quantifier
+        /// </summary>
         public QuantifyingDeterminer Quantifier;
 
         /// <summary>
@@ -171,6 +180,9 @@ namespace Imaginarium.Parsing
         /// </summary>
         public float ParsedUpperBound;
         
+        /// <summary>
+        /// The number (plural, singular) of the main verb of the sentence
+        /// </summary>
         public Number? VerbNumber;
         #endregion
 
@@ -184,22 +196,49 @@ namespace Imaginarium.Parsing
         /// </summary>
         public readonly Func<bool> Has;
 
+        /// <summary>
+        /// Matches all, every, or nothing
+        /// </summary>
         public SimpleClosedClassSegment OptionalAll;
 
+        /// <summary>
+        /// Matches always or nothing
+        /// </summary>
         public SimpleClosedClassSegment OptionalAlways;
 
+        /// <summary>
+        /// Matches exist or not exist
+        /// </summary>
         public SimpleClosedClassSegment ExistNotExist;
 
+        /// <summary>
+        /// Matches rare, common, etc.
+        /// </summary>
         public ClosedClassSegmentWithValue<float> RareCommon;
 
+        /// <summary>
+        /// Matches can and must
+        /// </summary>
         public SimpleClosedClassSegment CanMust;
 
+        /// <summary>
+        /// Matches can't, cannot, etc.
+        /// </summary>
         public SimpleClosedClassSegment CanNot;
 
+        /// <summary>
+        /// Matches reflexive pronouns (herself, etc.)
+        /// </summary>
         public SimpleClosedClassSegment Reflexive;
 
+        /// <summary>
+        /// Matches always, every
+        /// </summary>
         public SimpleClosedClassSegment Always;
 
+        /// <summary>
+        /// Matches "each other"
+        /// </summary>
         public SimpleClosedClassSegment EachOther;
 
         /// <summary>
@@ -327,6 +366,11 @@ namespace Imaginarium.Parsing
             return true;
         }
 
+        /// <summary>
+        /// True if the token is a conjunction that can end a list of items: "and" / "or"
+        /// </summary>
+        /// <param name="currentToken"></param>
+        /// <returns></returns>
         public static bool ListConjunction(string currentToken) => currentToken == "and" || currentToken == "or";
         #endregion
     }

@@ -33,11 +33,14 @@ using static Imaginarium.Parsing.Parser;
 namespace Imaginarium.Parsing
 {
     /// <summary>
-    /// Rules for parsing the top-level syntax of sentences.
+    /// Possible pattern for a sentence that can be matched against it
     /// </summary>
     [DebuggerDisplay("{" + nameof(HelpDescription) + "}")]
     public class SentencePattern
     {
+        /// <summary>
+        /// Parser to which this sentence pattern belongs
+        /// </summary>
         public readonly Parser Parser;
 
         /// <summary>
@@ -53,6 +56,11 @@ namespace Imaginarium.Parsing
         }
 
         #region Constructors
+        /// <summary>
+        /// Makes a new sentence pattern
+        /// </summary>
+        /// <param name="p">Parser to which the pattern will be added</param>
+        /// <param name="constituents">Segments and other elements to match against the input, in order</param>
         public SentencePattern(Parser p, params object[] constituents)
         {
             Parser = p;
@@ -324,7 +332,13 @@ namespace Imaginarium.Parsing
         /// </summary>
         private Func<bool>[] validityTests;
 
+        /// <summary>
+        /// True if this is a command rather than a declaration
+        /// </summary>
         public bool IsCommand;
+        /// <summary>
+        /// True if we should trigger a breakpoint whenever the parser tries to match this sentence pattern to an input.
+        /// </summary>
         public bool BreakOnMatch;
         /// <summary>
         /// True if logging all parsing
@@ -341,18 +355,29 @@ namespace Imaginarium.Parsing
         /// </summary>
         public bool LogMatch => _logMatch || LogAllParsing;
 
+        /// <summary>
+        /// Force parser to breakpoint when trying to match this pattern.
+        /// </summary>
         public SentencePattern DebugMatch()
         {
             BreakOnMatch = true;
             return this;
         }
 
+        /// <summary>
+        /// Elaborately log the matching process for this pattern
+        /// </summary>
+        /// <returns></returns>
         public SentencePattern Log()
         {
             _logMatch = true;
             return this;
         }
 
+        /// <summary>
+        /// Mark this pattern as a command rather than an assertion.
+        /// </summary>
+        /// <returns></returns>
         public SentencePattern Command()
         {
             IsCommand = true;
@@ -374,6 +399,9 @@ namespace Imaginarium.Parsing
         }
 
         private static readonly StringBuilder Buffer = new StringBuilder();
+        /// <summary>
+        /// Text describing this pattern and what it does
+        /// </summary>
         public string HelpDescription
         {
             get
@@ -400,6 +428,9 @@ namespace Imaginarium.Parsing
             }
         }
 
+        /// <summary>
+        /// Text describing this pattern and what it does
+        /// </summary>
         public string SentencePatternDescription
         {
             get

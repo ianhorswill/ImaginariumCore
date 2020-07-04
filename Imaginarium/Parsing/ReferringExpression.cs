@@ -58,6 +58,7 @@ namespace Imaginarium.Parsing
         /// </summary>
         protected abstract TR GetConcept();
 
+        /// <inheritdoc />
         protected ReferringExpression(Parser parser) : base(parser)
         { }
     }

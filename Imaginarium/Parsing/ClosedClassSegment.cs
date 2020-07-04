@@ -37,6 +37,9 @@ namespace Imaginarium.Parsing
         /// The token that was used as a determiner;
         /// </summary>
         public string[] MatchedText;
+        /// <summary>
+        /// Tokens that can start a phrase this segment can match
+        /// </summary>
         public string[] PossibleBeginnings;
 
         /// <summary>
@@ -44,8 +47,12 @@ namespace Imaginarium.Parsing
         /// </summary>
         public Func<string, bool> IsPossibleStart;
 
+        /// <summary>
+        /// Closed-class words that can be used in this segment
+        /// </summary>
         public abstract IEnumerable<string> Keywords { get; }
 
+        /// <inheritdoc />
         protected ClosedClassSegment(Parser parser) : base(parser)
         { }
     }

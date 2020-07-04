@@ -25,9 +25,13 @@
 
 namespace Imaginarium.Parsing
 {
+    /// <inheritdoc />
     public class GrammaticalError : UserException
     {
+        /// <inheritdoc />
         public GrammaticalError(string message) : base(message, message) { }
+
+        /// <inheritdoc />
         public GrammaticalError(string problemDescription, string rich) : base(problemDescription, rich)
         { }
     }

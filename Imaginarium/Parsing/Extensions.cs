@@ -28,6 +28,9 @@ using System.Collections.Generic;
 
 namespace Imaginarium.Parsing
 {
+    /// <summary>
+    /// Useful extension methods
+    /// </summary>
     public static class Extensions
     {
         /// <summary>

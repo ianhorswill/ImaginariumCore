@@ -37,7 +37,7 @@ namespace Imaginarium.Ontology
     [DebuggerDisplay("{" + nameof(Text) + "}")]
     public class CommonNoun : Noun
     {
-        public CommonNoun(Ontology ontology) : base(ontology, null)
+        internal CommonNoun(Ontology ontology) : base(ontology, null)
         { }
 
         /// <summary>
@@ -49,8 +49,10 @@ namespace Imaginarium.Ontology
         public Generator.Generator MakeGenerator(int count = 1, params MonadicConceptLiteral[] modifiers)
             => new Generator.Generator(this, modifiers, count);
 
+        /// <inheritdoc />
         public override string Description => $"<b>{ToString()}</b> <i>{DictionaryStylePartOfSpeech}</i> plural: <i>{PluralForm.Untokenize()}</i>";
 
+        /// <inheritdoc />
         protected override string DictionaryStylePartOfSpeech => "n.";
 
         /// <inheritdoc />
@@ -193,6 +195,9 @@ namespace Imaginarium.Ontology
         /// </summary>
         public Property PropertyNamed(string[] name) => Properties.FirstOrDefault(p => p.IsNamed(name));
 
+        /// <summary>
+        /// Run action over all the ancestor kinds of this kind
+        /// </summary>
         public void ForAllAncestorKinds(Action<CommonNoun> a, bool includeSelf = true)
         {
             if (includeSelf)
@@ -201,6 +206,9 @@ namespace Imaginarium.Ontology
                 super.ForAllAncestorKinds(a);
         }
 
+        /// <summary>
+        /// Run action over all the descendant kinds of this kind
+        /// </summary>
         public void ForAllDescendantKinds(Action<CommonNoun> a, bool includeSelf = true)
         {
             if (includeSelf)
@@ -209,15 +217,31 @@ namespace Imaginarium.Ontology
                 super.ForAllDescendantKinds(a);
         }
 
+        /// <summary>
+        /// True if this is an immediate superkind of the specified subkind.
+        /// </summary>
         public bool IsImmediateSuperKindOf(CommonNoun sub) => Subkinds.Contains(sub);
+
+        /// <summary>
+        /// True if this is an immediate subkind of the specified superkind.
+        /// </summary>
         public bool IsImmediateSubKindOf(CommonNoun super) => Superkinds.Contains(super);
 
+        /// <summary>
+        /// This is a superkind of the specified subkind
+        /// </summary>
         public bool IsSuperKindOf(CommonNoun sub) =>
             sub == this                         // A is a super kind of A
             || Subkinds.Any(s => s.IsSuperKindOf(sub));
 
+        /// <summary>
+        /// This is a subkind of the specified superkind
+        /// </summary>
         public bool IsSubKindOf(CommonNoun super) => super.IsSuperKindOf(this);
 
+        /// <summary>
+        /// Returns the LUB of the two kinds in the kind lattice
+        /// </summary>
         public static CommonNoun LeastUpperBound(CommonNoun a, CommonNoun b)
         {
             if (a == null)
@@ -238,6 +262,9 @@ namespace Imaginarium.Ontology
             return null;
         }
 
+        /// <summary>
+        /// Returns the LUB of the three kinds in the kind lattice
+        /// </summary>
         public static CommonNoun LeastUpperBound(CommonNoun a, CommonNoun b, CommonNoun c) =>
             a == null ? LeastUpperBound(b, c) : LeastUpperBound(a, LeastUpperBound(b, c));
 
@@ -264,14 +291,20 @@ namespace Imaginarium.Ontology
             /// </summary>
             public readonly MonadicConceptLiteral[] Alternatives;
 
+            /// <summary>
+            /// Minimum number of literals that can be true
+            /// </summary>
             public readonly int MinCount;
+            /// <summary>
+            /// Maximum number of literals that can be true
+            /// </summary>
             public readonly int MaxCount;
 
-            public AlternativeSet(MonadicConceptLiteral[] alternatives, bool isRequired)
+            internal AlternativeSet(MonadicConceptLiteral[] alternatives, bool isRequired)
                 : this(alternatives, isRequired ? 1 : 0, 1)
             { }
 
-            public AlternativeSet(MonadicConceptLiteral[] alternatives, int minCount, int maxCount)
+            internal AlternativeSet(MonadicConceptLiteral[] alternatives, int minCount, int maxCount)
             {
                 Alternatives = alternatives;
                 MinCount = minCount;
@@ -295,7 +328,7 @@ namespace Imaginarium.Ontology
             /// </summary>
             public readonly MonadicConceptLiteral Modifier;
 
-            public ConditionalModifier(MonadicConceptLiteral[] conditions, MonadicConceptLiteral modifier)
+            internal ConditionalModifier(MonadicConceptLiteral[] conditions, MonadicConceptLiteral modifier)
             {
                 Conditions = conditions??emptyCondition;
                 Modifier = modifier;

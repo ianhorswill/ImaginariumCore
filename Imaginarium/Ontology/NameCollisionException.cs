@@ -28,12 +28,27 @@ using Imaginarium.Parsing;
 
 namespace Imaginarium.Ontology
 {
+    /// <summary>
+    /// Represents an error in which the same name is used for two different Concepts of different types (e.g. noun and verb)
+    /// </summary>
     public class NameCollisionException : UserException
     {
+        /// <summary>
+        /// Name that was inconsistently defined
+        /// </summary>
         public readonly string[] Name;
+        /// <summary>
+        /// First type assigned to the name
+        /// </summary>
         public readonly Type OldType;
+        /// <summary>
+        /// New type the user tried to assign to it.
+        /// </summary>
         public readonly Type NewType;
 
+        /// <summary>
+        /// Make a new NameCollisionException
+        /// </summary>
         public NameCollisionException(string[] name, Type oldType, Type newType)
             : base(
                 $"Can't create a new {newType}, {name.Untokenize()}, because there is already {oldType} of the same name.",

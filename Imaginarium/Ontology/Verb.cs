@@ -36,9 +36,10 @@ namespace Imaginarium.Ontology
     /// </summary>
     public class Verb : Concept
     {
-        public Verb(Ontology ontology) : base(ontology, null)
+        internal Verb(Ontology ontology) : base(ontology, null)
         { }
 
+        /// <inheritdoc />
         public override string Description
         {
             get
@@ -90,6 +91,7 @@ namespace Imaginarium.Ontology
             }
         }
 
+        /// <inheritdoc />
         protected override string DictionaryStylePartOfSpeech => "v.";
 
         /// <summary>
@@ -102,8 +104,13 @@ namespace Imaginarium.Ontology
         /// </summary>
         public List<Verb> MutualExclusions = new List<Verb>();
 
+        /// <summary>
+        /// Verbs that are specializations of this verb
+        /// </summary>
         public List<Verb> Subspecies = new List<Verb>();
-        // ReSharper disable once IdentifierTypo
+        /// <summary>
+        /// Verbs that are generalizations of this verb
+        /// </summary>
         public List<Verb> Superspecies = new List<Verb>();
 
         /// <summary>
@@ -139,16 +146,34 @@ namespace Imaginarium.Ontology
 //        set => ObjectLowerBound = value?Math.Max(1, ObjectLowerBound):ObjectLowerBound;
 //    }
 
+        /// <summary>
+        /// A verb A for all A in it's domain
+        /// </summary>
         public bool IsReflexive;
 
+        /// <summary>
+        /// This verb and/or one of its superspecies is reflexive
+        /// </summary>
         public bool AncestorIsReflexive => IsReflexive || Superspecies.Any(sup => sup.AncestorIsReflexive);
 
+        /// <summary>
+        /// A verb A for NO A in its domain
+        /// </summary>
         public bool IsAntiReflexive;
 
+        /// <summary>
+        /// This verb and/or one of its superspecies is anti-reflexive
+        /// </summary>
         public bool AncestorIsAntiReflexive => IsAntiReflexive || Superspecies.Any(sup => sup.AncestorIsAntiReflexive);
 
+        /// <summary>
+        /// X verb Y implies Y verb X
+        /// </summary>
         public bool IsSymmetric;
 
+        /// <summary>
+        /// X verb Y implies not Y verb X
+        /// </summary>
         public bool IsAntiSymmetric;
 
         /// <summary>
@@ -156,6 +181,7 @@ namespace Imaginarium.Ontology
         /// </summary>
         public float Density = 0.5f;
 
+        /// <inheritdoc />
         public override bool IsNamed(string[] tokens) => tokens.SameAs(SingularForm) || tokens.SameAs(PluralForm);
 
         // ReSharper disable InconsistentNaming
@@ -164,6 +190,11 @@ namespace Imaginarium.Ontology
 
         // ReSharper restore InconsistentNaming
 
+        /// <summary>
+        /// The base form of the verb (e.g. eat, rather than eats, eating,
+        /// to eat, eaten by, etc.).
+        /// This is most commonly the same as the third person plural.
+        /// </summary>
         public string[] BaseForm
         {
             get => _baseForm;
@@ -178,8 +209,17 @@ namespace Imaginarium.Ontology
             }
         }
 
+        /// <summary>
+        /// Passive participle of the verb (eat => eaten).
+        /// In English, this is the same as the past participle, but
+        /// since Imaginarium doesn't do tenses, we refer to it as the
+        /// passive participle.
+        /// </summary>
         public string[] PassiveParticiple { get; private set;  }
 
+        /// <summary>
+        /// The gerund/present participle form (eat => eating)
+        /// </summary>
         public string[] GerundForm
         {
             get => _gerundForm;
@@ -193,6 +233,7 @@ namespace Imaginarium.Ontology
             }
         }
 
+        /// <inheritdoc />
         public override string[] StandardName => BaseForm;
 
         // ReSharper disable InconsistentNaming
@@ -303,27 +344,52 @@ namespace Imaginarium.Ontology
             }
         }
 
+        /// <summary>
+        /// Type/kind/noun of the subject argument to the verb
+        /// </summary>
         public CommonNoun SubjectKind { get; set; }
+        /// <summary>
+        /// Modifies that must also be true of subjects of the verb
+        /// </summary>
         public MonadicConceptLiteral[] SubjectModifiers { get; set; }
+        /// <summary>
+        /// Type/kind/noun of the object argument of the verb
+        /// </summary>
         public CommonNoun ObjectKind { get; set; }
+
+        /// <summary>
+        /// Modifiers that must also be true of the objects of the verb.
+        /// </summary>
         public MonadicConceptLiteral[] ObjectModifiers { get; set; }
 
         private void EnsurePluralForm()
         {
             if (_plural != null)
                 return;
-            if (_baseForm != null)
-                PluralForm = Inflection.ReplaceCopula(_baseForm, "are"); 
-            else
-                PluralForm = Inflection.PluralOfVerb(_singular);
+            PluralForm = _baseForm != null ? Inflection.ReplaceCopula(_baseForm, "are") : Inflection.PluralOfVerb(_singular);
         }
     }
 
+    /// <summary>
+    /// Possible conjugations of a verb
+    /// </summary>
     public enum VerbConjugation
     {
+        /// <summary>
+        /// Third person
+        /// </summary>
         ThirdPerson,
+        /// <summary>
+        /// Base form
+        /// </summary>
         BaseForm,
+        /// <summary>
+        /// Gerund form / present participle
+        /// </summary>
         Gerund,
+        /// <summary>
+        /// Passive participle / past participle
+        /// </summary>
         PassiveParticiple
     };
 }

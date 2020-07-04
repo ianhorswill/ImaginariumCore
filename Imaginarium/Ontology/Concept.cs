@@ -32,9 +32,16 @@ namespace Imaginarium.Ontology
     /// </summary>
     public abstract class Concept : Referent
     {
+        /// <summary>
+        /// Makes Concept
+        /// </summary>
         protected Concept(Ontology ontology, string[] name) : base(ontology, name)
         { }
 
+        /// <summary>
+        /// Converts a C# type object that is a subclass of Concept to the English term for it.
+        /// For example CommonNoun maps to "noun" and Adjective maps to "adjective"
+        /// </summary>
         public static string EnglishTypeName(Type t)
         {
             switch (t.Name)
@@ -50,6 +57,9 @@ namespace Imaginarium.Ontology
             }
         }
 
+        /// <summary>
+        /// What part of speech (noun, verb, adjective, etc.) this concept corresponds to.
+        /// </summary>
         protected virtual string DictionaryStylePartOfSpeech => GetType().Name.ToLower();
 
         /// <summary>

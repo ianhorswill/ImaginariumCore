@@ -38,7 +38,7 @@ namespace Imaginarium.Parsing
     /// </summary>
     public partial class Parser
     {
-        public void StandardSentencePatterns(Ontology.Ontology ontology)
+        internal void StandardSentencePatterns(Ontology.Ontology ontology)
         {
             SentencePatterns.AddRange(new[]
             {

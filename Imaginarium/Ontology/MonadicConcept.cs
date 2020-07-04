@@ -30,6 +30,9 @@ namespace Imaginarium.Ontology
     /// </summary>
     public abstract class MonadicConcept : Concept
     {
+        /// <summary>
+        /// Makes a new Monadic concept
+        /// </summary>
         protected MonadicConcept(Ontology ontology, string[] name) : base(ontology, name) 
         { }
 

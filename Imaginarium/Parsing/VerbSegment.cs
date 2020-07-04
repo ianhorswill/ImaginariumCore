@@ -41,8 +41,12 @@ namespace Imaginarium.Parsing
         /// </summary>
         public Verb Verb => Concept;
 
+        /// <summary>
+        /// What form this verb takes (singular, plural, base, etc.)
+        /// </summary>
         public VerbConjugation Conjugation;
 
+        /// <inheritdoc />
         public override void Reset()
         {
             base.Reset();
@@ -120,6 +124,7 @@ namespace Imaginarium.Parsing
         }
         #endregion
 
+        /// <inheritdoc />
         protected override Verb GetConcept()
         {
             var text = Text;
@@ -151,6 +156,7 @@ namespace Imaginarium.Parsing
             return verb;
         }
 
+        /// <inheritdoc />
         public VerbSegment(Parser parser) : base(parser)
         {
         }

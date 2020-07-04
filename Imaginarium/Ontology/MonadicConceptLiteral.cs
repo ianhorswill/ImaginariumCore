@@ -40,17 +40,23 @@ namespace Imaginarium.Ontology
         /// </summary>
         public readonly bool IsPositive;
 
-        public MonadicConceptLiteral(MonadicConcept concept, bool isPositive = true)
+        internal MonadicConceptLiteral(MonadicConcept concept, bool isPositive = true)
         {
             Concept = concept;
             IsPositive = isPositive;
         }
 
+        /// <summary>
+        /// Makes a literal sating this monadic concept is true
+        /// </summary>
         public static implicit operator MonadicConceptLiteral(MonadicConcept c)
         {
             return new MonadicConceptLiteral(c);
         }
 
+        /// <summary>
+        /// Inverts a monadic concept literal
+        /// </summary>
         public MonadicConceptLiteral Inverse()
         {
             return new MonadicConceptLiteral(Concept, !IsPositive);

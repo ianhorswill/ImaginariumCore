@@ -33,15 +33,27 @@ namespace Imaginarium.Parsing
 // ReSharper disable once InconsistentNaming
     public class AP : ReferringExpression<Adjective>
     {
+        /// <summary>
+        /// The Adjective object referred to by the parsed phrase
+        /// </summary>
         public Adjective Adjective => Concept;
+        /// <summary>
+        /// True if the adjectival phrase is prefixed by "not"  or "non-"
+        /// </summary>
         public bool IsNegated;
 
+        /// <summary>
+        /// The adjective referred to, but in the form of a MCL.
+        /// </summary>
         public MonadicConceptLiteral MonadicConceptLiteral => new MonadicConceptLiteral(Adjective, !IsNegated);
 
+        /// <inheritdoc />
         protected override Adjective GetConcept() => Ontology.Adjective(Text) ?? new Adjective(Ontology, Text);
 
+        /// <inheritdoc />
         public override bool ValidBeginning(string firstToken) => firstToken != "a" && firstToken != "an";
 
+        /// <inheritdoc />
         public override void ParseModifiers()
         {
             var tok = CurrentToken.ToLower();
@@ -54,12 +66,14 @@ namespace Imaginarium.Parsing
             }
         }
 
+        /// <inheritdoc />
         public override void Reset()
         {
             base.Reset();
             IsNegated = false;
         }
 
+        /// <inheritdoc />
         public AP(Parser parser) : base(parser)
         {
         }

@@ -42,6 +42,11 @@ namespace Imaginarium.Ontology
     [DebuggerDisplay("{" + nameof(Name) + "}")]
     public class Ontology
     {
+        /// <summary>
+        /// Create a new Ontology and load the code in the specified directory
+        /// </summary>
+        /// <param name="name">Name for the ontology (for debugging purposes)</param>
+        /// <param name="definitionsDirectory">Path to the directory containing code to load</param>
         public Ontology(string name, string definitionsDirectory)
         {
             AllReferentTables.Add(AllAdjectives);
@@ -58,15 +63,21 @@ namespace Imaginarium.Ontology
                 Load();
         }
 
+        /// <summary>
+        /// Name of the ontology (for debugging purposes)
+        /// </summary>
         public readonly string Name;
 
-        public readonly List<TokenTrieBase> AllTokenTries = new List<TokenTrieBase>();
+        /// <summary>
+        /// All the TokenTries used in this ontology, e.g. for monadic concepts and verbs.
+        /// </summary>
+        internal readonly List<TokenTrieBase> AllTokenTries = new List<TokenTrieBase>();
 
         /// <summary>
         /// List of all the tables of different kinds of referents.
         /// Used so we know what to clear when reinitializing the ontology.
         /// </summary>
-        public readonly List<IDictionary> AllReferentTables = new List<IDictionary>();
+        internal readonly List<IDictionary> AllReferentTables = new List<IDictionary>();
 
         internal readonly Dictionary<TokenString, Adjective> AllAdjectives = new Dictionary<TokenString, Adjective>();
 
@@ -77,22 +88,47 @@ namespace Imaginarium.Ontology
             .Where(n => n is CommonNoun).Cast<CommonNoun>().Distinct();
 
 
+        /// <summary>
+        /// All the permanent individuals in this ontology.
+        /// A permanent individual is made when one defines a proper name in the ontology.
+        /// It is then produced by all Generators for this ontology, regardless of what the
+        /// "imagine" command requires.
+        /// </summary>
         public Dictionary<TokenString, Individual> AllPermanentIndividuals = new Dictionary<TokenString, Individual>();
 
-        public readonly TokenTrie<MonadicConcept> MonadicConceptTrie;
-        public bool LastMatchPlural => MonadicConceptTrie.LastMatchPlural;
+        /// <summary>
+        /// The trie used for monadic concepts (common nouns and adjectives).
+        /// </summary>
+        internal readonly TokenTrie<MonadicConcept> MonadicConceptTrie;
 
+        /// <summary>
+        /// True if the last lookup of the monadic concept trie was for a plural noun.
+        /// </summary>
+        internal bool LastMatchPlural => MonadicConceptTrie.LastMatchPlural;
+
+        /// <summary>
+        /// All nouns in this ontology (common or proper)
+        /// </summary>
         public Dictionary<TokenString, Noun> AllNouns = new Dictionary<TokenString, Noun>();
 
+        /// <summary>
+        /// All Parts in this ontology, regardless of what common noun they're attached to
+        /// </summary>
         internal readonly Dictionary<TokenString, Part> AllParts = new Dictionary<TokenString, Part>();
 
+        /// <summary>
+        /// All Properties in this ontology, regardless of what common noun they're attached to
+        /// </summary>
         internal readonly Dictionary<TokenString, Property> AllProperties = new Dictionary<TokenString, Property>();
 
-        public readonly TokenTrie<Verb> VerbTrie;
+        internal readonly TokenTrie<Verb> VerbTrie;
 
+        /// <summary>
+        /// All verbs (binary relations) defined in this ontology.
+        /// </summary>
         public IEnumerable<Verb> AllVerbs => VerbTrie.Contents.Distinct();
 
-        public void ClearAllTries()
+        internal void ClearAllTries()
         {
             foreach (var t in AllTokenTries)
                 t.Clear();
@@ -141,7 +177,12 @@ namespace Imaginarium.Ontology
             return (CommonNoun)Noun(name);
         }
 
-        public Individual Individual(params string[] tokens) => AllPermanentIndividuals.LookupOrDefault(tokens);
+        /// <summary>
+        /// Return the (permanent) individual with the specified name
+        /// An individual is the referent of a proper noun.
+        /// </summary>
+        /// <param name="name">The name of the individual</param>
+        public Individual Individual(params string[] name) => AllPermanentIndividuals.LookupOrDefault(name);
 
         /// <summary>
         /// Returns the noun named by the specified token string, or null if there is none.
@@ -158,11 +199,14 @@ namespace Imaginarium.Ontology
         /// </summary>
         public Property Property(params string[] tokens) => AllProperties.LookupOrDefault(tokens);
 
-        public Verb Verb(params string[] tokens)
+        /// <summary>
+        /// Return the verb with the specified name
+        /// </summary>
+        public Verb Verb(params string[] name)
         {
             int index = 0;
-            var v = VerbTrie.Lookup(tokens, ref index);
-            if (index != tokens.Length)
+            var v = VerbTrie.Lookup(name, ref index);
+            if (index != name.Length)
                 return null;
             return v;
         }
@@ -236,6 +280,9 @@ namespace Imaginarium.Ontology
 
         private Parser parser;
 
+        /// <summary>
+        /// The default Parser for use with this ontology.
+        /// </summary>
         public Parser Parser => parser ?? (parser = new Parser(this));
 
         /// <summary>
@@ -278,28 +325,49 @@ namespace Imaginarium.Ontology
 
         private static string _definitionsDirectory;
 
-        public void EnsureUndefinedOrDefinedAsType(string[] name, Type newType)
+        /// <summary>
+        /// Throw an exception if an object with a different type is already defined under this name.
+        /// </summary>
+        /// <param name="name">Name of the concept</param>
+        /// <param name="type">C# type we think the referent should have (e.g. typeof(Verb) for verb)</param>
+        /// <exception cref="NameCollisionException">If there is already a concept with that name but a different type.</exception>
+        internal void EnsureUndefinedOrDefinedAsType(string[] name, Type type)
         {
             if (name == null)
                 return;
             var old = Concept((TokenString) name);
-            if (old != null && old.GetType() != newType)
-                throw new NameCollisionException(name, old.GetType(), newType);
+            if (old != null && old.GetType() != type)
+                throw new NameCollisionException(name, old.GetType(), type);
         }
 
         #region Testing
         private readonly List<Test> tests = new List<Test>();
 
+        /// <summary>
+        /// Remove any tests defined for this ontology.
+        /// </summary>
         public void ClearTests()
         {
             tests.Clear();
         }
     
+        /// <summary>
+        /// Add a test to the ontology
+        /// </summary>
+        /// <param name="noun">Kind of object to test (a common noun)</param>
+        /// <param name="modifiers">other attributes it should have</param>
+        /// <param name="shouldExist">If true, the test succeeds when a noun with those modifiers exists.  If false, it succeeds when it doesn't exist.</param>
+        /// <param name="succeedMessage">Message to print when it succeeds</param>
+        /// <param name="failMessage">Message to print when it fails</param>
         public void AddTest(CommonNoun noun, IEnumerable<MonadicConceptLiteral> modifiers, bool shouldExist, string succeedMessage, string failMessage)
         {
             tests.Add(new Test(noun, modifiers, shouldExist, succeedMessage, failMessage));
         }
 
+        /// <summary>
+        /// Run all the defined tests for this ontology and return their results
+        /// </summary>
+        /// <returns>A stream of results: test that was run, whether it succeeded, and the invention that's an example/counter-example</returns>
         public IEnumerable<(Test test, bool success, Invention example)> TestResults()
         {
             foreach (var test in tests)

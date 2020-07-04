@@ -28,12 +28,23 @@ using Imaginarium.Parsing;
 
 namespace Imaginarium.Ontology
 {
+    /// <summary>
+    /// A ProperNoun is a name given in English to a particular Individual in the Ontology.
+    /// It is a permanent individual, meaning it isn't local to a specific generator.  It's present
+    /// in all inventions.
+    /// </summary>
     public class ProperNoun : Noun
     {
+        /// <summary>
+        /// Name of the concept
+        /// </summary>
         public string[] Name;
+        /// <summary>
+        /// The (permanent) individual from the Ontology this name represents
+        /// </summary>
         public readonly Individual Individual;
 
-        public ProperNoun(Ontology ontology, string[] name) : base(ontology, name)
+        internal ProperNoun(Ontology ontology, string[] name) : base(ontology, name)
         {
             Name = name;
             Individual = Ontology.PermanentIndividual(new MonadicConceptLiteral[0], Name);
@@ -41,12 +52,18 @@ namespace Imaginarium.Ontology
             Ontology.AllNouns[Name] = this;
         }
 
+        /// <inheritdoc />
         protected override string DictionaryStylePartOfSpeech => "prop. n.";
 
+        /// <inheritdoc />
         public override bool IsNamed(string[] tokens) => Name.SameAs(tokens);
 
+        /// <inheritdoc />
         public override string[] StandardName => Name;
 
+        /// <summary>
+        /// The Kinds (CommonNouns) this individual is declared always to have.
+        /// </summary>
         public List<CommonNoun> Kinds => Individual.Kinds;
     }
 }

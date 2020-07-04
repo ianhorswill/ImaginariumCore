@@ -44,6 +44,9 @@ namespace Imaginarium.Generator
         /// </summary>
         public static Generator Current;
 
+        /// <summary>
+        /// The Ontology containing the concepts used by this generator
+        /// </summary>
         public readonly Ontology.Ontology Ontology;
 
         #region Instance variables
@@ -92,7 +95,13 @@ namespace Imaginarium.Generator
             Rebuild();
         }
 
+        /// <summary>
+        /// The kind of object(s) to be generated
+        /// </summary>
         public readonly CommonNoun Noun;
+        /// <summary>
+        /// Any other attributes they the generated object(s) should have, beyond Noun.
+        /// </summary>
         public readonly MonadicConceptLiteral[] Concepts;
 
         /// <summary>
@@ -502,6 +511,10 @@ namespace Imaginarium.Generator
             return l.IsPositive ? prop : Not(prop);
         }
 
+        /// <summary>
+        /// It is potentially possible for this individual to be of this kind.
+        /// That is, there are probably models in which it does.
+        /// </summary>
         public bool CanBeA(Individual i, CommonNoun kind)
         {
             bool SearchUp(CommonNoun k)
@@ -531,7 +544,14 @@ namespace Imaginarium.Generator
             return false;
         }
 
-        public Proposition Holds(Verb v, Individual i1, Individual i2) => PredicateOf(v)(i1, i2);
+        /// <summary>
+        /// Proposition representing that i1 verbs i2.
+        /// </summary>
+        /// <param name="verb">Verb</param>
+        /// <param name="i1">Subject (left) argument to the verb</param>
+        /// <param name="i2">Object (right) argument to the verb</param>
+        /// <returns>A CatSAT Proposition object representing that i1 verbs i2.</returns>
+        public Proposition Holds(Verb verb, Individual i1, Individual i2) => PredicateOf(verb)(i1, i2);
 
         /// <summary>
         /// The predicate used to represent concept in the CatSAT problem

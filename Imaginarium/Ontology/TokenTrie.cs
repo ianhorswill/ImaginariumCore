@@ -29,19 +29,37 @@ using Imaginarium.Parsing;
 
 namespace Imaginarium.Ontology
 {
+    /// <summary>
+    /// Abstract class of Tries of Tokens
+    /// </summary>
     public abstract class TokenTrieBase
     {
+        /// <summary>
+        /// Make a new TokenTrie
+        /// </summary>
         protected TokenTrieBase(Ontology ontology)
         {
             ontology.AllTokenTries.Add(this);
         }
 
+        /// <summary>
+        /// Erase the data in the Trie
+        /// </summary>
         public abstract void Clear();
 
+        /// <summary>
+        /// True if the trie contains this string of tokens
+        /// </summary>
         public bool Contains(TokenString t) => Find(t) != null;
 
+        /// <summary>
+        /// Returns the Trie node for this token string, or null if it doesn't appear in the Trie.
+        /// </summary>
         public abstract object Find(TokenString t);
 
+        /// <summary>
+        /// True if the trie should ignore case.
+        /// </summary>
         public bool IsCaseSensitive = false;
     }
 
@@ -52,16 +70,17 @@ namespace Imaginarium.Ontology
     public class TokenTrie<TReferent> : TokenTrieBase
         where TReferent : Referent
     {
-        public TokenTrie(Ontology ontology) : base(ontology)
+        internal TokenTrie(Ontology ontology) : base(ontology)
         { }
 
         private readonly Node root = new Node();
 
-        public bool IsEmpty => root.Dict.Count == 0;
-
+        /// <summary>
+        /// Enumerate all nodes in the trie
+        /// </summary>
         public IEnumerable<TReferent> Contents => SubtreeContents(root);
 
-        IEnumerable<TReferent> SubtreeContents(Node n)
+        private static IEnumerable<TReferent> SubtreeContents(Node n)
         {
             var children = n.Dict.SelectMany(pair => SubtreeContents(pair.Value));
             return n.Concept != null ? children.Prepend(n.Concept) : children;
@@ -140,6 +159,7 @@ namespace Imaginarium.Ontology
             return null;
         }
 
+        /// <inheritdoc />
         public override object Find(TokenString tokens)
         {
             var node = root;

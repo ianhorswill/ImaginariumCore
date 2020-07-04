@@ -37,8 +37,13 @@ namespace Imaginarium.Driver
         /// </summary>
         public static string DataHome;
 
+        /// <summary>
+        /// File name extension for lists of items
+        /// </summary>
         public const string ListExtension = ".txt";
-
+        /// <summary>
+        /// File name extension for generator source code
+        /// </summary>
         public const string SourceExtension = ".gen";
 
         /// <summary>

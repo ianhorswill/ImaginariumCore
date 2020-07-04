@@ -28,6 +28,9 @@ using System.IO;
 
 namespace Imaginarium.Driver
 {
+    /// <summary>
+    /// Log that can be used for generating bug reports.
+    /// </summary>
     public static class LogFile
     {
         private static string LogFilePath =>
@@ -37,11 +40,17 @@ namespace Imaginarium.Driver
         private static TextWriter logFile;
         private static bool handlersInstalled;
 
+        /// <summary>
+        /// Flush the log file in case there's a crash
+        /// </summary>
         public static void Flush()
         {
             logFile?.FlushAsync();
         }
 
+        /// <summary>
+        /// True if we're currently logging.
+        /// </summary>
         public static bool Enabled
         {
             get => logFile != null;
@@ -86,18 +95,30 @@ namespace Imaginarium.Driver
 
         private static bool separated;
 
+        /// <summary>
+        /// Write a message to the log file
+        /// </summary>
+        /// <param name="message"></param>
         public static void Log(string message)
         {
             logFile?.WriteLine(message);
             separated = false;
         }
 
+        /// <summary>
+        /// Write a message to the log file
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
         public static void Log(string format, params object[] args)
         {
             logFile?.WriteLine(format, args);
             separated = false;
         }
 
+        /// <summary>
+        /// Write a blank line to the log file
+        /// </summary>
         public static void Separate()
         {
             if (!separated)

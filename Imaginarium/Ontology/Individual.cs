@@ -99,23 +99,32 @@ namespace Imaginarium.Ontology
         public readonly string[] Name;
 
         /// <summary>
-        /// The Individual of which this is a part
+        /// The Individual of which this is a part, if any, or null
         /// </summary>
         public readonly Individual Container;
 
+        /// <summary>
+        /// If this is a part of another Individual (its Container), what Part this is of that Container
+        /// </summary>
         public readonly Part ContainerPart;
 
         /// <inheritdoc />
         public override string[] StandardName => Name;
 
+        /// <summary>
+        /// Cached description string from the last time it was generated for this individual.
+        /// This will be invalid if switching between different Inventions that both contain this Individual.
+        /// </summary>
         public string MostRecentDescription { get; set; }
 
+        /// <inheritdoc />
         public override bool IsNamed(string[] tokens) => Name.SameAs(tokens);
 
         #region Comparisons
         private static int uidCounter;
         private readonly int uid = uidCounter++;
 
+        /// <inheritdoc />
         public int CompareTo(object obj)
         {
             if (obj is Individual i)
@@ -123,10 +132,22 @@ namespace Imaginarium.Ontology
             return -1;
         }
 
+        /// <summary>
+        /// Implements an arbitrary total order on Individuals
+        /// </summary>
         public static bool operator <(Individual a, Individual b) => a.uid < b.uid;
+        /// <summary>
+        /// Implements an arbitrary total order on Individuals
+        /// </summary>
         public static bool operator >(Individual a, Individual b) => a.uid > b.uid;
 
+        /// <summary>
+        /// Implements an arbitrary total order on Individuals
+        /// </summary>
         public static bool operator <=(Individual a, Individual b) => a.uid <= b.uid;
+        /// <summary>
+        /// Implements an arbitrary total order on Individuals
+        /// </summary>
         public static bool operator >=(Individual a, Individual b) => a.uid >= b.uid;
         #endregion
     }

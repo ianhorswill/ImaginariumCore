@@ -30,6 +30,10 @@ using static Imaginarium.Parsing.Parser;
 
 namespace Imaginarium.Parsing
 {
+    /// <summary>
+    /// A matches a determiner that quantifies a noun phrase
+    /// For example, a/an/one is singular, many is plural, and 3 is plural but a specific number.
+    /// </summary>
     public class QuantifyingDeterminer : ClosedClassSegment
     {
         /// <summary>
@@ -66,6 +70,7 @@ namespace Imaginarium.Parsing
             "other"
         };
 
+        /// <inheritdoc />
         public override IEnumerable<string> Keywords
         {
             get
@@ -82,11 +87,24 @@ namespace Imaginarium.Parsing
             "a",
         };
 
+        /// <summary>
+        /// True if this quantifier is indicating the NP is plural
+        /// </summary>
         public bool IsPlural => PluralQuantifiers.Contains(Quantifier) || (ExplicitCount.HasValue && ExplicitCount.Value > 1);
+        /// <summary>
+        /// The quantifier includes the word "other", as in "one other", "many other", or just "other".
+        /// </summary>
         public bool IsOther;
+        /// <summary>
+        /// The token contains a word specifically disallowed as a quantifier
+        /// </summary>
         public bool IsInvalid => InvalidQuantifiers.Contains(Quantifier);
+        /// <summary>
+        /// When the quantifier specifies a specific number, rather than just "many", the specific number.
+        /// </summary>
         public int? ExplicitCount;
 
+        /// <inheritdoc />
         public override bool ScanTo(Func<string, bool> endPredicate)
         {
             Quantifier = CurrentToken;
@@ -110,6 +128,7 @@ namespace Imaginarium.Parsing
             return !EndOfInput && endPredicate(CurrentToken);
         }
 
+        /// <inheritdoc />
         public override bool ScanTo(string token)
         {
             if (EndOfInput)
@@ -130,12 +149,14 @@ namespace Imaginarium.Parsing
             return !EndOfInput && CurrentToken == token;
         }
 
+        /// <inheritdoc />
         public override bool ScanToEnd(bool failOnConjunction = true)
         {
             Quantifier = CurrentToken;
             return Match(IsQuantifier) && EndOfInput;
         }
 
+        /// <inheritdoc />
         public override void Reset()
         {
             base.Reset();
@@ -143,6 +164,7 @@ namespace Imaginarium.Parsing
             ExplicitCount = null;
         }
 
+        /// <inheritdoc />
         public QuantifyingDeterminer(Parser parser) : base(parser)
         {
         }

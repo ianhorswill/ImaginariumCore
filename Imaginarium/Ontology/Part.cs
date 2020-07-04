@@ -34,7 +34,7 @@ namespace Imaginarium.Ontology
     /// </summary>
     public class Part : Concept
     {
-        public Part(Ontology ontology, string[] name, CommonNoun kind, IEnumerable<MonadicConceptLiteral> modifiers) : base(ontology, name)
+        internal Part(Ontology ontology, string[] name, CommonNoun kind, IEnumerable<MonadicConceptLiteral> modifiers) : base(ontology, name)
         {
             Name = name;
             Ontology.AllParts[name] = this;

@@ -36,13 +36,14 @@ namespace Imaginarium.Ontology
     /// </summary>
     public class Property : Concept
     {
-        public Property(Ontology ontology, string[] name, VariableType type) : base(ontology, name)
+        internal Property(Ontology ontology, string[] name, VariableType type) : base(ontology, name)
         {
             Name = name;
             Ontology.AllProperties[name] = this;
             Type = type;
         }
 
+        /// <inheritdoc />
         public override string Description
         {
             get
@@ -73,6 +74,9 @@ namespace Imaginarium.Ontology
         /// </summary>
         public readonly VariableType Type;
 
+        /// <summary>
+        /// Rules for which menus to use when for this variable, it it's a MenuVariable.
+        /// </summary>
         public readonly List<MenuRule> MenuRules = new List<MenuRule>();
 
         /// <summary>
@@ -86,12 +90,22 @@ namespace Imaginarium.Ontology
         /// <inheritdoc />
         public override bool IsNamed(string[] tokens) => Name.SameAs(tokens);
 
+        /// <summary>
+        /// A set of conditions under which a property should take its value from a specific menu of possible values.
+        /// In practice, menus are files of strings.
+        /// </summary>
         public class MenuRule
         {
+            /// <summary>
+            /// Conditions in which this rule applies
+            /// </summary>
             public readonly MonadicConceptLiteral[] Conditions;
+            /// <summary>
+            /// Menu of allowable strings
+            /// </summary>
             public readonly Menu<string> Menu;
 
-            public MenuRule(MonadicConceptLiteral[] conditions, Menu<string> menu)
+            internal MenuRule(MonadicConceptLiteral[] conditions, Menu<string> menu)
             {
                 Conditions = conditions;
                 Menu = menu;

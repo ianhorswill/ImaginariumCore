@@ -33,6 +33,9 @@ namespace Imaginarium.Ontology
     [DebuggerDisplay("{" + nameof(Text) + "}")]
     public abstract class Noun : MonadicConcept
     {
+        /// <summary>
+        /// Makes a new noun
+        /// </summary>
         protected Noun(Ontology ontology, string[] name) : base(ontology, name) 
         { }
     }
