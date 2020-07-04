@@ -89,6 +89,10 @@ namespace Imaginarium.Parsing
                     "itself", "himself", "herself", "themselves")
                 {Name = "itself"};
 
+            PossessivePronoun = new SimpleClosedClassSegment(this,
+                "its", "their", "his", "her")
+                { Name = "its" };
+
             Always = new SimpleClosedClassSegment(this,
                     "must", "always")
                 {Name = "always"};
@@ -171,6 +175,11 @@ namespace Imaginarium.Parsing
         public QuantifyingDeterminer Quantifier;
 
         /// <summary>
+        /// The count of a number of items, e.g. in a declaration of a Part.
+        /// </summary>
+        public int ParsedCount;
+        
+        /// <summary>
         /// The lower bound of a range appearing in the definition of a numeric property
         /// </summary>
         public float ParsedLowerBound;
@@ -232,6 +241,11 @@ namespace Imaginarium.Parsing
         public SimpleClosedClassSegment Reflexive;
 
         /// <summary>
+        /// Matches possessive pronouns (its, their, his, her)
+        /// </summary>
+        public SimpleClosedClassSegment PossessivePronoun;
+
+        /// <summary>
         /// Matches always, every
         /// </summary>
         public SimpleClosedClassSegment Always;
@@ -240,6 +254,11 @@ namespace Imaginarium.Parsing
         /// Matches "each other"
         /// </summary>
         public SimpleClosedClassSegment EachOther;
+
+        /// <summary>
+        /// Recognizes numbers and stores them in count
+        /// </summary>
+        public Func<bool> Count;
 
         /// <summary>
         /// Recognizes numbers and stores them in lowerBound

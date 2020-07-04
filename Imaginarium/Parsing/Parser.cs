@@ -45,8 +45,9 @@ namespace Imaginarium.Parsing
             InitializeConstituents();
             Is = MatchCopula;
             Has = MatchHave;
-            UpperBound = () => MatchNumber(out ParsedUpperBound);
-            LowerBound = () => MatchNumber(out ParsedLowerBound);
+            Count = () => MatchInt(out ParsedCount);
+            UpperBound = () => MatchFloat(out ParsedUpperBound);
+            LowerBound = () => MatchFloat(out ParsedLowerBound);
             StandardSentencePatterns(o);
             foreach (var set in commandSets)
                 SentencePatterns.AddRange(set(this));
@@ -291,11 +292,34 @@ namespace Imaginarium.Parsing
         }
 
         /// <summary>
-        /// Attempt to match token to a number.  If successful, writes number to out arg.
+        /// Attempt to match token to an integernumber.  If successful, writes number to out arg.
         /// </summary>
         /// <param name="number">Variable or field to write result back to</param>
         /// <returns>True on success</returns>
-        public bool MatchNumber(out float number)
+        public bool MatchInt(out int number)
+        {
+            var token = CurrentToken;
+            if (int.TryParse(token, out number))
+            {
+                SkipToken();
+                return true;
+            }
+
+            number = Array.IndexOf(NumberWords, token);
+
+            var success = number >= 0;
+            if (success)
+                SkipToken();
+
+            return success;
+        }
+
+        /// <summary>
+        /// Attempt to match token to a floating-point number.  If successful, writes number to out arg.
+        /// </summary>
+        /// <param name="number">Variable or field to write result back to</param>
+        /// <returns>True on success</returns>
+        public bool MatchFloat(out float number)
         {
             var token = CurrentToken;
             if (Single.TryParse(token, out number))

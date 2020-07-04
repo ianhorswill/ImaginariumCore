@@ -101,6 +101,15 @@ namespace Tests
         }
 
         [TestMethod]
+        public void MultiPartTest()
+        {
+            var o = new Ontology("MultiPartTest", null);
+            o.Parser.ParseAndExecute("A person has 4 pastimes called their hobbies");
+            var invention = o.Generator("person").Generate();
+            Assert.AreEqual(5, invention.Individuals.Count);
+        }
+
+        [TestMethod]
         public void  CompoundNounTest()
         {
             Ontology.EraseConcepts();

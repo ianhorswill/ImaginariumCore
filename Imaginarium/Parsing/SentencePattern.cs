@@ -473,6 +473,8 @@ namespace Imaginarium.Parsing
                         return "is/are";
                     if (f == Parser.Has)
                         return "have/has";
+                    if (f == Parser.Count)
+                        return "<i><color=grey>Count</color></i>";
                     if (f == Parser.LowerBound)
                         return "<i><color=grey>LowerBound</color></i>";
                     if (f == Parser.UpperBound)

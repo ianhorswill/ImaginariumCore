@@ -178,6 +178,11 @@ namespace Imaginarium.Ontology
         }
 
         /// <summary>
+        /// Returns the common noun (kind) named by the specified string, or null if there is none.
+        /// </summary>
+        public CommonNoun CommonNoun(string name) => CommonNoun(name.Split());
+
+        /// <summary>
         /// Return the (permanent) individual with the specified name
         /// An individual is the referent of a proper noun.
         /// </summary>
@@ -188,6 +193,11 @@ namespace Imaginarium.Ontology
         /// Returns the noun named by the specified token string, or null if there is none.
         /// </summary>
         public Noun Noun(params string[] tokens) => AllNouns.LookupOrDefault(tokens);
+
+        /// <summary>
+        /// Returns the noun named by the specified string, or null if there is none.
+        /// </summary>
+        public Noun Noun(string name) => Noun(name.Split());
     
         /// <summary>
         /// Return the property with the specified name, if any, otherwise null.
@@ -376,6 +386,18 @@ namespace Imaginarium.Ontology
                 yield return (test, success, example);
             }
         }
+        #endregion
+
+        #region Generators
+        /// <summary>
+        /// Make a generator to generate the specified noun and modifiers
+        /// </summary>
+        public Generator.Generator Generator(CommonNoun noun, params MonadicConceptLiteral[] modifiers) => new Generator.Generator(noun, modifiers);
+
+        /// <summary>
+        /// Make a generator to generate the specified noun and modifiers
+        /// </summary>
+        public Generator.Generator Generator(string noun, int count = 1) => new Generator.Generator(CommonNoun(noun), new MonadicConceptLiteral[0], count);
         #endregion
     }
 }

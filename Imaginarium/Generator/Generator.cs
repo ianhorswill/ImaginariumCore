@@ -310,10 +310,11 @@ namespace Imaginarium.Generator
         {
             foreach (var part in k.Parts)
             {
-                var p = Ontology.EphemeralIndividual(part.MonadicConcepts, null, i, part);
-                i.Parts[part] = p;
-                EphemeralIndividuals.Add(p);
-                AddParts(p);
+                var partSet = Enumerable.Range(1, part.Count).Select(index => Ontology.EphemeralIndividual(part.MonadicConcepts, null, i, part)).ToArray();
+                i.Parts[part] = partSet;
+                EphemeralIndividuals.AddRange(partSet);
+                foreach (var p in partSet)
+                    AddParts(p);
             }
 
             foreach (var super in k.Superkinds)

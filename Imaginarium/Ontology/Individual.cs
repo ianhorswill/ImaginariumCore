@@ -62,7 +62,7 @@ namespace Imaginarium.Ontology
         /// <summary>
         /// The Properties of this individual.
         /// </summary>
-        public readonly Dictionary<Part, Individual> Parts = new Dictionary<Part, Individual>();
+        public readonly Dictionary<Part, Individual[]> Parts = new Dictionary<Part, Individual[]>();
     
         /// <summary>
         /// The Properties of this individual.

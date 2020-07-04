@@ -216,7 +216,7 @@ namespace Imaginarium.Generator
         private void AppendPropertyValue(StringBuilder b, Individual i, string[] propertyName, CommonNoun templateKind,
             List<Property> suppressedProperties)
         {
-// Find the property
+            // Find the property
             var property = templateKind.PropertyNamed(propertyName);
             if (property != null)
             {
@@ -227,7 +227,11 @@ namespace Imaginarium.Generator
             else
             {
                 var part = templateKind.PartNamed(propertyName);
-                b.Append(part != null ? Description(i.Parts[part]) : $"<unknown property {propertyName.Untokenize()}>");
+                if (part != null)
+                    foreach (var p in i.Parts[part])
+                        b.Append(Description(p));
+                else
+                    b.Append($"<unknown property {propertyName.Untokenize()}>");
             }
         }
 

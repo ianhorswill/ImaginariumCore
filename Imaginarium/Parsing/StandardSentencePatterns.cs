@@ -433,7 +433,22 @@ namespace Imaginarium.Parsing
                     .Documentation(
                         "States that Subjects have a property whose possible values are given in the specified file.  For example 'cats have a name from cat names', or 'French cats have a name from French cat names'"),
 
-                new SentencePattern(this, OptionalAll, Subject, Has, Object, "called", "!", "its", Text)
+                new SentencePattern(this, OptionalAll, Subject, Has, Count, Object, "called", "!", PossessivePronoun, Text)
+                    .Action(() =>
+                    {
+
+                        var partName = ParsedCount == 1 ? Text.Text : Inflection.SingularOfNoun(Text.Text);
+                        var part = Subject.CommonNoun.Parts.FirstOrDefault(p => p.IsNamed(partName));
+                        if (part == null)
+                        {
+                            part = new Part(ontology, partName, ParsedCount, Object.CommonNoun, Object.Modifiers);
+                            Subject.CommonNoun.Parts.Add(part);
+                        }
+                    })
+                    .Check(SubjectVerbAgree, ObjectUnmodified, ObjectCommonNoun)
+                    .Documentation("States that Subjects have part called Text that is a Object."),
+                
+                new SentencePattern(this, OptionalAll, Subject, Has, Object, "called", "!", PossessivePronoun, Text)
                     .Action(() =>
                     {
 
@@ -441,7 +456,7 @@ namespace Imaginarium.Parsing
                         var part = Subject.CommonNoun.Parts.FirstOrDefault(p => p.IsNamed(partName));
                         if (part == null)
                         {
-                            part = new Part(ontology, partName, Object.CommonNoun, Object.Modifiers);
+                            part = new Part(ontology, partName, 1, Object.CommonNoun, Object.Modifiers);
                             Subject.CommonNoun.Parts.Add(part);
                         }
                     })

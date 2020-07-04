@@ -34,13 +34,19 @@ namespace Imaginarium.Ontology
     /// </summary>
     public class Part : Concept
     {
-        internal Part(Ontology ontology, string[] name, CommonNoun kind, IEnumerable<MonadicConceptLiteral> modifiers) : base(ontology, name)
+        internal Part(Ontology ontology, string[] name, int count, CommonNoun kind, IEnumerable<MonadicConceptLiteral> modifiers) : base(ontology, name)
         {
             Name = name;
             Ontology.AllParts[name] = this;
+            Count = count;
             Kind = kind;
             Modifiers = modifiers.ToArray();
         }
+
+        /// <summary>
+        /// Number of instances of this part in a given instance of Kind.
+        /// </summary>
+        public readonly int Count;
     
         /// <summary>
         /// The CatSAT domain of this variable
