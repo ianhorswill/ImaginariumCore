@@ -82,7 +82,7 @@ namespace Imaginarium.Driver
         }
         #endregion
 
-        public static IRepl Repl;
+        public static IRepl Repl = new StubRepl();
 
         public static void SetOutputWindow(string contents) => Repl.SetOutputWindow(contents);
     }

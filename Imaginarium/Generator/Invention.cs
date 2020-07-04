@@ -208,7 +208,7 @@ namespace Imaginarium.Generator
             if (property != null)
             {
                 // Print its value
-                b.Append(Model[i.Properties[property]]);
+                b.Append(PropertyValue(i, property));
                 suppressedProperties?.Add(property);
             }
             else
@@ -219,6 +219,17 @@ namespace Imaginarium.Generator
                 else
                     b.Append($"<unknown property {propertyName.Untokenize()}>");
             }
+        }
+
+        /// <summary>
+        /// The value of the specified property of the specified individual in this Invention.
+        /// </summary>
+        /// <param name="i">Individual whose property is needed</param>
+        /// <param name="property">The Property object for the property requested.</param>
+        /// <returns>The value of i's property property</returns>
+        public object PropertyValue(Individual i, Property property)
+        {
+            return Model[i.Properties[property]];
         }
 
         // ReSharper disable once UnusedParameter.Local

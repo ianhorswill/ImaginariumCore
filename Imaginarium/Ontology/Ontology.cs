@@ -99,7 +99,7 @@ namespace Imaginarium.Ontology
         }
 
         /// <summary>
-        /// Return the concept with the specified name
+        /// Return the concept with the specified name, or null if there isn't one.
         /// </summary>
         public object Concept(TokenString name)
         {
@@ -117,7 +117,7 @@ namespace Imaginarium.Ontology
         }
 
         /// <summary>
-        /// Return the concept with the specified name
+        /// Return the concept with the specified name, or null if there isn't one
         /// </summary>
         public object this[TokenString name] => Concept(name);
 
