@@ -292,7 +292,7 @@ namespace Imaginarium.Parsing
         }
 
         /// <summary>
-        /// Attempt to match token to an integernumber.  If successful, writes number to out arg.
+        /// Attempt to match token to an integer.  If successful, writes number to out arg.
         /// </summary>
         /// <param name="number">Variable or field to write result back to</param>
         /// <returns>True on success</returns>

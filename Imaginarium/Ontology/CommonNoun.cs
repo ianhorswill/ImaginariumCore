@@ -152,11 +152,11 @@ namespace Imaginarium.Ontology
         public string[] DescriptionTemplate { get; set; }
 
         /// <summary>
-        /// The common nouns identifying the subtypes of this noun
+        /// The common nouns identifying the immediate subkinds of this noun
         /// </summary>
         public readonly List<CommonNoun> Subkinds = new List<CommonNoun>();
         /// <summary>
-        /// The common nouns identifying the superkinds of this noun
+        /// The common nouns identifying the immediate superkinds of this noun
         /// </summary>
         public readonly List<CommonNoun> Superkinds = new List<CommonNoun>();
         /// <summary>
@@ -194,6 +194,24 @@ namespace Imaginarium.Ontology
         /// Return the property of this noun with the specified name, or null.
         /// </summary>
         public Property PropertyNamed(string[] name) => Properties.FirstOrDefault(p => p.IsNamed(name));
+
+        /// <summary>
+        /// Search for and return the property with the specified name in this noun or one of its ancestor kinds
+        /// </summary>
+        public Property FindPropertyInAncestor(string[] name)
+        {
+            var p = PropertyNamed(name);
+            if (p != null)
+                return p;
+            foreach (var k in Superkinds)
+            {
+                p = k.FindPropertyInAncestor(name);
+                if (p != null)
+                    return p;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Run action over all the ancestor kinds of this kind

@@ -80,6 +80,11 @@ namespace Imaginarium.Ontology
         public readonly List<MenuRule> MenuRules = new List<MenuRule>();
 
         /// <summary>
+        /// Rules for which Intervals to use when for this variable, it it's a FloatVariable.
+        /// </summary>
+        public readonly List<IntervalRule> IntervalRules = new List<IntervalRule>();
+
+        /// <summary>
         /// Token string used to refer to this property
         /// </summary>
         public readonly string[] Name;
@@ -109,6 +114,27 @@ namespace Imaginarium.Ontology
             {
                 Conditions = conditions;
                 Menu = menu;
+            }
+        }
+
+        /// <summary>
+        /// A set of conditions under which a float property should take its value from a specific interval (range).
+        /// </summary>
+        public class IntervalRule
+        {
+            /// <summary>
+            /// Conditions in which this rule applies
+            /// </summary>
+            public readonly MonadicConceptLiteral[] Conditions;
+            /// <summary>
+            /// Menu of allowable strings
+            /// </summary>
+            public readonly Interval Interval;
+
+            internal IntervalRule(MonadicConceptLiteral[] conditions, Interval i)
+            {
+                Conditions = conditions;
+                Interval = i;
             }
         }
     }

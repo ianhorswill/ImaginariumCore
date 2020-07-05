@@ -170,6 +170,36 @@ namespace Tests
         }
 
         [TestMethod]
+        public void MultipleRangePropertyTest()
+        {
+            var o = new Ontology("MultipleRangePropertyTest", null);
+            o.Parser.ParseAndExecute("cats have an age between 1 and 20",
+                "kittens are a kind of cat",
+                "kittens have an age between 1 and 2",
+                "adults are a kind of cat",
+                "adults have an age between 2 and 20");
+            var g = o.Generator("cat");
+            var age = o.Property("age");
+            for (var n = 0; n < 200; n++)
+            {
+                var i = g.Generate();
+                var cat = i.Individuals[0];
+                var catAge = (float)(i.PropertyValue(cat, age));
+                if (i.IsA(cat, "kitten"))
+                {
+                    Assert.IsTrue(catAge >= 1);
+                    Assert.IsTrue(catAge <= 2);
+                }
+                else
+                {
+                    Assert.IsTrue(catAge >= 2);
+                    Assert.IsTrue(catAge <= 20);
+                }
+
+            }
+        }
+
+        [TestMethod]
         public void ProperNameTest()
         {
             Ontology.EraseConcepts();

@@ -359,25 +359,38 @@ namespace Imaginarium.Generator
                         AssertKind(i, super);
                     MaybeFormalizeKindInstance(i, k);
 
-                    foreach (var p in k.Properties)
-                    {
-                        if (!i.Properties.ContainsKey(p))
-                            // Create SMT variable
-                        {
-                            var v = p.Type == null ? new MenuVariable<string>(p.Text, null, Problem, isK) : p.Type.Instantiate(p.Text, Problem, isK);
-                            i.Properties[p] = v;
-                            foreach (var r in p.MenuRules)
-                            {
-                                AddRule(i, r.Conditions.Append(k), ((MenuVariable<string>)v).In(r.Menu));
-                                //AddClause(r.Conditions.Select(c => Not(MembershipProposition(i, c))).Append(Not(isK)).Append(((MenuVariable<string>)v).In(r.Menu)));
-                            }
-                        }
-                    }
+                    MaybeAddProperties(k, i, isK);
 
                     return true;
                 }
 
                 return false;
+            }
+
+            void MaybeAddProperties(CommonNoun commonNoun, Individual individual, Proposition isK)
+            {
+                foreach (var p in commonNoun.Properties)
+                {
+                    if (!individual.Properties.ContainsKey(p))
+                        // Create SMT variable
+                    {
+                        var v = p.Type == null
+                            ? new MenuVariable<string>(p.Text, null, Problem, isK)
+                            : p.Type.Instantiate(p.Text, Problem, isK);
+                        individual.Properties[p] = v;
+                        var menuV = v as MenuVariable<string>;
+                        foreach (var r in p.MenuRules)
+                            // ReSharper disable once PossibleNullReferenceException
+                            AddRule(individual, r.Conditions.Append(commonNoun), menuV.In(r.Menu));
+
+                        var floatV = v as FloatVariable;
+                        foreach (var r in p.IntervalRules)
+                        {
+                            AddImplication(individual, r.Conditions.Append(commonNoun), floatV > r.Interval.Lower);
+                            AddImplication(individual, r.Conditions.Append(commonNoun), floatV < r.Interval.Upper);
+                        }
+                    }
+                }
             }
 
             // We know that i MIGHT BE of kind k so add clauses stating that if it is, i
@@ -423,21 +436,7 @@ namespace Imaginarium.Generator
                     Problem.Quantify(set.MinCount, set.MaxCount, clause);
                 }
 
-                var isK = IsA(i, k);
-                foreach (var p in k.Properties)
-                {
-                    if (!i.Properties.ContainsKey(p))
-                        // Create SMT variable
-                    {
-                        var v = p.Type == null ? new MenuVariable<string>(p.Text, null, Problem, isK) : p.Type.Instantiate(p.Text, Problem, isK);
-                        i.Properties[p] = v;
-                        foreach (var r in p.MenuRules)
-                        {
-                            AddRule(i, r.Conditions.Append(k), ((MenuVariable<string>)v).In(r.Menu));
-                            //AddClause(r.Conditions.Select(c => Not(MembershipProposition(i, c))).Append(Not(isK)).Append(((MenuVariable<string>)v).In(r.Menu)));
-                        }
-                    }
-                }
+                MaybeAddProperties(k, i, IsA(i, k));
 
                 kindsFormalized.Add(new Tuple<Individual, CommonNoun>(i, k));
             }

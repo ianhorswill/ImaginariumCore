@@ -401,10 +401,25 @@ namespace Imaginarium.Parsing
                 new SentencePattern(this, OptionalAll, Subject, Has, Object, "between", "!", LowerBound, "and", UpperBound)
                     .Action(() =>
                     {
-                        Subject.CommonNoun.Properties.Add(new Property(ontology, Object.Text,
-                            new FloatDomain(Object.Text.Untokenize(), ParsedLowerBound, ParsedUpperBound)));
+                        var subject = Subject.CommonNoun;
+                        var propertyName = Object.Text;
+
+                        var existingProperty = subject.FindPropertyInAncestor(propertyName);
+                        if (existingProperty == null)
+                        {
+                            if (Subject.Modifiers.Count > 0)
+                                throw new InvalidOperationException($"Can't define a range for property {Object.Text.Untokenize()} of {Subject.Text.Untokenize()} without first defining it for {subject.StandardName.Untokenize()}");
+                            subject.Properties.Add(new Property(ontology, propertyName,
+                                new FloatDomain(propertyName.Untokenize(), ParsedLowerBound, ParsedUpperBound)));
+                        }
+                        else
+                        {
+                            var rule = new Property.IntervalRule(Subject.Modifiers.Append(subject).ToArray(),
+                                                                    new Interval(ParsedLowerBound, ParsedUpperBound));
+                            existingProperty.IntervalRules.Add(rule);
+                        }
                     })
-                    .Check(SubjectVerbAgree, SubjectUnmodified, ObjectUnmodified)
+                    .Check(SubjectVerbAgree, ObjectUnmodified)
                     .Documentation(
                         "Says Subjects have a property, Object, that is a number in the specified range.  For example, 'cats have an age between 1 and 20'"),
 
