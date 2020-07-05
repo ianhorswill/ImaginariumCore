@@ -101,6 +101,21 @@ namespace Tests
         }
 
         [TestMethod]
+        public void UnnamedPartTest()
+        {
+            var o = new Ontology("UnnamedPartTest");
+            o.Parser.ParseAndExecute("a cat is a kind of person",
+                "a cat has a color");
+            var cat = o.CommonNoun("cat");
+            var color = o.CommonNoun("color");
+            var i = o.Generator(cat).Generate();
+            Assert.AreEqual(1, cat.Parts.Count);
+            Assert.AreEqual("color", cat.Parts[0].StandardName.Untokenize());
+            Assert.IsTrue(i.IsA(i.Individuals[0], cat));
+            Assert.IsTrue(i.IsA(i.Individuals[1], color));
+        }
+
+        [TestMethod]
         public void MultiPartTest()
         {
             var o = new Ontology("MultiPartTest", null);

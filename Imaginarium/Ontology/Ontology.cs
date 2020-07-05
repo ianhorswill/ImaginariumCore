@@ -47,7 +47,7 @@ namespace Imaginarium.Ontology
         /// </summary>
         /// <param name="name">Name for the ontology (for debugging purposes)</param>
         /// <param name="definitionsDirectory">Path to the directory containing code to load</param>
-        public Ontology(string name, string definitionsDirectory)
+        public Ontology(string name, string definitionsDirectory = null)
         {
             AllReferentTables.Add(AllAdjectives);
             AllReferentTables.Add(AllPermanentIndividuals);
@@ -343,7 +343,8 @@ namespace Imaginarium.Ontology
         /// <exception cref="NameCollisionException">If there is already a concept with that name but a different type.</exception>
         internal void EnsureUndefinedOrDefinedAsType(string[] name, Type type)
         {
-            if (name == null)
+            // Parts can have the same names as other things because there's no potential for ambiguity
+            if (name == null || type == typeof(Part))
                 return;
             var old = Concept((TokenString) name);
             if (old != null && old.GetType() != type)

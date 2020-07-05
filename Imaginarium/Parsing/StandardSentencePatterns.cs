@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CatSAT;
@@ -451,14 +452,12 @@ namespace Imaginarium.Parsing
                 new SentencePattern(this, OptionalAll, Subject, Has, Count, Object, "called", "!", PossessivePronoun, Text)
                     .Action(() =>
                     {
-
-                        var partName = ParsedCount == 1 ? Text.Text : Inflection.SingularOfNoun(Text.Text);
+                        var count = ParsedCount;
+                        var partName = count == 1 ? Text.Text : Inflection.SingularOfNoun(Text.Text);
                         var part = Subject.CommonNoun.Parts.FirstOrDefault(p => p.IsNamed(partName));
                         if (part == null)
-                        {
-                            part = new Part(ontology, partName, ParsedCount, Object.CommonNoun, Object.Modifiers);
-                            Subject.CommonNoun.Parts.Add(part);
-                        }
+                            InstallPart(ontology, partName, count, Object.CommonNoun, Object.Modifiers,
+                                Subject.CommonNoun);
                     })
                     .Check(SubjectVerbAgree, ObjectUnmodified, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
@@ -470,10 +469,30 @@ namespace Imaginarium.Parsing
                         var partName = Text.Text;
                         var part = Subject.CommonNoun.Parts.FirstOrDefault(p => p.IsNamed(partName));
                         if (part == null)
-                        {
-                            part = new Part(ontology, partName, 1, Object.CommonNoun, Object.Modifiers);
-                            Subject.CommonNoun.Parts.Add(part);
-                        }
+                            InstallPart(ontology, partName, 1, Object.CommonNoun, Object.Modifiers,
+                                Subject.CommonNoun);
+                    })
+                    .Check(SubjectVerbAgree, ObjectUnmodified)
+                    .Documentation("States that Subjects have part called Text that is a Object."),
+
+                new SentencePattern(this, OptionalAll, Subject, Has, Count, Object)
+                    .Action(() =>
+                    {
+                        var part = Subject.CommonNoun.Parts.FirstOrDefault(p => p.IsNamed(Object.CommonNoun.StandardName));
+                        if (part == null)
+                            InstallPart(ontology, Object.CommonNoun.StandardName, ParsedCount, Object.CommonNoun, Object.Modifiers,
+                                Subject.CommonNoun);
+                    })
+                    .Check(SubjectVerbAgree, ObjectUnmodified, ObjectCommonNoun)
+                    .Documentation("States that Subjects have part called Text that is a Object."),
+                
+                new SentencePattern(this, OptionalAll, Subject, Has, Object)
+                    .Action(() =>
+                    {
+                        var part = Subject.CommonNoun.Parts.FirstOrDefault(p => p.IsNamed(Object.CommonNoun.StandardName));
+                        if (part == null)
+                            InstallPart(ontology, Object.CommonNoun.StandardName, 1, Object.CommonNoun, Object.Modifiers,
+                                Subject.CommonNoun);
                     })
                     .Check(SubjectVerbAgree, ObjectUnmodified)
                     .Documentation("States that Subjects have part called Text that is a Object."),
@@ -560,6 +579,14 @@ namespace Imaginarium.Parsing
                     .Documentation(
                         "Instructs the system to add a new button to the button bar with the specified name.  When it is pressed, it will execute the specified text."),
             });
+        }
+
+        private static void InstallPart(Ontology.Ontology ontology, string[] partName, int count, CommonNoun kind, List<MonadicConceptLiteral> modifiers,
+            CommonNoun subject)
+        {
+            Part part;
+            part = new Part(ontology, partName, count, kind, modifiers);
+            subject.Parts.Add(part);
         }
 
         /// <summary>
