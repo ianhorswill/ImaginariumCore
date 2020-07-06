@@ -35,7 +35,7 @@ namespace Tests
     [TestClass]
     public class GeneratorTests
     {
-        public static Ontology Ontology = new Ontology("Test", null);
+        public static Ontology Ontology = new Ontology("Test");
         public Parser Parser = new Parser(Ontology);
 
         public GeneratorTests()
@@ -118,7 +118,7 @@ namespace Tests
         [TestMethod]
         public void MultiPartTest()
         {
-            var o = new Ontology("MultiPartTest", null);
+            var o = new Ontology("MultiPartTest");
             o.Parser.ParseAndExecute("A person has 4 pastimes called their hobbies");
             var invention = o.Generator("person").Generate();
             Assert.AreEqual(5, invention.Individuals.Count);
@@ -127,7 +127,7 @@ namespace Tests
         [TestMethod]
         public void PartNamingTest()
         {
-            var o = new Ontology("PartNamingTest", null);
+            var o = new Ontology("PartNamingTest");
             o.Parser.ParseAndExecute("A face has eyes",
                 "A face has a mouth",
                 "A face has a nose",
@@ -203,7 +203,7 @@ namespace Tests
         [TestMethod]
         public void MultipleRangePropertyTest()
         {
-            var o = new Ontology("MultipleRangePropertyTest", null);
+            var o = new Ontology("MultipleRangePropertyTest");
             o.Parser.ParseAndExecute("cats have an age between 1 and 20",
                 "kittens are a kind of cat",
                 "kittens have an age between 1 and 2",

@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -161,6 +160,7 @@ namespace Imaginarium.Generator
                     break;
 
                 case "ProperNameIfDefined":
+                    // Generate the name of i, but only if it's different from container+part
                     if (i.Container == null || i.NameProperty(Model) != null)
                         b.Append(NameString(i, suppressedProperties));
                     break;
