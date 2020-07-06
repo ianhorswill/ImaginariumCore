@@ -161,7 +161,9 @@ namespace Imaginarium.Generator
 
                 case "ProperNameIfDefined":
                     // Generate the name of i, but only if it's different from container+part
-                    if (i.Container == null || i.NameProperty(Model) != null)
+                    if (i.Container == null
+                        || i.NameProperty(Model) != null
+                        || FindKindOrSuperKind(i, kind => kind.NameTemplate != null) != null)
                         b.Append(NameString(i, suppressedProperties));
                     break;
 
