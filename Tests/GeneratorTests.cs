@@ -125,6 +125,22 @@ namespace Tests
         }
 
         [TestMethod]
+        public void PartNamingTest()
+        {
+            var o = new Ontology("PartNamingTest", null);
+            o.Parser.ParseAndExecute("A face has eyes",
+                "A face has a mouth",
+                "A face has a nose",
+                "A face has hair");
+            var invention = o.Generator("face").Generate();
+            Assert.AreEqual("the face", invention.NameString(invention.Individuals[0]));
+            Assert.AreEqual("the face's eye", invention.NameString(invention.Individuals[1]));
+            Assert.AreEqual("the face's mouth", invention.NameString(invention.Individuals[2]));
+            Assert.AreEqual("the face's nose", invention.NameString(invention.Individuals[3]));
+            Assert.AreEqual("the face's hair", invention.NameString(invention.Individuals[4]));
+        }
+
+        [TestMethod]
         public void  CompoundNounTest()
         {
             Ontology.EraseConcepts();

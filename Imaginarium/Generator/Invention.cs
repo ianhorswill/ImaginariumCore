@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -69,7 +70,7 @@ namespace Imaginarium.Generator
         #region Description generation
 
         private static readonly string[] DefaultDescriptionTemplate =
-            { "[", "ContainerAndPart", "]", "[", "NameString", "]", "is", "a", "[", "Modifiers", "]", "[", "Noun", "]", "[", "AllProperties", "]" };
+            { "[", "ContainerAndPart", "]", "[", "ProperNameIfDefined", "]", "is", "a", "[", "Modifiers", "]", "[", "Noun", "]", "[", "AllProperties", "]" };
 
         /// <summary>
         /// The StringBuilder currently has whitespace at the end
@@ -157,6 +158,11 @@ namespace Imaginarium.Generator
 
                 case "NameString":
                     b.Append(NameString(i, suppressedProperties));
+                    break;
+
+                case "ProperNameIfDefined":
+                    if (i.Container == null || i.NameProperty(Model) != null)
+                        b.Append(NameString(i, suppressedProperties));
                     break;
 
                 case "Modifiers":
@@ -367,7 +373,7 @@ namespace Imaginarium.Generator
             if (k1 != null)
                 return FormatNameFromTemplate(i, referencedProperties, k1);
             if (i.Container != null)
-                return NameString(i.Container) + i.Text;
+                return $"{NameString(i.Container)}'s {i.ContainerPart.StandardName.Untokenize()}";
             return i.Text;
         }
 
