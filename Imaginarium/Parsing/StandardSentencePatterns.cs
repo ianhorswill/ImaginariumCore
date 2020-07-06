@@ -459,7 +459,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, partName, count, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectUnmodified, ObjectCommonNoun)
+                    .Check(SubjectVerbAgree, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
                 
                 new SentencePattern(this, OptionalAll, Subject, Has, Object, "called", "!", PossessivePronoun, Text)
@@ -472,7 +472,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, partName, 1, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectUnmodified)
+                    .Check(SubjectVerbAgree, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
 
                 new SentencePattern(this, OptionalAll, Subject, Has, Count, Object)
@@ -483,7 +483,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, Object.CommonNoun.StandardName, ParsedCount, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectUnmodified, ObjectCommonNoun)
+                    .Check(SubjectVerbAgree, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
                 
                 new SentencePattern(this, OptionalAll, Subject, Has, Object)
@@ -494,7 +494,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, Object.CommonNoun.StandardName, 1, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectUnmodified)
+                    .Check(SubjectVerbAgree, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
 
                 new SentencePattern(this, "every", "kind", "of", "!", Subject, "should", "exist")
