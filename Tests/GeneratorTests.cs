@@ -35,7 +35,7 @@ namespace Tests
     [TestClass]
     public class GeneratorTests
     {
-        public static Ontology Ontology = new Ontology("Test", null);
+        public static Ontology Ontology = new Ontology("Test");
         public Parser Parser = new Parser(Ontology);
 
         public GeneratorTests()
@@ -118,10 +118,26 @@ namespace Tests
         [TestMethod]
         public void MultiPartTest()
         {
-            var o = new Ontology("MultiPartTest", null);
+            var o = new Ontology("MultiPartTest");
             o.Parser.ParseAndExecute("A person has 4 pastimes called their hobbies");
             var invention = o.Generator("person").Generate();
             Assert.AreEqual(5, invention.Individuals.Count);
+        }
+
+        [TestMethod]
+        public void PartNamingTest()
+        {
+            var o = new Ontology("PartNamingTest");
+            o.Parser.ParseAndExecute("A face has eyes",
+                "A face has a mouth",
+                "A face has a nose",
+                "A face has hair");
+            var invention = o.Generator("face").Generate();
+            Assert.AreEqual("the face", invention.NameString(invention.Individuals[0]));
+            Assert.AreEqual("the face's eye", invention.NameString(invention.Individuals[1]));
+            Assert.AreEqual("the face's mouth", invention.NameString(invention.Individuals[2]));
+            Assert.AreEqual("the face's nose", invention.NameString(invention.Individuals[3]));
+            Assert.AreEqual("the face's hair", invention.NameString(invention.Individuals[4]));
         }
 
         [TestMethod]
@@ -187,7 +203,7 @@ namespace Tests
         [TestMethod]
         public void MultipleRangePropertyTest()
         {
-            var o = new Ontology("MultipleRangePropertyTest", null);
+            var o = new Ontology("MultipleRangePropertyTest");
             o.Parser.ParseAndExecute("cats have an age between 1 and 20",
                 "kittens are a kind of cat",
                 "kittens have an age between 1 and 2",
