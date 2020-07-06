@@ -364,9 +364,11 @@ namespace Imaginarium.Generator
             }
 
             var k1 = FindKindOrSuperKind(i, kind => kind.NameTemplate != null);
-            return k1 != null
-                ? FormatNameFromTemplate(i, referencedProperties, k1)
-                : i.Text;
+            if (k1 != null)
+                return FormatNameFromTemplate(i, referencedProperties, k1);
+            if (i.Container != null)
+                return NameString(i.Container) + i.Text;
+            return i.Text;
         }
 
         private string FormatNameFromTemplate(Individual i, List<Property> suppressedProperties, CommonNoun kind)
