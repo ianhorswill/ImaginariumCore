@@ -168,11 +168,11 @@ namespace Imaginarium.Generator
                     break;
 
                 case "Modifiers":
-                    b.Append(AllModifiersOf(i));
+                    b.Append(AdjectivesString(i));
                     break;
 
                 case "Noun":
-                    b.Append(NounsDescribing(i, startEmphasis, endEmphasis));
+                    b.Append(NounsString(i, startEmphasis, endEmphasis));
                     break;
 
                 case "AllProperties":
@@ -204,13 +204,19 @@ namespace Imaginarium.Generator
             }
         }
 
-        private string NounsDescribing(Individual i, string startEmphasis, string endEmphasis)
+        /// <summary>
+        /// Nouns describing i, as a string
+        /// </summary>
+        public string NounsString(Individual i, string startEmphasis="", string endEmphasis="")
         {
             return MostSpecificNouns(i).SelectMany(noun => noun.StandardName).Prepend(startEmphasis)
                 .Append(endEmphasis).Untokenize();
         }
 
-        private string AllModifiersOf(Individual i)
+        /// <summary>
+        /// Adjectives describing i, as a string
+        /// </summary>
+        public string AdjectivesString(Individual i)
         {
             var adjectivalPhrases = AdjectivesDescribing(i).Where(a => !a.IsSilent).Select(a => a.StandardName)
                 .Cast<IEnumerable<string>>().ToList();

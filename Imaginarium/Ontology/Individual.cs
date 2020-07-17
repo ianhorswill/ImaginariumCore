@@ -150,5 +150,16 @@ namespace Imaginarium.Ontology
         /// </summary>
         public static bool operator >=(Individual a, Individual b) => a.uid >= b.uid;
         #endregion
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var normalAnswer = base.ToString();
+            if (!string.IsNullOrEmpty(normalAnswer))
+                return normalAnswer;
+            if (Container != null)
+                return $"{Container}'s {ContainerPart.Text}";
+            return $"Individual{uid}";
+        }
     }
 }
