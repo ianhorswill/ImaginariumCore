@@ -135,13 +135,14 @@ namespace Imaginarium.Generator
                     b.Append(token);
             }
 
-            var description = b.ToString();
+            var description = b.ToString().Trim();
             i.MostRecentDescription = description;
             return description;
         }
 
         private void AppendPropertyOrMetaPropertyValue(StringBuilder b, Individual i, string[] propertyName,
-            List<Property> suppressedProperties, CommonNoun templateKind, string startEmphasis, string endEmphasis)
+            List<Property> suppressedProperties, CommonNoun templateKind, string startEmphasis = "",
+            string endEmphasis = "", bool disallowNameString = false)
         {
             switch (propertyName[0])
             {
@@ -156,7 +157,10 @@ namespace Imaginarium.Generator
                     break;
 
                 case "NameString":
-                    b.Append(NameString(i, suppressedProperties));
+                    if (disallowNameString)
+                        b.Append("<uh oh, name is defined in terms of itself!");
+                    else
+                        b.Append(NameString(i, suppressedProperties));
                     break;
 
                 case "ProperNameIfDefined":
@@ -168,11 +172,11 @@ namespace Imaginarium.Generator
                     break;
 
                 case "Modifiers":
-                    b.Append(AllModifiersOf(i));
+                    b.Append(AdjectivesString(i));
                     break;
 
                 case "Noun":
-                    b.Append(NounsDescribing(i, startEmphasis, endEmphasis));
+                    b.Append(NounsString(i, startEmphasis, endEmphasis));
                     break;
 
                 case "AllProperties":
@@ -204,13 +208,19 @@ namespace Imaginarium.Generator
             }
         }
 
-        private string NounsDescribing(Individual i, string startEmphasis, string endEmphasis)
+        /// <summary>
+        /// Nouns describing i, as a string
+        /// </summary>
+        public string NounsString(Individual i, string startEmphasis="", string endEmphasis="")
         {
             return MostSpecificNouns(i).SelectMany(noun => noun.StandardName).Prepend(startEmphasis)
                 .Append(endEmphasis).Untokenize();
         }
 
-        private string AllModifiersOf(Individual i)
+        /// <summary>
+        /// Adjectives describing i, as a string
+        /// </summary>
+        public string AdjectivesString(Individual i)
         {
             var adjectivalPhrases = AdjectivesDescribing(i).Where(a => !a.IsSilent).Select(a => a.StandardName)
                 .Cast<IEnumerable<string>>().ToList();
@@ -376,7 +386,7 @@ namespace Imaginarium.Generator
                 return FormatNameFromTemplate(i, referencedProperties, k1);
             if (i.Container != null)
                 return $"{NameString(i.Container)}'s {i.ContainerPart.StandardName.Untokenize()}";
-            return i.Text;
+            return i.Text.Trim();
         }
 
         private string FormatNameFromTemplate(Individual i, List<Property> suppressedProperties, CommonNoun kind)
@@ -402,16 +412,7 @@ namespace Imaginarium.Generator
                         end = t.Length;
                     var propertyName = new string[end - start];
                     Array.Copy(t, start, propertyName, 0, end - start);
-                    // Find the property
-                    var property = kind.PropertyNamed(propertyName);
-                    if (property == null)
-                        b.Append($"<unknown property {propertyName.Untokenize()}>");
-                    else
-                    {
-                        // Print its value
-                        b.Append(Model[i.Properties[property]]);
-                        suppressedProperties?.Add(property);
-                    }
+                    AppendPropertyOrMetaPropertyValue(b, i, propertyName, suppressedProperties, kind);
 
                     n = end;
                 }
