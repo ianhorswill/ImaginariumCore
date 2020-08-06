@@ -2875,6 +2875,13 @@
             <param name="literal">Literal tha must always be true</param>
             <exception cref="T:System.InvalidOperationException">When the Problem has already been solved once</exception>
         </member>
+        <member name="M:CatSAT.Problem.SetPreinitializedValue(CatSAT.Proposition,System.Boolean)">
+            <summary>
+            Used to specify an initial value to be used by the solver for this one particular run of the solver.
+            </summary>
+            <param name="p">Proposition to assign a value to</param>
+            <param name="value">Truth value to assign to the proposition</param>
+        </member>
         <member name="M:CatSAT.Problem.Assert(CatSAT.Implication)">
             <summary>
             Asserts that the head must be true in any solution in which the body is true
