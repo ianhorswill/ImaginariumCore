@@ -23,3 +23,13 @@ Then add the following to your code:
    * `IsA(concept)` tells you if the concept (a common noun or adjective) holds of
       the individual.
    * `RelatesTo(that, verb)` tells you if this possible individual verbs that.
+
+   So, to generate a thing and its textual description, first do:
+
+   ```Ontology Ont = new Ontology(path);
+   ```
+
+   Then, each time you want to make something do:
+
+   ```Ont.CommonNoun("noun").MakeGenerator().Generate().PossibleIndividuals[0].Description()
+   ```
