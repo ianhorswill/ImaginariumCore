@@ -14,11 +14,12 @@ Then add the following to your code:
   generators using the Imaginarium IDE)
 * Call `o.CommonNoun("noun").MakeGenerator().Generate()` where `o` is the ontology, and
   `"noun"` is the name of the kind of thing to generate, e.g. "character", "monster", "cat", etc.
-* The result is an object of type `Invention`.  It has the following useful members
-   * `Individuals` is a list of the created objects.  If you just asked for one, it will be
-     `i.Individuals[0]`, where `i` is the invention you generated.
-   * `NameString(individual)` returns the whatever name has been assigned to the individual.
-   * `Description(individual)` generates an English description of the individual
-   * `IsA(individual, concept)` tells you if the concept (a common noun or adjective) holds of
+* The result is an object of type `Invention`.  It has a field called PossibleIndividuals, which is
+  an array of the created objects.  If you just asked for one object, it will be `i.PossibleIndividuals[0]`,
+  where `i` is the invention you generated.
+* The PossibleIndividual class has the following useful members
+   * `NameString()` returns the whatever name has been assigned to the individual.
+   * `Description()` generates an English description of the individual
+   * `IsA(concept)` tells you if the concept (a common noun or adjective) holds of
       the individual.
-   * `Holds(verb, i1, i1)` tells you if i1 verbs i2.
+   * `RelatesTo(that, verb)` tells you if this possible individual verbs that.
