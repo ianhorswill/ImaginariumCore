@@ -296,6 +296,16 @@ namespace Imaginarium.Ontology
         public Parser Parser => parser ?? (parser = new Parser(this));
 
         /// <summary>
+        /// Load the specified code into the ontology
+        /// </summary>
+        public void ParseAndExecute(string declaration) => Parser.ParseAndExecute(declaration);
+
+        /// <summary>
+        /// Load the specified code into the ontology
+        /// </summary>
+        public void ParseAndExecute(params string[] declarations) => Parser.ParseAndExecute(declarations);
+
+        /// <summary>
         /// Load all the source files in the current project
         /// </summary>
         public void Load()

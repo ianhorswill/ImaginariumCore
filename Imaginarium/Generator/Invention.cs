@@ -51,6 +51,18 @@ namespace Imaginarium.Generator
         public List<Individual> Individuals => Generator.Individuals;
 
         /// <summary>
+        /// The PossibleIndividuals in this invention (possible world).
+        /// PossibleIndividuals are just combinations of Individuals and Inventions.
+        /// </summary>
+        public readonly List<PossibleIndividual> PossibleIndividuals;
+
+        /// <summary>
+        /// Returns the PossibleIndividual from within this Invention, corresponding to the specified individual.
+        /// </summary>
+        public PossibleIndividual PossibleIndividual(Individual i) =>
+            PossibleIndividuals.FirstOrDefault(p => p.Individual == i);
+
+        /// <summary>
         /// The Generator that created this invention
         /// </summary>
         public Generator Generator;
@@ -64,10 +76,11 @@ namespace Imaginarium.Generator
             Ontology = ontology;
             Generator = generator;
             Model = model;
+            PossibleIndividuals = new List<PossibleIndividual>(Individuals.Count);
+            PossibleIndividuals.AddRange(Individuals.Select(i => new PossibleIndividual(i, this)));
         }
 
         #region Description generation
-
         private static readonly string[] DefaultDescriptionTemplate =
             { "[", "ContainerAndPart", "]", "[", "ProperNameIfDefined", "]", "is", "a", "[", "Modifiers", "]", "[", "Noun", "]", "[", "AllProperties", "]" };
 
