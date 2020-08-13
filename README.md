@@ -26,10 +26,12 @@ Then add the following to your code:
 
    So, to generate a thing and its textual description, first do:
 
-   ```Ontology Ont = new Ontology(path);
+   ```
+   Ontology Ont = new Ontology(path);
    ```
 
    Then, each time you want to make something do:
 
-   ```Ont.CommonNoun("noun").MakeGenerator().Generate().PossibleIndividuals[0].Description()
+   ```
+   Ont.CommonNoun("noun").MakeGenerator().Generate().PossibleIndividuals[0].Description()
    ```
