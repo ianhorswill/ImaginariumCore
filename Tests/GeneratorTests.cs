@@ -259,5 +259,40 @@ namespace Tests
                 Console.WriteLine(i.Description(i.Individuals[0]));
             }
         }
+
+        [TestMethod]
+        public void PossibleIndividualTest()
+        {
+            var o = new Ontology("PossibleIndividualTest");
+            o.ParseAndExecute("a cat is a kind of person",
+                "a persian is a kind of cat",
+                "a tabby is a kind of cat",
+                "a siamese is a kind of cat",
+                "a cat can be haughty",
+                "a cat can be cuddly",
+                "a cat can be crazy",
+                "a persian can be matted");
+            var i = o.Generator("cat", 10).Generate();
+            foreach (var pi in i.PossibleIndividuals)
+                Assert.IsTrue(pi.IsA("cat"));
+        }
+
+        [TestMethod]
+        public void PossibleIndividualPartTest()
+        {
+            var o = new Ontology("PartNamingTest");
+            o.ParseAndExecute("A face has eyes",
+                "A face has a mouth",
+                "A face has a nose",
+                "A face has hair");
+            var invention = o.Generator("face").Generate();
+            var face = invention.PossibleIndividuals[0];
+            Assert.IsTrue(face.IsA("face"));
+            Assert.IsTrue(face.Part("eye")[0].IsA("eye"));
+            Assert.IsTrue(face.Part("mouth")[0].IsA("mouth"));
+            Assert.IsTrue(face.Part("nose")[0].IsA("nose"));
+            Assert.IsTrue(face.Part("hair")[0].IsA("hair"));
+        }
+
     }
 }

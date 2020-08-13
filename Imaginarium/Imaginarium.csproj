@@ -50,6 +50,7 @@
     <Compile Include="Driver\LogFile.cs" />
     <Compile Include="Generator\Generator.cs" />
     <Compile Include="Generator\Invention.cs" />
+    <Compile Include="Generator\PossibleIndividual.cs" />
     <Compile Include="Ontology\Adjective.cs" />
     <Compile Include="Ontology\CommonNoun.cs" />
     <Compile Include="Ontology\Concept.cs" />
