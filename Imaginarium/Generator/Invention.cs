@@ -114,6 +114,20 @@ namespace Imaginarium.Generator
         }
 
         /// <summary>
+        /// A description of all the individuals in this invention
+        /// </summary>
+        public string Description(string startEmphasis = "", string endEmphasis = "")
+        {
+            var b = new StringBuilder();
+            foreach (var i in PossibleIndividuals)
+            {
+                b.Append(i.Description(startEmphasis, endEmphasis));
+                b.Append('\n');
+            }
+            return b.ToString();
+        }
+
+        /// <summary>
         /// A textual description of the Individual's attributes within Model.
         /// </summary>
         public string Description(Individual i, string startEmphasis="", string endEmphasis="")
