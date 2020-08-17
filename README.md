@@ -9,13 +9,13 @@ any Unity project.  To use it, add the following files to your Assets directory:
 Then add the following to your code:
 
 * Set `Imaginarium.Driver.DataFiles` to the path of the folder holding the `Inflections` folder.
-* Call `new Imaginarium.Ontology.Ontology(generatorPath)`, where `generatorPath`
+* Call `new Imaginarium.Ontology.Ontology("name", "generatorPath")`, where `generatorPath`
   is a path to the directory holding your generator definition (you can create and debug the 
   generators using the Imaginarium IDE)
 * Call `o.CommonNoun("noun").MakeGenerator().Generate()` where `o` is the ontology, and
   `"noun"` is the name of the kind of thing to generate, e.g. "character", "monster", "cat", etc.
-* The result is an object of type `Invention`.  It has a field called PossibleIndividuals, which is
-  an array of the created objects.  If you just asked for one object, it will be `i.PossibleIndividuals[0]`,
+* The result is an object of type `Invention`.  it contains a set of `PossibleIndividual`s, which 
+  are the created objects.  If you just asked for one object, it will be `i[0]`,
   where `i` is the invention you generated.
 * The PossibleIndividual class has the following useful members
    * `NameString()` returns the whatever name has been assigned to the individual.
@@ -27,11 +27,24 @@ Then add the following to your code:
    So, to generate a thing and its textual description, first do:
 
    ```
-   Ontology Ont = new Ontology(path);
+   var o = new Ontology(path);
    ```
 
    Then, each time you want to make something do:
 
    ```
-   Ont.CommonNoun("noun").MakeGenerator().Generate().PossibleIndividuals[0].Description()
+   o.CommonNoun("noun").MakeGenerator().Generate()[0].Description()
    ```
+
+   If you know you'll want to repeatedly make the same nouns, do:
+
+   ```
+   var g = o.CommonNoun("noun").MakeGenerator();
+   ```
+   Which will make the generator once (making a generator is expensive).  Then you can repeatedly do:
+
+   ```
+   g.Generate()[0].Description()
+   ```
+
+   To make instances of it.
