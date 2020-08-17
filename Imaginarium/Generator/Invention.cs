@@ -63,6 +63,17 @@ namespace Imaginarium.Generator
             PossibleIndividuals.FirstOrDefault(p => p.Individual == i);
 
         /// <summary>
+        /// The index'th PossibleIndividual in this invention.
+        /// </summary>
+        /// <param name="index">Index of the individual.  This will be 0 if there is only one individual.</param>
+        public PossibleIndividual this[int index] => PossibleIndividuals[index];
+
+        /// <summary>
+        /// Returns the PossibleIndividual within this invention of the specified individual
+        /// </summary>
+        public PossibleIndividual this[Individual i] => PossibleIndividual(i);
+
+        /// <summary>
         /// The Generator that created this invention
         /// </summary>
         public Generator Generator;
