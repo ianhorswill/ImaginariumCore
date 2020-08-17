@@ -27,7 +27,7 @@ Then add the following to your code:
    So, to generate a thing and its textual description, first do:
 
    ```
-   var o = new Ontology(path);
+   var o = new Ontology("name", "path");
    ```
 
    Then, each time you want to make something do:
