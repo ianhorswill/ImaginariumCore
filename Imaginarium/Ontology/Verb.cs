@@ -255,7 +255,7 @@ namespace Imaginarium.Ontology
             {
                 if (_singular != null && ((TokenString) _singular).Equals((TokenString) value))
                     return;
-                Ontology.EnsureUndefinedOrDefinedAsType(value, GetType());
+                Ontology.CheckTerminologyCanBeAdded(value, GetType());
                 if (_singular != null) Ontology.VerbTrie.Store(_singular, null);
                 _singular = value;
                 Ontology.VerbTrie.Store(_singular, this);
@@ -333,7 +333,7 @@ namespace Imaginarium.Ontology
             {
                 if (_plural != null && ((TokenString) _plural).Equals((TokenString) value))
                     return;
-                Ontology.EnsureUndefinedOrDefinedAsType(value, GetType());
+                Ontology.CheckTerminologyCanBeAdded(value, GetType());
                 if (_plural != null) Ontology.VerbTrie.Store(_plural, null);
                 _plural = value;
                 Ontology.VerbTrie.Store(_plural, this, true);

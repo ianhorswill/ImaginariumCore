@@ -66,6 +66,7 @@
     <Compile Include="Ontology\Referent.cs" />
     <Compile Include="Ontology\Test.cs" />
     <Compile Include="Ontology\TokenTrie.cs" />
+    <Compile Include="Ontology\UnknownReferentException.cs" />
     <Compile Include="Ontology\Verb.cs" />
     <Compile Include="Parsing\AP.cs" />
     <Compile Include="Parsing\ClosedClassSegment.cs" />

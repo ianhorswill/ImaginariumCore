@@ -81,7 +81,7 @@ namespace Imaginarium.Ontology
                     return;
                 // If we're defining the plural to be identical to the singular, don't check for name collision
                 if (_plural == null || !((TokenString) _plural).Equals((TokenString) value))
-                    Ontology.EnsureUndefinedOrDefinedAsType(value, GetType());
+                    Ontology.CheckTerminologyCanBeAdded(value, GetType());
                 if (_singular != null)
                 {
                     Ontology.AllNouns.Remove(_singular);
@@ -119,7 +119,7 @@ namespace Imaginarium.Ontology
                     return;
                 // If we're defining the plural to be identical to the singular, don't check for name collision
                 if (_singular == null || !((TokenString) _singular).Equals((TokenString) value))
-                    Ontology.EnsureUndefinedOrDefinedAsType(value, GetType());
+                    Ontology.CheckTerminologyCanBeAdded(value, GetType());
                 if (_plural != null)
                 {
                     Ontology.AllNouns.Remove(_plural);

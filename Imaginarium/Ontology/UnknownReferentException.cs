@@ -1,6 +1,6 @@
 ﻿#region Copyright
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Referent.cs" company="Ian Horswill">
+// <copyright file="NameCollisionException.cs" company="Ian Horswill">
 // Copyright (C) 2019, 2020 Ian Horswill
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,50 +23,36 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
-using System.Diagnostics;
+using System;
 using Imaginarium.Parsing;
 
 namespace Imaginarium.Ontology
 {
     /// <summary>
-    /// An object within an ontology (e.g. a Concept or Individual)
+    /// Represents an error in which the same name is used for two different Concepts of different types (e.g. noun and verb)
     /// </summary>
-    [DebuggerDisplay("{" + nameof(Text) + "}")]
-    public abstract class Referent
+    public class UnknownReferentException : UserException
     {
         /// <summary>
-        /// The ontology to which this belongs
+        /// Name that was inconsistently defined
         /// </summary>
-        public readonly Ontology Ontology;
+        public readonly string[] Name;
 
         /// <summary>
-        /// Make a new referent.
+        /// New type the user tried to assign to it.
         /// </summary>
-        protected Referent(Ontology ontology, string[] name)
+        public readonly Type NewType;
+
+        /// <summary>
+        /// Make a new NameCollisionException
+        /// </summary>
+        public UnknownReferentException(string[] name, Type newType)
+            : base(
+                $"Can't create a new {newType}, {name.Untokenize()}, because the ontology is locked.",
+                $"You appear to be using {name.Untokenize()} as if it were a {Concept.EnglishTypeName(newType)}, but there is no such {Concept.EnglishTypeName(newType)} in the generator, and the generator is locked to prevent additions to it.")
         {
-            Ontology = ontology;
-            Ontology.CheckTerminologyCanBeAdded(name, GetType(), true);
+            Name = name;
+            NewType = newType;
         }
-
-        /// <summary>
-        /// True if this object's name matches the specified token string.
-        /// </summary>
-        /// <param name="tokens"></param>
-        /// <returns></returns>
-        // ReSharper disable once UnusedMemberInSuper.Global
-        public abstract bool IsNamed(string[] tokens);
-
-        /// <summary>
-        /// String form of standard name of this object
-        /// </summary>
-        public virtual string Text => Tokenizer.Untokenize(StandardName);
-
-        /// <summary>
-        /// Tokenized form of the standard name of this object
-        /// </summary>
-        public abstract string[] StandardName { get; }
-    
-        /// <inheritdoc />
-        public override string ToString() => Text;
     }
 }

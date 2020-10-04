@@ -33,7 +33,7 @@ namespace Tests
     [TestClass]
     public class ParserTests
     {
-        public static Ontology Ontology = new Ontology("Test", null);
+        public static Ontology Ontology = new Ontology("Test");
         public Parser Parser = new Parser(Ontology);
 
         public ParserTests()
@@ -52,7 +52,7 @@ namespace Tests
         {
             Ontology.EraseConcepts();
             Parser.ParseAndExecute("the plural of person is people");
-            Assert.AreEqual("people",(Ontology.CommonNoun("person")).PluralForm[0]);
+            Assert.AreEqual("people",Ontology.CommonNoun("person").PluralForm[0]);
         }
 
         [TestMethod]
@@ -60,6 +60,15 @@ namespace Tests
         {
             Parser.ParseAndExecute("a cat is a kind of person");
             Assert.IsTrue(Parser.Subject.CommonNoun.IsImmediateSubKindOf(Parser.Object.CommonNoun));
+        }
+
+        [TestMethod, ExpectedException(typeof(UnknownReferentException))]
+        public void LockedOntologyTest()
+        {
+            var o = new Ontology("LockedOntologyTest");
+            o.ParseAndExecute("a cat is a kind of person");
+            o.IsLocked = true;
+            o.ParseAndExecute("an alligator is a kind of cat");
         }
 
         [TestMethod]
