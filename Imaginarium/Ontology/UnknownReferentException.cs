@@ -48,7 +48,7 @@ namespace Imaginarium.Ontology
         /// </summary>
         public UnknownReferentException(string[] name, Type newType)
             : base(
-                $"Can't create a new {newType}, {name.Untokenize()}, because the ontology is locked.",
+                $"Can't create a new {Concept.EnglishTypeName(newType)}, {name.Untokenize()}, because the ontology is locked.",
                 $"You appear to be using {name.Untokenize()} as if it were a {Concept.EnglishTypeName(newType)}, but there is no such {Concept.EnglishTypeName(newType)} in the generator, and the generator is locked to prevent additions to it.")
         {
             Name = name;

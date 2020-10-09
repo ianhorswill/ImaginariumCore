@@ -37,7 +37,7 @@ namespace Imaginarium.Ontology
     [DebuggerDisplay("{" + nameof(Text) + "}")]
     public class CommonNoun : Noun
     {
-        internal CommonNoun(Ontology ontology) : base(ontology, null)
+        internal CommonNoun(Ontology ontology, string[] name) : base(ontology, name)
         { }
 
         /// <summary>

@@ -69,7 +69,7 @@ namespace Imaginarium.Ontology
         /// </summary>
         public readonly Dictionary<Property, Variable> Properties = new Dictionary<Property, Variable>();
 
-        internal Individual(Ontology ontology, IEnumerable<MonadicConceptLiteral> concepts, string[] name, Individual container = null, Part containerPart = null) : base(ontology, name)
+        internal Individual(Ontology ontology, IEnumerable<MonadicConceptLiteral> concepts, string[] name, Individual container = null, Part containerPart = null, bool ephemeral = false) : base(ontology, name, ephemeral)
         {
             Name = name;
             Container = container;

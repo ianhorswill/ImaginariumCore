@@ -271,7 +271,7 @@ namespace Imaginarium.Parsing
                 return noun;
             }
 
-            noun = new CommonNoun(Ontology);
+            noun = new CommonNoun(Ontology, text);
 
             if (!Number.HasValue)
                 // Don't know syntactically if it's supposed to be singular or plural, so guess.

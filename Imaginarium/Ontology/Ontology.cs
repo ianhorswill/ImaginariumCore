@@ -254,7 +254,7 @@ namespace Imaginarium.Ontology
         /// <returns></returns>
         public Individual EphemeralIndividual(IEnumerable<MonadicConceptLiteral> concepts, string[] name, Individual container = null, Part containerPart = null)
         {
-            return new Individual(this, concepts, name, container, containerPart);
+            return new Individual(this, concepts, name, container, containerPart, true);
         }
 
         /// <summary>
@@ -355,11 +355,11 @@ namespace Imaginarium.Ontology
         /// </summary>
         /// <param name="name">Name of the concept</param>
         /// <param name="type">C# type we think the referent should have (e.g. typeof(Verb) for verb)</param>
-        /// <param name="creating">True if we are creating this referent for the first time, as opposed to adding a new inflection of an existing term</param>
+        /// <param name="addingToOntology">True if we are addingToOntology this referent for the first time, as opposed to adding a new inflection of an existing term</param>
         /// <exception cref="NameCollisionException">If there is already a concept with that name but a different type.</exception>
-        internal void CheckTerminologyCanBeAdded(string[] name, Type type, bool creating = false)
+        internal void CheckTerminologyCanBeAdded(string[] name, Type type, bool addingToOntology = false)
         {
-            if (creating && IsLocked)
+            if (addingToOntology && IsLocked)
                 throw new UnknownReferentException(name, type);
 
             // Parts can have the same names as other things because there's no potential for ambiguity

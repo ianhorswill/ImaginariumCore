@@ -42,10 +42,13 @@ namespace Imaginarium.Ontology
         /// <summary>
         /// Make a new referent.
         /// </summary>
-        protected Referent(Ontology ontology, string[] name)
+        /// <param name="name">Name of the referent</param>
+        /// <param name="ephemeral">True if this referent will exist only in one generator, and is not being added to the ontology</param>
+        /// <param name="ontology">Ontology within which the referent exists</param>
+        protected Referent(Ontology ontology, string[] name, bool ephemeral = false)
         {
             Ontology = ontology;
-            Ontology.CheckTerminologyCanBeAdded(name, GetType(), true);
+            Ontology.CheckTerminologyCanBeAdded(name, GetType(), !ephemeral);
         }
 
         /// <summary>
