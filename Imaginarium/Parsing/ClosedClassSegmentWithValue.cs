@@ -112,7 +112,7 @@ namespace Imaginarium.Parsing
         /// <inheritdoc />
         public override bool ScanToEnd(bool failOnConjunction = true)
         {
-            if (!IsPossibleStart(CurrentToken))
+            if (EndOfInput || !IsPossibleStart(CurrentToken))
                 return false;
             var old = State;
             MatchedText = null;

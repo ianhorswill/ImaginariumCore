@@ -184,6 +184,14 @@ namespace Imaginarium.Generator
         {
             switch (propertyName[0])
             {
+                case "Container":
+                    if (i.Container != null)
+                    {
+                        b.Append(NameString(i.Container));
+                        b.Append(" ");
+                    }
+                    break;
+                
                 case "ContainerAndPart":
                     if (i.Container != null)
                     {

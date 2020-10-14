@@ -348,7 +348,7 @@ namespace Imaginarium.Ontology
             }
         }
 
-        private static string _definitionsDirectory;
+        private string _definitionsDirectory;
 
         /// <summary>
         /// Throw an exception if an object with a different type is already defined under this name.
