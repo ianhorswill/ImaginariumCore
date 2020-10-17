@@ -74,6 +74,21 @@ namespace Imaginarium.Ontology
         public readonly string Name;
 
         /// <summary>
+        /// Author(s) who wrote this generator
+        /// </summary>
+        public string Author;
+
+        /// <summary>
+        /// Description of the generator
+        /// </summary>
+        public string Description;
+
+        /// <summary>
+        /// Instructions for use
+        /// </summary>
+        public string Instructions;
+
+        /// <summary>
         /// All the TokenTries used in this ontology, e.g. for monadic concepts and verbs.
         /// </summary>
         internal readonly List<TokenTrieBase> AllTokenTries = new List<TokenTrieBase>();

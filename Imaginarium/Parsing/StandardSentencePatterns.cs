@@ -578,6 +578,21 @@ namespace Imaginarium.Parsing
                     .Action(() => { Driver.Driver.Repl.AddButton(ButtonName.Text.Untokenize(), Text.Text.Untokenize()); })
                     .Documentation(
                         "Instructs the system to add a new button to the button bar with the specified name.  When it is pressed, it will execute the specified text."),
+
+                new SentencePattern(this, "author", ":", Text)
+                    .Action(() => { ontology.Author = Text.Text.Untokenize(); })
+                    .Documentation(
+                        "Adds the name of the author to the generator."),
+
+                new SentencePattern(this, "description", ":", Text)
+                    .Action(() => { ontology.Description = Text.Text.Untokenize(); })
+                    .Documentation(
+                        "Adds a short description to the generator."),
+
+                new SentencePattern(this, "instructions", ":", Text)
+                    .Action(() => { ontology.Instructions = Text.Text.Untokenize(); })
+                    .Documentation(
+                        "Adds some brief instructions to the generator."),
             });
         }
 
