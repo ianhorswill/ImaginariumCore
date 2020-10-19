@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Imaginarium.Ontology;
@@ -78,6 +79,14 @@ namespace Imaginarium.Generator
         /// <returns>Name as a single string</returns>
         public string NameString() => Invention.NameString(Individual);
 
+        private string cachedName;
+
+        /// <summary>
+        /// NameString for the object.
+        /// Caches name, so the name is only computed once.
+        /// </summary>
+        public string Name => cachedName ?? (cachedName = NameString());
+
         /// <summary>
         /// True if the concept with the specified name applies to the individual in the current Model.
         /// </summary>
@@ -125,6 +134,18 @@ namespace Imaginarium.Generator
         /// Returns the PossibleIndividual(s) representing the specified Part of this possible individual
         /// </summary>
         public PossibleIndividual[] Part(params string[] name) => Part(Ontology.Part(name));
+
+        /// <summary>
+        /// Returns the relationships in which this individual is involved.
+        /// </summary>
+        public IEnumerable<(Verb, PossibleIndividual, PossibleIndividual)> Relationships
+        {
+            get
+            {
+                return Invention.Relationships.Where(r => r.Item2 == Individual || r.Item3 == Individual)
+                    .Select(r => (r.Item1, Invention[r.Item2], Invention[r.Item3]));
+            }
+        }
 
         /// <inheritdoc />
         public override string ToString() => NameString();

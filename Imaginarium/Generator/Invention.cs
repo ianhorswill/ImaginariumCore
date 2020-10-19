@@ -74,6 +74,14 @@ namespace Imaginarium.Generator
         public PossibleIndividual this[Individual i] => PossibleIndividual(i);
 
         /// <summary>
+        /// Returns the PossibleIndividual with the specified name
+        /// </summary>
+        /// <param name="name">Name to search for</param>
+        /// <returns>The PossibleIndividual or null</returns>
+        public PossibleIndividual this[string name] 
+            => PossibleIndividuals.Find(i => string.Compare(i.Name,name, StringComparison.InvariantCultureIgnoreCase) == 0);
+
+        /// <summary>
         /// The Generator that created this invention
         /// </summary>
         public Generator Generator;
