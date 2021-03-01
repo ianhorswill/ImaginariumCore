@@ -55,6 +55,11 @@ namespace Imaginarium.Ontology
         }
 
         /// <summary>
+        /// Number of alternative sets or implications this adjective is involved in
+        /// </summary>
+        public int ReferenceCount;
+
+        /// <summary>
         /// True if this is an adjective that can apply to an individual of the specified kind.
         /// </summary>
         /// <param name="noun">Noun representing a kind of object</param>

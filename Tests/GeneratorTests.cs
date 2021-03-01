@@ -70,6 +70,39 @@ namespace Tests
         }
 
         [TestMethod]
+        public void RelativeFrequencyTest()
+        {
+            Ontology.EraseConcepts();
+            Parser.ParseAndExecute("a cat is a kind of person",
+                "persian, tabby (10), and siamese are kinds of cat",
+                "a cat is grey, white, ginger (10), or black.",
+                "a cat can be haughty",
+                "a cat can be cuddly",
+                "a cat can be crazy",
+                "a persian can be matted");
+            var cat = Ontology.CommonNoun("cat");
+            var tabby = Ontology.CommonNoun("tabby");
+            var ginger = Ontology.Adjective("ginger");
+            Assert.AreEqual(tabby, cat.Subkinds[1]);
+            //cat.SubkindFrequencies[1] = 10; // tabby
+            var g = new Generator(cat);
+            var tabbyCount = 0;
+            var gingerCount = 0;
+            for (var n = 0; n < 1000; n++)
+            {
+                var i = g.Generate();
+                if (i.IsA(i.Individuals[0], tabby))
+                    tabbyCount++;
+                if (i.IsA(i.Individuals[0], ginger))
+                    gingerCount++;
+            }
+            Assert.IsTrue(tabbyCount > 700);
+            Assert.IsTrue(tabbyCount < 1000);
+            Assert.IsTrue(gingerCount > 700);
+            Assert.IsTrue(gingerCount < 1000);
+        }
+
+        [TestMethod]
         public void PartTest()
         {
             Ontology.EraseConcepts();
@@ -301,5 +334,65 @@ namespace Tests
             o.ParseAndExecute("imagine not knowing what a car is");
         }
 
+        [TestMethod]
+        public void MonsterTest()
+        {
+            var o = new Ontology(nameof(MonsterTest));
+            foreach (var decl in MonsterSource.Replace("\r", "").Split(new [] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                o.ParseAndExecute(decl);
+            var g = o.CommonNoun("monster").MakeGenerator(20);
+            for (var n = 0; n < 100; n++) 
+                g.Generate();
+            Console.WriteLine(g.Problem.PerformanceStatistics);
+            Console.WriteLine($"Average flips per solve: {g.Problem.SolveFlips.Average}");
+        }
+
+        private const string MonsterSource = @"
+fish, bird, plant, fungus, reptile, mammal (5), insect, and crustacean are kinds of monster.
+the plural of fungus is fungi.
+
+humanoid, carnivoid, rodent, bat, marsupial, shrew, ungulate, and rabbitoid are kinds of mammal. 
+
+felinoid, caninoid, and bearoid are kinds of carnivoid.
+carnivoids are quadrapedal.
+
+A monster is flat, ameboid, legged, serpentine, polyhedral, or spherical.
+A legged monster is bipedal, tripedal, quadrapedal, hexapodal, octopodal, or centipedal.
+Do not mention being legged.
+
+mammals are legged.
+reptiles are legged.
+birds are legged.
+insects can be legged.
+crustaceans are legged.
+fishes are not legged.
+
+monsters can be aerial or aquatic.
+do not mention being aerial.
+fishes are aquatic.
+crustaceans are aquatic.
+
+monsters can be winged.
+birds are winged.
+
+monsters are very small, small, dog-sized, human-sized, large, very large, or building-sized.
+monsters are teleporting, burrowing, slithering, flying, swimming, walking, or hovering.
+
+flying monsters are winged.
+Aerial monsters are flying or hovering.
+A burrowing monster is legged.
+
+
+flying monsters are aerial.
+hovering monsters are aerial.
+
+a swimming monster is always aquatic.
+walking monsters are legged.
+a slithering monster is always a reptile.
+Do not mention being walking.
+
+monsters are spitting, biting, clawing, bashing, or fire breathing.
+aquatic monsters are not fire breathing.
+aquatic monsters are not spitting.";
     }
 }

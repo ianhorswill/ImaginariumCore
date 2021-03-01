@@ -223,14 +223,14 @@ namespace Imaginarium.Parsing
                 new SentencePattern(this, SubjectNounList, Is, "kinds", "!", "of", Object)
                     .Action(() =>
                     {
-                        foreach (var noun in SubjectNounList.Concepts)
+                        foreach (var e in SubjectNounList.Expressions)
                         {
-                            var c = noun as CommonNoun;
+                            var c = e.Concept as CommonNoun;
                             if (c == null)
                                 throw new GrammaticalError(
-                                    $"The noun '{noun.StandardName}' is a proper noun (a name of a specific thing), but I need a common noun (a kind of thing) here",
-                                    $"The noun '<i>{noun.StandardName}</i>' is a proper noun (a name of a specific thing), but I need a common noun (a kind of thing) here");
-                            c.DeclareSuperclass(Object.CommonNoun);
+                                    $"The noun '{e.Concept.StandardName}' is a proper noun (a name of a specific thing), but I need a common noun (a kind of thing) here",
+                                    $"The noun '<i>{e.Concept.StandardName}</i>' is a proper noun (a name of a specific thing), but I need a common noun (a kind of thing) here");
+                            c.DeclareSuperclass(Object.CommonNoun, e.RelativeFrequency);
                             foreach (var mod in Object.Modifiers)
                                 c.ImpliedAdjectives.Add(new CommonNoun.ConditionalModifier(null, mod));
 
@@ -336,8 +336,12 @@ namespace Imaginarium.Parsing
                         var alternatives = PredicateAPList.Expressions.Select(ap => ap.MonadicConceptLiteral)
                             .Concat(Subject.Modifiers.Select(l => l.Inverse()))
                             .ToArray();
+                        var frequencies = PredicateAPList.Expressions.Select(ap => ap.RelativeFrequency)
+                            .Concat(Subject.Modifiers.Select(l => 1f))
+                            .ToArray();
                         var alternativeSet =
-                            new CommonNoun.AlternativeSet(alternatives, (int) ParsedLowerBound, (int) ParsedLowerBound);
+                            new CommonNoun.AlternativeSet(alternatives, frequencies,(int) ParsedLowerBound, (int) ParsedLowerBound,
+                                Subject.Modifiers.Count == 0);
                         Subject.CommonNoun.AlternativeSets.Add(alternativeSet);
                     })
                     .Check(SubjectVerbAgree)
@@ -347,11 +351,10 @@ namespace Imaginarium.Parsing
                         PredicateAPList)
                     .Action(() =>
                     {
-                        var alternatives = PredicateAPList.Expressions.Select(ap => ap.MonadicConceptLiteral)
-                            .Concat(Subject.Modifiers.Select(l => l.Inverse()))
-                            .ToArray();
+                        var (alternatives, frequencies) = AdjectiveAlternatives(Subject, PredicateAPList);
                         var alternativeSet =
-                            new CommonNoun.AlternativeSet(alternatives, (int) ParsedLowerBound, (int) ParsedUpperBound);
+                            new CommonNoun.AlternativeSet(alternatives, frequencies, (int) ParsedLowerBound, (int) ParsedUpperBound,
+                                Subject.Modifiers.Count == 0);
                         Subject.CommonNoun.AlternativeSets.Add(alternativeSet);
                     })
                     .Check(SubjectVerbAgree)
@@ -362,10 +365,9 @@ namespace Imaginarium.Parsing
                         PredicateAPList)
                     .Action(() =>
                     {
-                        var alternatives = PredicateAPList.Expressions.Select(ap => ap.MonadicConceptLiteral)
-                            .Concat(Subject.Modifiers.Select(l => l.Inverse()))
-                            .ToArray();
-                        var alternativeSet = new CommonNoun.AlternativeSet(alternatives, 0, (int) ParsedLowerBound);
+                        var (alternatives, frequencies) = AdjectiveAlternatives(Subject, PredicateAPList);
+                        var alternativeSet = new CommonNoun.AlternativeSet(alternatives, frequencies, 0, (int) ParsedLowerBound,
+                            Subject.Modifiers.Count == 0);
                         Subject.CommonNoun.AlternativeSets.Add(alternativeSet);
                     })
                     .Check(SubjectVerbAgree)
@@ -375,11 +377,9 @@ namespace Imaginarium.Parsing
                 new SentencePattern(this, OptionalAll, Subject, Is, PredicateAPList)
                     .Action(() =>
                     {
-                        Subject.CommonNoun.AlternativeSets.Add(new CommonNoun.AlternativeSet(
-                            PredicateAPList.Expressions.Select(ap => ap.MonadicConceptLiteral)
-                                .Concat(Subject.Modifiers.Select(l => l.Inverse()))
-                                .ToArray(),
-                            true));
+                        var (alternatives, frequencies) = AdjectiveAlternatives(Subject, PredicateAPList);
+                        Subject.CommonNoun.AlternativeSets.Add(new CommonNoun.AlternativeSet(alternatives, frequencies, true,
+                            Subject.Modifiers.Count == 0));
                     })
                     .Check(SubjectVerbAgree)
                     .Documentation(
@@ -388,12 +388,10 @@ namespace Imaginarium.Parsing
                 new SentencePattern(this, OptionalAll, Subject, "can", "be", PredicateAPList)
                     .Action(() =>
                     {
+                        var (alternatives, frequencies) = AdjectiveAlternatives(Subject, PredicateAPList);
                         Subject.CommonNoun.AlternativeSets.Add(
-                            new CommonNoun.AlternativeSet(
-                                PredicateAPList.Expressions.Select(ap => ap.MonadicConceptLiteral)
-                                    .Concat(Subject.Modifiers.Select(l => l.Inverse()))
-                                    .ToArray(),
-                                false));
+                            new CommonNoun.AlternativeSet(alternatives, frequencies, false,
+                                Subject.Modifiers.Count == 0));
                     })
                     .Check(SubjectDefaultPlural)
                     .Documentation(
@@ -594,6 +592,17 @@ namespace Imaginarium.Parsing
                     .Documentation(
                         "Adds some brief instructions to the generator."),
             });
+        }
+
+        private static (MonadicConceptLiteral[], float[]) AdjectiveAlternatives(NP subject, ReferringExpressionList<AP, Adjective> predicateAPList)
+        {
+            var alternatives = predicateAPList.Expressions.Select(ap => ap.MonadicConceptLiteral)
+                .Concat(subject.Modifiers.Select(l => l.Inverse()))
+                .ToArray();
+            var frequencies = predicateAPList.Expressions.Select(ap => ap.RelativeFrequency)
+                .Concat(subject.Modifiers.Select(l => 1f))
+                .ToArray();
+            return (alternatives, frequencies);
         }
 
         private static void InstallPart(Ontology.Ontology ontology, string[] partName, int count, CommonNoun kind, List<MonadicConceptLiteral> modifiers,

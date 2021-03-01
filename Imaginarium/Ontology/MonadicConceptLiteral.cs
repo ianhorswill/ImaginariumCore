@@ -23,11 +23,14 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
+using System.Diagnostics;
+
 namespace Imaginarium.Ontology
 {
     /// <summary>
     /// Represents a monadic concept or its negation
     /// </summary>
+    [DebuggerDisplay("{" + nameof(DebugString) + "}")]
     public class MonadicConceptLiteral
     {
         /// <summary>
@@ -46,6 +49,12 @@ namespace Imaginarium.Ontology
             IsPositive = isPositive;
         }
 
+        internal void IncrementReferenceCount()
+        {
+            if (Concept is Adjective a)
+                a.ReferenceCount++;
+        }
+
         /// <summary>
         /// Makes a literal sating this monadic concept is true
         /// </summary>
@@ -61,5 +70,13 @@ namespace Imaginarium.Ontology
         {
             return new MonadicConceptLiteral(Concept, !IsPositive);
         }
+
+        /// <summary>
+        /// Printed string representation of this literal
+        /// </summary>
+        public string DebugString => IsPositive ? Concept.ToString() : "!" + Concept;
+
+        /// <inheritdoc />
+        public override string ToString() => DebugString;
     }
 }

@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CatSAT;
 using CatSAT.NonBoolean.SMT.MenuVariables;
@@ -111,6 +112,7 @@ namespace Imaginarium.Generator
         {
             // Do this first so that Problem.Current gets set.
             Problem = new Problem("invention");
+            Problem.InitializeTruthAssignment += RandomlySelectKinds;
 
             DetermineIndividuals();
 
@@ -121,6 +123,77 @@ namespace Imaginarium.Generator
 
             Problem.Optimize();
         }
+
+        /// <summary>
+        /// For each individual, randomly select its subkinds, if any.
+        /// </summary>
+        private void RandomlySelectKinds(Problem _)
+        {
+            foreach (var i in Individuals)
+            foreach (var k in i.Kinds)
+            {
+                SelectInitialSubkind(i, k);
+                //Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Individual i is of kind k; randomly choose a subkind, if k has subkinds.
+        /// </summary>
+        private void SelectInitialSubkind(Individual i, CommonNoun k)
+        {
+            if (k.Subkinds.Count == 0)
+                // nothing to do
+                return;
+
+            var sub = k.RandomSubkind;
+            //Console.Write(sub); Console.Write(' ');
+
+            foreach (var s in k.Subkinds)
+            {
+                SetIsA(i, s, s == sub);
+                if (s == sub)
+                    // This is the chosen subkind, so choose sub-sub-kinds
+                    SelectInitialSubkind(i, s);
+                else
+                    // This one wasn't chosen, so set it and all its children to false
+                    DeselectSubkinds(i, s);
+            }
+
+            foreach (var set in k.AlternativeSets)
+            {
+                if (set.AllowPreInitialization && set.AllSingleReferenceAdjectives)
+                {
+                    var chosen = set.RandomAlternative;
+                    //Console.Write(chosen);
+                    //Console.Write(' ');
+                    if (set.MinCount == 1 && set.MaxCount == 1)
+                        foreach (var alt in set.Alternatives)
+                            SetLiteral(i, alt, alt == chosen);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Individual i is known not to be of kind k.  Initialize to also not
+        /// be one of its subkinds
+        /// </summary>
+        private void DeselectSubkinds(Individual i, CommonNoun k)
+        {
+            if (k.Subkinds.Count == 0)
+                // Nothing to do
+                return;
+            
+            foreach (var sub in k.Subkinds)
+            {
+                SetIsA(i, sub, false);
+                DeselectSubkinds(i, sub);
+            }
+        }
+        
+        private void SetIsA(Individual i, MonadicConcept n, bool truth) => Problem.Initialize(IsA(i, n), truth);
+
+        private void SetLiteral(Individual i, MonadicConceptLiteral l, bool truth) => SetIsA(i, l.Concept, l.IsPositive ? truth : !truth);
 
         /// <summary>
         /// Find all the individuals that need to exist in these inventions
@@ -283,8 +356,7 @@ namespace Imaginarium.Generator
                             var literals = v.Subspecies.Select(sub => Holds(sub, s, o))
                                 .Concat(v.Subspecies.Select(sub => Holds(sub, o, s)))
                                 .Append(Not(vHolds)).Distinct().ToArray();
-                            Problem.Exactly(1, literals
-                            );
+                            Problem.Exactly(1, literals);
                         }
                         else
                         {
@@ -338,7 +410,10 @@ namespace Imaginarium.Generator
             Problem.Timeout = timeout;
             Solution solution = null;
             for (var retry = 0; solution == null && retry < retries; retry++)
+            {
                 solution = Problem.Solve(false);
+                //Console.WriteLine(solution == null ? "fail" : "succeed");
+            }
             return solution == null? null:new Invention(Ontology, this, solution);
         }
 

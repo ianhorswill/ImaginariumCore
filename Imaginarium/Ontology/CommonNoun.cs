@@ -61,6 +61,33 @@ namespace Imaginarium.Ontology
             return SingularForm.SameAs(tokens) || PluralForm.SameAs(tokens);
         }
 
+        /// <summary>
+        /// Randomly choose a subkind of this kind, weighted by the subkinds' respective RelativeFrequencies
+        /// </summary>
+        public CommonNoun RandomSubkind
+        {
+            get
+            {
+                var totalWeight = 0f;
+                foreach (var f in SubkindFrequencies)
+                    totalWeight += f;
+
+                Debug.Assert(totalWeight>0);
+                
+                var target = CatSAT.Random.Float(0, totalWeight);
+                for (var i = 0; i < SubkindFrequencies.Count; i++)
+                {
+                    var f = SubkindFrequencies[i];
+                    if (target <= f)
+                        return Subkinds[i];
+                    else
+                        target -= f;
+                }
+
+                throw new InvalidOperationException("Reached unreachable code in " + nameof(RandomSubkind));
+            }
+        }
+
         // ReSharper disable InconsistentNaming
         private string[] _singular, _plural;
         // ReSharper restore InconsistentNaming
@@ -155,6 +182,12 @@ namespace Imaginarium.Ontology
         /// The common nouns identifying the immediate subkinds of this noun
         /// </summary>
         public readonly List<CommonNoun> Subkinds = new List<CommonNoun>();
+        
+        /// <summary>
+        /// Relative frequencies (in the sense of probability) of the respective Subkinds
+        /// </summary>
+        public readonly List<float> SubkindFrequencies = new List<float>();
+        
         /// <summary>
         /// The common nouns identifying the immediate superkinds of this noun
         /// </summary>
@@ -290,24 +323,29 @@ namespace Imaginarium.Ontology
         /// Ensure super is an immediate super-kind of this kind.
         /// Does nothing if it is already a super-kind.
         /// </summary>
-        public void DeclareSuperclass(CommonNoun super)
+        public void DeclareSuperclass(CommonNoun super, float relativeFrequency = 1)
         {
             if (!Superkinds.Contains(super))
             {
                 Superkinds.Add(super);
                 super.Subkinds.Add(this);
+                super.SubkindFrequencies.Add(relativeFrequency);
             }
         }
 
         /// <summary>
         /// A set of mutually exclusive adjectives that can apply to a CommonNoun.
         /// </summary>
-        public struct AlternativeSet
+        public readonly struct AlternativeSet
         {
             /// <summary>
             /// At most one of these may be true of the noun
             /// </summary>
             public readonly MonadicConceptLiteral[] Alternatives;
+            /// <summary>
+            /// Relative frequencies for the corresponding alternative
+            /// </summary>
+            public readonly float[] AlternativeFrequencies;
 
             /// <summary>
             /// Minimum number of literals that can be true
@@ -318,15 +356,61 @@ namespace Imaginarium.Ontology
             /// </summary>
             public readonly int MaxCount;
 
-            internal AlternativeSet(MonadicConceptLiteral[] alternatives, bool isRequired)
-                : this(alternatives, isRequired ? 1 : 0, 1)
+            /// <summary>
+            /// Sum of the frequencies of all alternatives.
+            /// </summary>
+            public readonly float TotalWeight;
+
+            internal readonly bool AllowPreInitialization;
+            internal bool AllSingleReferenceAdjectives
+            {
+                get
+                {
+                    foreach (var alt in Alternatives)
+                        if (!(alt.Concept is Adjective a) || a.ReferenceCount != 1)
+                            return false;
+                    return true;
+                }
+            }
+
+            /// <summary>
+            /// Randomly choose a subkind of this kind, weighted by the subkinds' respective RelativeFrequencies
+            /// </summary>
+            public MonadicConceptLiteral RandomAlternative
+            {
+                get
+                {
+                   var target = CatSAT.Random.Float(0, TotalWeight);
+                    for (var i = 0; i < AlternativeFrequencies.Length; i++)
+                    {
+                        var f = AlternativeFrequencies[i];
+                        if (target <= f)
+                            return Alternatives[i];
+                        else
+                            target -= f;
+                    }
+
+                    throw new InvalidOperationException("Reached unreachable code in " + nameof(RandomSubkind));
+                }
+            }
+
+            internal AlternativeSet(MonadicConceptLiteral[] alternatives, float[] alternativeFrequencies, bool isRequired, bool allowPreInitialization)
+                : this(alternatives, alternativeFrequencies, isRequired ? 1 : 0, 1, allowPreInitialization)
             { }
 
-            internal AlternativeSet(MonadicConceptLiteral[] alternatives, int minCount, int maxCount)
+            internal AlternativeSet(MonadicConceptLiteral[] alternatives, float[] alternativeFrequencies, int minCount, int maxCount, bool allowPreInitialization)
             {
                 Alternatives = alternatives;
+                AlternativeFrequencies = alternativeFrequencies;
                 MinCount = minCount;
                 MaxCount = maxCount;
+                AllowPreInitialization = allowPreInitialization;
+                TotalWeight = 0;
+                foreach (var alt in alternatives)
+                    if (alt.Concept is Adjective a)
+                        a.ReferenceCount++;
+                foreach (var f in AlternativeFrequencies)
+                    TotalWeight += f;
             }
         }
 
@@ -350,6 +434,8 @@ namespace Imaginarium.Ontology
             {
                 Conditions = conditions??emptyCondition;
                 Modifier = modifier;
+                foreach (var c in Conditions) c.IncrementReferenceCount();
+                Modifier.IncrementReferenceCount();
             }
         }
     }

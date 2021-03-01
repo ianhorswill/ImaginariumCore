@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Imaginarium.Driver;
 using Imaginarium.Ontology;
@@ -467,8 +468,6 @@ namespace Imaginarium.Parsing
 
         #endregion
 
-
-
         #region Definition files
         /// <summary>
         /// Returns full path for library definitions for the specified noun.
@@ -584,6 +583,47 @@ namespace Imaginarium.Parsing
             if (index < 0)
                 return s;
             return s.Substring(0, index);
+        }
+        #endregion
+
+        #region Utilities
+
+        /// <summary>
+        /// Take a chunk of tokens, and remove "(number)" from the end, returning the stripped
+        /// text and the number.  If there is no number at the end, just return the original
+        /// text and 1.
+        /// </summary>
+        internal (string[] strippedText, float relativeFrequency) ParseRelativeFrequencyFromText(string[] text)
+        {
+            var length = text.Length;
+            if (length > 2 && text[length - 3] == "(")
+            {
+                if (text[length - 1] != ")" || !float.TryParse(text[length - 2], out var relativeFrequency))
+                    throw new GrammaticalError($"I don't understand the noun phrase {text.Untokenize()}.");
+                var stripped = text.Take(length - 3).ToArray();
+                return (stripped, relativeFrequency);
+            }
+
+            return (text, 1);
+        }
+
+        /// <summary>
+        /// Check for '(number)' in the input stream.  If it's there, consume those tokens
+        /// and return the number.  Otherwise, leave the input stream unchanged and return 1.
+        /// </summary>
+        internal float ParseRelativeFrequency()
+        {
+            if (EndOfInput || !Match("("))
+                // There's no relative frequency annotation
+                return 1;
+            if (EndOfInput || !float.TryParse(CurrentToken, out var relativeFrequency))
+                throw new GrammaticalError($"I expected a number after the '(', but instead got {(EndOfInput?"end of line":CurrentToken)}");
+            currentTokenIndex++;
+            if (EndOfInput)
+                throw new GrammaticalError($"Expected a ')' after '({relativeFrequency}' but instead the line ended");
+            if (!Match(")"))
+                throw new GrammaticalError($"Expected a ')' after '({relativeFrequency}' but instead got {CurrentToken}");
+            return relativeFrequency;
         }
         #endregion
     }

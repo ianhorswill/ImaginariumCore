@@ -43,12 +43,22 @@ namespace Imaginarium.Parsing
         public bool IsNegated;
 
         /// <summary>
+        /// How often this adjective it to be chosen compared to other adjectives in the same list.
+        /// </summary>
+        public float RelativeFrequency = 1;
+
+        /// <summary>
         /// The adjective referred to, but in the form of a MCL.
         /// </summary>
         public MonadicConceptLiteral MonadicConceptLiteral => new MonadicConceptLiteral(Adjective, !IsNegated);
 
         /// <inheritdoc />
-        protected override Adjective GetConcept() => Ontology.Adjective(Text) ?? new Adjective(Ontology, Text);
+        protected override Adjective GetConcept()
+        {
+            var (text, relativeFrequency) = Parser.ParseRelativeFrequencyFromText(Text);
+            RelativeFrequency = relativeFrequency;
+            return Ontology.Adjective(text) ?? new Adjective(Ontology, text);
+        }
 
         /// <inheritdoc />
         public override bool ValidBeginning(string firstToken) => firstToken != "a" && firstToken != "an";
@@ -71,6 +81,7 @@ namespace Imaginarium.Parsing
         {
             base.Reset();
             IsNegated = false;
+            RelativeFrequency = 1;
         }
 
         /// <inheritdoc />

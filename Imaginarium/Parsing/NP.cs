@@ -225,6 +225,8 @@ namespace Imaginarium.Parsing
                     // This is to get around nouns that are their own plurals.
                     Number = Ontology.LastMatchPlural ? Parser.Number.Plural : Parser.Number.Singular;
 
+                RelativeFrequency = Parser.ParseRelativeFrequency();
+
                 return true;
             }
 
@@ -243,7 +245,8 @@ namespace Imaginarium.Parsing
         /// <returns></returns>
         protected override Noun GetConcept()
         {
-            var text = Text;
+            var (text, relativeFrequency) = Parser.ParseRelativeFrequencyFromText(Text);
+            RelativeFrequency = relativeFrequency;
 
             if (Number == Parser.Number.Plural || BeginsWithDeterminer || ForceCommonNoun)
                 return GetCommonNoun(text);
@@ -297,6 +300,11 @@ namespace Imaginarium.Parsing
         public Number? Number { get; set; }
 
         /// <summary>
+        /// The number appearing in a parenthesized expression after the main NP, or 1 if there is no number
+        /// </summary>
+        public float RelativeFrequency = 1;
+
+        /// <summary>
         /// The explicitly specified count of the NP, if any.
         /// For example, "ten cats"
         /// </summary>
@@ -322,6 +330,7 @@ namespace Imaginarium.Parsing
             Modifiers.Clear();
             Number = null;
             ExplicitCount = null;
+            RelativeFrequency = 1;
             BeginsWithDeterminer = false;
             ForceCommonNoun = false;
         }

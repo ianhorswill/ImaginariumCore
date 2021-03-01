@@ -2875,7 +2875,7 @@
             <param name="literal">Literal tha must always be true</param>
             <exception cref="T:System.InvalidOperationException">When the Problem has already been solved once</exception>
         </member>
-        <member name="M:CatSAT.Problem.SetPreinitializedValue(CatSAT.Proposition,System.Boolean)">
+        <member name="M:CatSAT.Problem.Initialize(CatSAT.Proposition,System.Boolean)">
             <summary>
             Used to specify an initial value to be used by the solver for this one particular run of the solver.
             </summary>
