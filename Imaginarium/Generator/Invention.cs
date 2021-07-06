@@ -154,13 +154,12 @@ namespace Imaginarium.Generator
                 descriptionKind = i.Kinds[0];
 
             var b = new StringBuilder();
-
+            var previousToken = "";
             for (var n = 0; n < template.Length; n++)
             {
-                if (!EndsWithSpace(b))
-                    b.Append(' ');
-
                 var token = template[n];
+                if (!EndsWithSpace(b) && token != "-" && previousToken != "-")
+                    b.Append(' ');
                 if (token == "[")
                 {
                     // Get a property name
@@ -179,6 +178,8 @@ namespace Imaginarium.Generator
                 }
                 else
                     b.Append(token);
+
+                previousToken = token;
             }
 
             var description = b.ToString().Trim();

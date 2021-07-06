@@ -282,6 +282,14 @@ namespace Imaginarium.Parsing
                 new SentencePattern(this, "Do", "not", "mention", "!", "being", PredicateAP)
                     .Action(() => { PredicateAP.Adjective.IsSilent = true; })
                     .Documentation("Declares that the specified adjective shouldn't be mentioned in descriptions."),
+                
+                new SentencePattern(this, "Do", "not", "print", "!", Object)
+                    .Check(ObjectCommonNoun)
+                    .Action(() =>
+                    {
+                        Object.CommonNoun.SuppressDescription = true;
+                    })
+                    .Documentation("Declares that descriptions of the specified kinds should not be printed as separate lines."),
 
                 new SentencePattern(this, Subject, "is", Object)
                     .Action(() =>

@@ -179,6 +179,11 @@ namespace Imaginarium.Ontology
         public string[] DescriptionTemplate { get; set; }
 
         /// <summary>
+        /// Do not print objects of this type as separate lines in the Imaginarium REPL
+        /// </summary>
+        public bool SuppressDescription;
+
+        /// <summary>
         /// The common nouns identifying the immediate subkinds of this noun
         /// </summary>
         public readonly List<CommonNoun> Subkinds = new List<CommonNoun>();

@@ -394,5 +394,27 @@ Do not mention being walking.
 monsters are spitting, biting, clawing, bashing, or fire breathing.
 aquatic monsters are not fire breathing.
 aquatic monsters are not spitting.";
+
+        [TestMethod]
+        public void IdentifiedAsTest()
+        {
+            var o = new Ontology(nameof(IdentifiedAsTest));
+            o.ParseAndExecute("esoteric crops, dangerous crops, and psychoactive crops are kinds of plant",
+                "wolf's bane, and foo are kinds of esoteric crops",
+                "triffids, poison ivy, and venus flytrap are kinds of dangerous crops",
+                "dartura, wormwood, peyote, ayahuasca, tobacco, and chocolate are kinds of psychoactive crops",
+                "a plant is described as \"[Modifiers] [Noun]\"",
+                "vodka, gin, bourbon, and absinthe are kinds of alcohol base",
+                "an alcohol base is described as \"[Modifiers] [Noun]\"",
+                "an infusion has an alcohol base",
+                "an infusion has a plant",
+                "an infusion is described as \"[plant]-infused [alcohol]\"");
+            var g = o.CommonNoun("infusion").MakeGenerator();
+            for (var i = 0; i < 100; i++)
+            {
+                var invention = g.Generate();
+                invention.PossibleIndividuals[0].Description();
+            }
+        }
     }
 }
