@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using CatSAT;
 using CatSAT.NonBoolean.SMT.MenuVariables;
@@ -276,13 +275,8 @@ namespace Imaginarium.Generator
                     if (objectDomain.Length < v.ObjectLowerBound)
                         throw new ContradictionException(Problem,
                             $"Each {v.SubjectKind.SingularForm.Untokenize()} must {v.SingularForm.Untokenize()} at least {v.ObjectLowerBound} {v.ObjectKind.PluralForm.Untokenize()}, but there are only {objectDomain.Length} total {v.ObjectKind.PluralForm.Untokenize()}.");
-                    Problem.Quantify(v.ObjectLowerBound, v.ObjectUpperBound, 
-                        objectDomain.Select(i2 => Holds(v, i1, i2)).Concat(NTimes(v.ObjectLowerBound, Not(IsA(i1, v.SubjectKind))))
-                            // KLUGE - We need this to bypass the optimizations that are performed when we pass in an IEnumerable
-                            // In particular, we *don't* want it to eliminate duplicate literals
-                            // TODO - Fix this when we have a proper implementation of pseudo-Boolean constraints in CatSAT
-                            // then we can just give the duplicated term a higher weight.
-                            .ToArray());
+                    Problem.QuantifyIf(IsA(i1, v.SubjectKind), v.ObjectLowerBound, v.ObjectUpperBound, 
+                        objectDomain.Select(i2 => (Literal)Holds(v, i1, i2)).ToArray());
                 }
 
             if (v.SubjectUpperBound < Verb.Unbounded || v.SubjectLowerBound > 0)
@@ -291,13 +285,8 @@ namespace Imaginarium.Generator
                     if (subjectDomain.Length < v.SubjectLowerBound)
                         throw new ContradictionException(Problem,
                             $"Each {v.SubjectKind.SingularForm.Untokenize()} must be {v.PassiveParticiple.Untokenize()} by at least {v.ObjectLowerBound} {v.ObjectKind.PluralForm.Untokenize()}, but there are only {subjectDomain.Length} total {v.ObjectKind.PluralForm.Untokenize()}.");
-                    Problem.Quantify(v.SubjectLowerBound, v.SubjectUpperBound,
-                        subjectDomain.Select(i2 => Holds(v, i2, i1)).Concat(NTimes(v.SubjectLowerBound, Not(IsA(i1, v.ObjectKind))))
-                            // KLUGE - We need this to bypass the optimizations that are performed when we pass in an IEnumerable
-                            // In particular, we *don't* want it to eliminate duplicate literals
-                            // TODO - Fix this when we have a proper implementation of pseudo-Boolean constraints in CatSAT
-                            // then we can just give the duplicated term a higher weight.
-                            .ToArray());
+                    Problem.QuantifyIf(IsA(i1, v.ObjectKind), v.SubjectLowerBound, v.SubjectUpperBound,
+                        subjectDomain.Select(i2 => (Literal)Holds(v, i2, i1)).ToArray());
                 }
 
             // Force diagonal values if (anti-)reflexive
@@ -365,12 +354,6 @@ namespace Imaginarium.Generator
                         }
                     }
                 }
-        }
-
-        private IEnumerable<T> NTimes<T>(int count, T item)
-        {
-            for (var i = 0; i < count; i++)
-                yield return item;
         }
 
         private void AddParts(Individual i)
@@ -507,8 +490,9 @@ namespace Imaginarium.Generator
                             // Try to ensure that all the alternatives start false so it only has to set one or two of them
                             // rather than clear a bunch of them.
                             IsA(i, lit.Concept).InitialProbability = lit.IsPositive ? 0 : 1;
-                    var clause = set.Alternatives.Select(a => Satisfies(i, a)).Append(Not(IsA(i, k)));
-                    Problem.Quantify(set.MinCount, set.MaxCount, clause);
+                    Problem.QuantifyIf(IsA(i, k),
+                        set.MinCount, set.MaxCount,
+                        set.Alternatives.Select(a => Satisfies(i, a)));
                 }
 
                 MaybeAddProperties(k, i, IsA(i, k));

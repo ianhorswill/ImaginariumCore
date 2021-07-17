@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using Imaginarium.Driver;
 using Imaginarium.Generator;
 using Imaginarium.Ontology;
@@ -414,6 +415,28 @@ aquatic monsters are not spitting.";
             {
                 var invention = g.Generate();
                 invention.PossibleIndividuals[0].Description();
+            }
+        }
+
+        [TestMethod]
+        public void OverlappingAdjectivesTest()
+        {
+            var o = new Ontology(nameof(OverlappingAdjectivesTest));
+            o.ParseAndExecute("x, y, and z are kinds of thing",
+                "a x is between 4 and 5 of b, c, d, e, f, or g",
+                "a y is between 1 and 2 of b, c, d, e, f, or g",
+                "a z is any 3 of b, c, d, e, f, or g");
+            var adjectives = new[] {"b", "c", "d", "e", "f", "g"}.Select(a => o.Adjective(a)).ToArray();
+            var g = o.CommonNoun("thing").MakeGenerator();
+            for (var i = 0; i < 100; i++)
+            {
+                var thing = g.Generate().PossibleIndividuals[0];
+                var count = adjectives.Count(a => thing.IsA(a));
+                Assert.IsTrue(
+                    (thing.IsA("x") && count >= 4 && count <= 5)
+                    || (thing.IsA("y") && count >= 1 && count <= 2)
+                    || (thing.IsA("z") && count == 3)
+                );
             }
         }
     }
