@@ -23,6 +23,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using Imaginarium.Driver;
@@ -124,6 +125,34 @@ namespace Tests
             foreach (var i1 in g.Individuals)
             foreach (var i2 in g.Individuals)
                 Assert.IsTrue(ReferenceEquals(g.Holds(v, i1, i2), g.Holds(v, i2, i1)));
+        }
+
+        [TestMethod]
+        public void VerbQuantificationTest()
+        {
+            var o = new Ontology(nameof(VerbQuantificationTest));
+            o.ParseAndExecute(
+                "employee and employer are kinds of person",
+                "an employee must work for one employer",
+                "an employer must be worked for by at least two employees");
+            var g = o.CommonNoun("person").MakeGenerator(10);
+            var employee = o.CommonNoun("employee");
+            var employer = o.CommonNoun("employer");
+            var workFor = o.Verb("work", "for");
+            for (var count = 0; count < 100; count++)
+            {
+                var invention = g.Generate();
+                foreach (var person in invention.PossibleIndividuals)
+                {
+                    if (person.IsA(employee))
+                        Assert.AreEqual(1, invention.PossibleIndividuals.Count(p => person.RelatesTo(p, workFor)));
+                    else if (person.IsA(employer))
+                        Assert.IsTrue(2 <= invention.PossibleIndividuals.Count(p => p.RelatesTo(person, workFor)));
+                    else
+                        throw new Exception("Object in model that is neither an employee or employer");
+                }
+            }
+
         }
     }
 }

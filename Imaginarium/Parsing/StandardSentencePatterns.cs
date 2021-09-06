@@ -64,7 +64,7 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
-                new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "at", "!", "least", LowerBound,
+                new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "at", "least", "!", LowerBound,
                         Subject)
                     .Action(() =>
                     {
@@ -74,11 +74,30 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
 
-                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "!", "least", LowerBound, Object)
+                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "least", "!", LowerBound, Object)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
                         verb.ObjectLowerBound = (int) ParsedLowerBound;
+                    })
+                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Documentation("Specifies how many Objects a given Subject can Verb."),
+
+                new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "at", "most", "!", UpperBound,
+                        Subject)
+                    .Action(() =>
+                    {
+                        var verb = ConfigureVerb(Verb, Subject, Object);
+                        verb.SubjectUpperBound = (int) ParsedUpperBound;
+                    })
+                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
+
+                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "most", "!", UpperBound, Object)
+                    .Action(() =>
+                    {
+                        var verb = ConfigureVerb(Verb, Subject, Object);
+                        verb.ObjectUpperBound = (int) ParsedUpperBound;
                     })
                     .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
