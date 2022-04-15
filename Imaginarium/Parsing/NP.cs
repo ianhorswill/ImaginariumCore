@@ -185,7 +185,7 @@ namespace Imaginarium.Parsing
         private bool ScanComplexNP()
         {
             Debug.Assert(CachedConcept == null);
-            var old = State;
+            var beginning = State;
             MonadicConcept nextConcept;
             MonadicConceptLiteral last = null;
             Modifiers.Clear();
@@ -226,11 +226,13 @@ namespace Imaginarium.Parsing
                     Number = Ontology.LastMatchPlural ? Parser.Number.Plural : Parser.Number.Singular;
 
                 RelativeFrequency = Parser.ParseRelativeFrequency();
+                
+                SetText(beginning);
 
                 return true;
             }
 
-            ResetTo(old);
+            ResetTo(beginning);
             return false;
         }
         #endregion

@@ -158,5 +158,14 @@ namespace Tests
             var love = Ontology.Verb("be","related","to");
             Assert.IsNotNull(love);
         }
+
+        [TestMethod]
+        public void RiTest()
+        {
+            // Due to Ri Boksenbaum
+            var o = new Ontology("test");
+            o.ParseAndExecute("sheep and orange are kinds of cat.", 
+                "the plural of sheep is sheep");
+        }
     }
 }
