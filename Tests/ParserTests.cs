@@ -167,5 +167,31 @@ namespace Tests
             o.ParseAndExecute("sheep and orange are kinds of cat.", 
                 "the plural of sheep is sheep");
         }
+
+        [TestMethod]
+        public void RiTest2()
+        {
+            // Due to Ri Boksenbaum
+            var o = new Ontology("test");
+            o.ParseAndExecute("Persian, tabby, Siamese, manx, Chartreux, and Maine coon are kinds of cat.",
+            "   The plural of Chartreux is Chartreux.");
+        }
+
+        [TestMethod]
+        public void DeclarationOrderTest()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("Persian, tabby, Siamese, manx, Chartreux, and Maine coon are kinds of cat.",
+            "cat, dog, bunny, dragon, toad, basilisk, owl, flumph, boar, phoenix, unicorn, and homunculus are kinds of pet.");
+        }
+
+        [TestMethod]
+        public void NewTest()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("Persian, tabby, Siamese, manx, Chartreux, and Maine coon are kinds of cat.",
+                "Cats are black, white, grey, or ginger.",
+                "Chartreux are grey.");
+        }
     }
 }

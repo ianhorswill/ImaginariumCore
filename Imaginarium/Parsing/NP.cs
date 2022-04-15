@@ -41,11 +41,13 @@ namespace Imaginarium.Parsing
         /// <summary>
         /// The Noun this NP refers to.
         /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Noun Noun => Concept;
 
         /// <summary>
         /// The CommonNoun this NP refers to (or exception if it's a proper noun)
         /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public CommonNoun CommonNoun
         {
             get
@@ -72,6 +74,11 @@ namespace Imaginarium.Parsing
         /// True if we've been told by our syntax rule that this has to be a common noun.
         /// </summary>
         public bool ForceCommonNoun;
+
+        /// <summary>
+        /// Whether this is an element of a list of NPs, and so can't include commas inside of it.
+        /// </summary>
+        public bool ElementOfList;
 
         #region Scanning
         /// <summary>
@@ -212,12 +219,13 @@ namespace Imaginarium.Parsing
                     if (last != null)
                         Modifiers.Add(last);
                     last = next;
-                    if (!EndOfInput && CurrentToken == ",")
+                    
+                    if (!EndOfInput && !ElementOfList && CurrentToken == ",")
                         SkipToken();
                 }
             } while (nextConcept != null);
 
-            if (last != null && last.Concept is Noun n)
+            if (last?.Concept is Noun n)
             {
                 CachedConcept = n;
                 if (!Number.HasValue)

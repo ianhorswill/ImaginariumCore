@@ -23,6 +23,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
+using System.Diagnostics;
 using Imaginarium.Ontology;
 
 namespace Imaginarium.Parsing
@@ -42,6 +43,7 @@ namespace Imaginarium.Parsing
         /// <summary>
         /// Gets the Referent of this expression
         /// </summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public TR Concept => CachedConcept ?? (CachedConcept = GetConcept());
 
         /// <summary>

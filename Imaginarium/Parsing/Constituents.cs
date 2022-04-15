@@ -45,7 +45,7 @@ namespace Imaginarium.Parsing
             Verb = new VerbSegment(this) {Name = "Verb"};
             Verb2 = new VerbSegment(this) {Name = "Verb2"};
 
-            SubjectNounList = new ReferringExpressionList<NP, Noun>(this, () => new NP(this))
+            SubjectNounList = new ReferringExpressionList<NP, Noun>(this, () => new NP(this) { ElementOfList = true })
                 {SanityCheck = SentencePattern.ForceBaseForm, Name = "Subjects"};
             PredicateAPList =
                 new ReferringExpressionList<AP, Adjective>(this, () => new AP(this))
