@@ -44,62 +44,68 @@ namespace Imaginarium.Parsing
             SentencePatterns.AddRange(new[]
             {
                 new SentencePattern(this, OptionalAll, Object, "can", "be", Verb, "by", "up", "!", "to", UpperBound,
-                        Subject)
+                        OptionalOther, Subject)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
 
                         verb.SubjectUpperBound = (int) ParsedUpperBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by."),
 
-                new SentencePattern(this, OptionalAll, Subject, "can", Verb, "up", "!", "to", UpperBound, Object)
+                new SentencePattern(this, OptionalAll, Subject, "can", Verb, "up", "!", "to", UpperBound, OptionalOther, Object)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
 
                         verb.ObjectUpperBound = (int) ParsedUpperBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
                 new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "at", "least", "!", LowerBound,
-                        Subject)
+                        OptionalOther, Subject)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
                         verb.SubjectLowerBound = (int) ParsedLowerBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
 
-                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "least", "!", LowerBound, Object)
+                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "least", "!", LowerBound, OptionalOther, Object)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
                         verb.ObjectLowerBound = (int) ParsedLowerBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
                 new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "at", "most", "!", UpperBound,
-                        Subject)
+                        OptionalOther, Subject)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
                         verb.SubjectUpperBound = (int) ParsedUpperBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
 
-                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "most", "!", UpperBound, Object)
+                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "most", "!", UpperBound, OptionalOther, Object)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
                         verb.ObjectUpperBound = (int) ParsedUpperBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
                 new SentencePattern(this, OptionalAll, Object, CanMust, "be", Verb, "by", Quantifier, "!", Subject)
@@ -114,7 +120,7 @@ namespace Imaginarium.Parsing
                         if (CanMust.MatchedText[0] == "must")
                             verb.SubjectLowerBound = Quantifier.ExplicitCount ?? 1;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subjects a given Object can be Verb'ed by."),
 
                 new SentencePattern(this, OptionalAll, Subject, CanMust, Verb, Quantifier, "!", Object)
@@ -129,7 +135,7 @@ namespace Imaginarium.Parsing
                         if (CanMust.MatchedText[0] == "must")
                             verb.ObjectLowerBound = Quantifier.ExplicitCount ?? 1;
                     })
-                    .Check(VerbBaseForm, ObjectQuantifierAgree, SubjectCommonNoun, ObjectCommonNoun)
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
                 new SentencePattern(this, Verb, "is", RareCommon)
@@ -484,7 +490,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, partName, count, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectCommonNoun)
+                    .Check(SubjectVerbAgree, SubjectUnmodified, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
                 
                 new SentencePattern(this, OptionalAll, Subject, Has, Object, "called", "!", PossessivePronoun, Text)
@@ -497,7 +503,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, partName, 1, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectCommonNoun)
+                    .Check(SubjectVerbAgree, SubjectUnmodified, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
 
                 new SentencePattern(this, OptionalAll, Subject, Has, Count, Object)
@@ -508,7 +514,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, Object.CommonNoun.StandardName, ParsedCount, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectCommonNoun)
+                    .Check(SubjectVerbAgree, SubjectUnmodified, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
                 
                 new SentencePattern(this, OptionalAll, Subject, Has, Object)
@@ -519,7 +525,7 @@ namespace Imaginarium.Parsing
                             InstallPart(ontology, Object.CommonNoun.StandardName, 1, Object.CommonNoun, Object.Modifiers,
                                 Subject.CommonNoun);
                     })
-                    .Check(SubjectVerbAgree, ObjectCommonNoun)
+                    .Check(SubjectVerbAgree, SubjectUnmodified, ObjectCommonNoun)
                     .Documentation("States that Subjects have part called Text that is a Object."),
 
                 new SentencePattern(this, "every", "kind", "of", "!", Subject, "should", "exist")

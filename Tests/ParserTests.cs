@@ -191,7 +191,15 @@ namespace Tests
             var o = new Ontology("test");
             o.ParseAndExecute("Persian, tabby, Siamese, manx, Chartreux, and Maine coon are kinds of cat.",
                 "Cats are black, white, grey, or ginger.",
+                "The plural of Chartreux is Chartreux",
                 "Chartreux are grey.");
+        }
+        
+        [TestMethod]
+        public void VerbWithNewNounTest()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("A foo can verb up to 2 foos");
         }
     }
 }

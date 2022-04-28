@@ -64,6 +64,10 @@ namespace Imaginarium.Parsing
                     "always")
                 { Name = "[always]", Optional = true };
 
+            OptionalOther = new SimpleClosedClassSegment(this,
+                    "other", "another")
+                { Name = "[other]", Optional = true };
+            
             ExistNotExist = new SimpleClosedClassSegment(this,
                     "exist", new[] {"not", "exist"}, new[] { "never", "exist" })
                 {Name = "exist/not exist"};
@@ -214,6 +218,11 @@ namespace Imaginarium.Parsing
         /// Matches always or nothing
         /// </summary>
         public SimpleClosedClassSegment OptionalAlways;
+
+        /// <summary>
+        /// Matches other, another, or nothing
+        /// </summary>
+        public SimpleClosedClassSegment OptionalOther;
 
         /// <summary>
         /// Matches exist or not exist

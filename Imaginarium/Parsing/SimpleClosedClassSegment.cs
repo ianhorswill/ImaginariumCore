@@ -44,6 +44,8 @@ namespace Imaginarium.Parsing
         /// </summary>
         public bool Optional;
 
+        public bool Matched => MatchedText != null;
+
         /// <inheritdoc />
         public SimpleClosedClassSegment(Parser parser, params object[] possibleMatches) : base(parser)
         {
@@ -67,10 +69,12 @@ namespace Imaginarium.Parsing
         /// <inheritdoc />
         public override bool ScanTo(Func<string, bool> endPredicate)
         {
+            MatchedText = null;
+            
             if (!Optional && !IsPossibleStart(CurrentToken))
                 return false;
             var old = State;
-            MatchedText = null;
+
             foreach (var candidate in PossibleMatches)
             {
                 if (Match(candidate))
@@ -88,10 +92,12 @@ namespace Imaginarium.Parsing
         /// <inheritdoc />
         public override bool ScanTo(string token)
         {
+            MatchedText = null;
+            
             if (!Optional && (EndOfInput || !IsPossibleStart(CurrentToken)))
                 return false;
             var old = State;
-            MatchedText = null;
+
             foreach (var candidate in PossibleMatches)
             {
                 if (Match(candidate))
@@ -108,10 +114,12 @@ namespace Imaginarium.Parsing
         /// <inheritdoc />
         public override bool ScanToEnd(bool failOnConjunction = true)
         {
+            MatchedText = null;
+            
             if (!Optional && !IsPossibleStart(CurrentToken))
                 return false;
             var old = State;
-            MatchedText = null;
+
             foreach (var candidate in PossibleMatches)
             {
                 if (Match(candidate))
