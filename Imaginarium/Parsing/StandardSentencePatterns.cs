@@ -98,6 +98,29 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
 
+                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "between", LowerBound, "and", UpperBound, OptionalOther, Object)
+                    .Action(() =>
+                    {
+                        var verb = ConfigureVerb(Verb, Subject, Object);
+                        verb.ObjectLowerBound = (int) ParsedLowerBound;
+                        verb.ObjectUpperBound = (int) ParsedUpperBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
+                    })
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
+                    .Documentation("Specifies how many Objects a given Subject can Verb."),
+
+                new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "between", "!", LowerBound, "and", UpperBound,
+                        OptionalOther, Subject)
+                    .Action(() =>
+                    {
+                        var verb = ConfigureVerb(Verb, Subject, Object);
+                        verb.SubjectLowerBound = (int) ParsedLowerBound;
+                        verb.SubjectUpperBound = (int) ParsedUpperBound;
+                        verb.IsAntiReflexive |= OptionalOther.Matched;
+                    })
+                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
+                    .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
+
                 new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "most", "!", UpperBound, OptionalOther, Object)
                     .Action(() =>
                     {
