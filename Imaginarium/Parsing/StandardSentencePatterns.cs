@@ -43,10 +43,14 @@ namespace Imaginarium.Parsing
         {
             SentencePatterns.AddRange(new[]
             {
-                new SentencePattern(this, OptionalAll, Object, "can", "be", Verb, "by", "up", "!", "to", UpperBound,
+                new SentencePattern(this, OptionalAll, Object, CanMustButShouldBeCan, "be", Verb, "by", AtMost, "!", UpperBound,
                         OptionalOther, Subject)
                     .Action(() =>
                     {
+                        if (CanMustButShouldBeCan.WasMatchedTo("must"))
+                            throw new GrammaticalError(
+                                "Using must here is confusing; please use can ... at most or can ... between 1 and ...");
+                        
                         var verb = ConfigureVerb(Verb, Subject, Object);
 
                         verb.SubjectUpperBound = (int) ParsedUpperBound;
@@ -55,9 +59,13 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by."),
 
-                new SentencePattern(this, OptionalAll, Subject, "can", Verb, "up", "!", "to", UpperBound, OptionalOther, Object)
+                new SentencePattern(this, OptionalAll, Subject, CanMustButShouldBeCan, Verb, AtMost, "!", UpperBound, OptionalOther, Object)
                     .Action(() =>
                     {
+                        if (CanMustButShouldBeCan.WasMatchedTo("must"))
+                            throw new GrammaticalError(
+                                "Using must here is confusing; please use can ... at most or can ... between 1 and ...");
+
                         var verb = ConfigureVerb(Verb, Subject, Object);
 
                         verb.ObjectUpperBound = (int) ParsedUpperBound;
@@ -66,10 +74,15 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
-                new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "at", "least", "!", LowerBound,
+                new SentencePattern(this, OptionalAll, Object, CanMustButShouldBeMust, "be", Verb, "by", "at", "least", "!", LowerBound,
                         OptionalOther, Subject)
                     .Action(() =>
                     {
+                        if (CanMustButShouldBeMust.WasMatchedTo("can"))
+                            throw new GrammaticalError(
+                                "Using can here is confusing; please use must ... at least ...");
+                        
+                        
                         var verb = ConfigureVerb(Verb, Subject, Object);
                         verb.SubjectLowerBound = (int) ParsedLowerBound;
                         verb.IsAntiReflexive |= OptionalOther.Matched;
@@ -77,9 +90,13 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
 
-                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "least", "!", LowerBound, OptionalOther, Object)
+                new SentencePattern(this, OptionalAll, Subject, CanMustButShouldBeMust, Verb, "at", "least", "!", LowerBound, OptionalOther, Object)
                     .Action(() =>
                     {
+                        if (CanMustButShouldBeMust.WasMatchedTo("can"))
+                            throw new GrammaticalError(
+                                "Using can here is confusing; please use must ... at least ...");
+                        
                         var verb = ConfigureVerb(Verb, Subject, Object);
                         verb.ObjectLowerBound = (int) ParsedLowerBound;
                         verb.IsAntiReflexive |= OptionalOther.Matched;
@@ -87,18 +104,7 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
-                new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "at", "most", "!", UpperBound,
-                        OptionalOther, Subject)
-                    .Action(() =>
-                    {
-                        var verb = ConfigureVerb(Verb, Subject, Object);
-                        verb.SubjectUpperBound = (int) ParsedUpperBound;
-                        verb.IsAntiReflexive |= OptionalOther.Matched;
-                    })
-                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
-                    .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
-
-                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "between", LowerBound, "and", UpperBound, OptionalOther, Object)
+                new SentencePattern(this, OptionalAll, Subject, CanMustButShouldBeMust, Verb, "between", LowerBound, "and", UpperBound, OptionalOther, Object)
                     .Action(() =>
                     {
                         var verb = ConfigureVerb(Verb, Subject, Object);
@@ -109,7 +115,7 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Objects a given Subject can Verb."),
 
-                new SentencePattern(this, OptionalAll, Object, "must", "be", Verb, "by", "between", "!", LowerBound, "and", UpperBound,
+                new SentencePattern(this, OptionalAll, Object, CanMustButShouldBeMust, "be", Verb, "by", "between", "!", LowerBound, "and", UpperBound,
                         OptionalOther, Subject)
                     .Action(() =>
                     {
@@ -120,16 +126,6 @@ namespace Imaginarium.Parsing
                     })
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
                     .Documentation("Specifies how many Subject a given Object can be Verb'ed by"),
-
-                new SentencePattern(this, OptionalAll, Subject, "must", Verb, "at", "most", "!", UpperBound, OptionalOther, Object)
-                    .Action(() =>
-                    {
-                        var verb = ConfigureVerb(Verb, Subject, Object);
-                        verb.ObjectUpperBound = (int) ParsedUpperBound;
-                        verb.IsAntiReflexive |= OptionalOther.Matched;
-                    })
-                    .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
-                    .Documentation("Specifies how many Objects a given Subject can Verb."),
 
                 new SentencePattern(this, OptionalAll, Object, CanMust, "be", Verb, "by", Quantifier, "!", Subject)
                     .Action(() =>
@@ -140,7 +136,7 @@ namespace Imaginarium.Parsing
                             verb.SubjectUpperBound = Quantifier.ExplicitCount.Value;
                         // "Cats can love other cats" means anti-reflexive, whereas "cats can love many cats" doesn't.
                         verb.IsAntiReflexive |= Quantifier.IsOther;
-                        if (CanMust.MatchedText[0] == "must")
+                        if (CanMust.WasMatchedTo("must"))
                             verb.SubjectLowerBound = Quantifier.ExplicitCount ?? 1;
                     })
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
@@ -155,7 +151,7 @@ namespace Imaginarium.Parsing
                             verb.ObjectUpperBound = Quantifier.ExplicitCount.Value;
                         // "Cats can love other cats" means anti-reflexive, whereas "cats can love many cats" doesn't.
                         verb.IsAntiReflexive |= Quantifier.IsOther;
-                        if (CanMust.MatchedText[0] == "must")
+                        if (CanMust.WasMatchedTo("must"))
                             verb.ObjectLowerBound = Quantifier.ExplicitCount ?? 1;
                     })
                     .Check(VerbBaseForm, SubjectCommonNoun, ObjectCommonNoun)
@@ -248,9 +244,12 @@ namespace Imaginarium.Parsing
                     .Check(VerbBaseForm, SubjectCommonNoun)
                     .Documentation("States that the verb always holds between objects and themselves."),
 
-                new SentencePattern(this, OptionalAll, Subject, "can", Verb, EachOther)
+                new SentencePattern(this, OptionalAll, Subject, CanMustButShouldBeCan, Verb, EachOther)
                     .Action(() =>
                     {
+                        if (CanMustButShouldBeCan.WasMatchedTo("must"))
+                            throw new GrammaticalError("Using must here is confusing; it suggests everything must verb everything else.");
+                        
                         var verb = ConfigureVerb(Verb, Subject, Subject);
                         verb.IsSymmetric = true;
                     })
@@ -417,7 +416,7 @@ namespace Imaginarium.Parsing
                     .Documentation(
                         "Declares the number of Adjectives true of Subjects must be in the specified range."),
 
-                new SentencePattern(this, OptionalAll, Subject, "can", "be", "up", "!", "to", LowerBound, "of",
+                new SentencePattern(this, OptionalAll, Subject, CanMust, "be", AtMost, "!", LowerBound, "of",
                         PredicateAPList)
                     .Action(() =>
                     {

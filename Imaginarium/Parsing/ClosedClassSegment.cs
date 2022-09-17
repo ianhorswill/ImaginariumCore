@@ -25,6 +25,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Imaginarium.Parsing
 {
@@ -55,6 +56,12 @@ namespace Imaginarium.Parsing
         /// <inheritdoc />
         protected ClosedClassSegment(Parser parser) : base(parser)
         { }
+
+        /// <summary>
+        /// True if text is the text this was matched to in the input
+        /// </summary>
+        /// <param name="text">Text to match</param>
+        public bool WasMatchedTo(params string[] text) => text.Length == MatchedText.Length && !text.Where((t, i) => t != MatchedText[i]).Any();
     }
 }
 

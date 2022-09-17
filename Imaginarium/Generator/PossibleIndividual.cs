@@ -9,6 +9,8 @@ namespace Imaginarium.Generator
     /// <summary>
     /// Represents the instantiation of a specific Individual within a specific Invention (possible world).
     /// </summary>
+    ///
+    [DebuggerDisplay("{" + nameof(StandardDescription) + "}")]
     public class PossibleIndividual
     {
         /// <summary>
@@ -35,6 +37,11 @@ namespace Imaginarium.Generator
             Individual = individual;
             Invention = invention;
         }
+
+        public string Noun => NounsString();
+        public string Adjectives => AdjectivesString();
+
+        public string StandardDescription => Description();
 
         /// <summary>
         /// A textual description of the Individual's attributes within Model.

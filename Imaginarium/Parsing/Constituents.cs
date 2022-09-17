@@ -67,6 +67,9 @@ namespace Imaginarium.Parsing
             OptionalOther = new SimpleClosedClassSegment(this,
                     "other", "another")
                 { Name = "[other]", Optional = true };
+
+            AtMost = new SimpleClosedClassSegment(this, new[] {"at", "most"}, new[] {"up", "to"})
+                { Name = "[at most]" };
             
             ExistNotExist = new SimpleClosedClassSegment(this,
                     "exist", new[] {"not", "exist"}, new[] { "never", "exist" })
@@ -83,6 +86,14 @@ namespace Imaginarium.Parsing
             CanMust = new SimpleClosedClassSegment(this,
                     "can", "must")
                 {Name = "can/must"};
+
+            CanMustButShouldBeMust = new SimpleClosedClassSegment(this,
+                    "can", "must")
+                { Name = "must" };
+
+            CanMustButShouldBeCan = new SimpleClosedClassSegment(this,
+                    "can", "must")
+                { Name = "can" };
 
             CanNot = new SimpleClosedClassSegment(this,
                     "cannot", "never", new[] {"can", "not"}, new[] {"can", "'", "t"},
@@ -210,6 +221,11 @@ namespace Imaginarium.Parsing
         public readonly Func<bool> Has;
 
         /// <summary>
+        /// Matches at most, up to
+        /// </summary>
+        public SimpleClosedClassSegment AtMost;
+
+        /// <summary>
         /// Matches all, every, or nothing
         /// </summary>
         public SimpleClosedClassSegment OptionalAll;
@@ -238,6 +254,16 @@ namespace Imaginarium.Parsing
         /// Matches can and must
         /// </summary>
         public SimpleClosedClassSegment CanMust;
+
+        /// <summary>
+        /// Matches can and must, but reports as just can
+        /// </summary>
+        public SimpleClosedClassSegment CanMustButShouldBeCan;
+
+        /// <summary>
+        /// Matches can and must but reports and jsut must
+        /// </summary>
+        public SimpleClosedClassSegment CanMustButShouldBeMust;
 
         /// <summary>
         /// Matches can't, cannot, etc.

@@ -135,13 +135,14 @@ namespace Tests
                 "employee and employer are kinds of person",
                 "an employee must work for one employer",
                 "an employer must be worked for by at least two employees");
-            var g = o.CommonNoun("person").MakeGenerator(10);
+            var g = o.CommonNoun("person").MakeGenerator(4);
             var employee = o.CommonNoun("employee");
             var employer = o.CommonNoun("employer");
             var workFor = o.Verb("work", "for");
             for (var count = 0; count < 100; count++)
             {
                 var invention = g.Generate();
+                Assert.IsNotNull(invention, "Generator failed, count = "+count);
                 foreach (var person in invention.PossibleIndividuals)
                 {
                     if (person.IsA(employee))

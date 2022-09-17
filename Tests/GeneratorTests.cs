@@ -439,5 +439,23 @@ aquatic monsters are not spitting.";
                 );
             }
         }
+
+        [TestMethod]
+        public void ForcedCycleTest()
+        {
+            var o = new Ontology(nameof(ForcedCycleTest));
+            o.ParseAndExecute("cat, dog, and mouse are kinds of animals",
+                "an animal can chase some animal",
+                "animals cannot chase each other",
+                "animals cannot chase themselves",
+                "a dog must dchase one cat",
+                "a cat must cchase one mouse",
+                "a mouse must mchase one dog",
+                "mchasing is a way of chasing",
+                "cchasing is a way of chasing",
+                "dchasing is a way of chasing");
+
+            o.Generator("animal", 3).Generate();
+        }
     }
 }

@@ -201,5 +201,13 @@ namespace Tests
             var o = new Ontology("test");
             o.ParseAndExecute("A foo can verb up to 2 foos");
         }
+
+        [TestMethod]
+        public void MercedesTest1()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("a character can know at most 5 characters.",
+                "being friends with is a way of knowing.");
+        }
     }
 }

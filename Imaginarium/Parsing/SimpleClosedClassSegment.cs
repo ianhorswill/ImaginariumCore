@@ -44,6 +44,9 @@ namespace Imaginarium.Parsing
         /// </summary>
         public bool Optional;
 
+        /// <summary>
+        /// True if the segment matched something
+        /// </summary>
         public bool Matched => MatchedText != null;
 
         /// <inheritdoc />
