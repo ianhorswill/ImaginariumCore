@@ -60,7 +60,7 @@ namespace Imaginarium.Parsing
         {
             "on", "in", "at", "since", "for", "ago", "before", "to", "past", "til", "until", "by",
             "next", "beside", "over", "under", "above", "below", "across", "through", "into", "onto",
-            "towards", "toward", "from", "of",  "about"
+            "towards", "toward", "from", "of",  "about", "with"
         };
 
         /// <summary>
@@ -181,10 +181,10 @@ namespace Imaginarium.Parsing
                 foreach (var gerund in RegularGerundsOfWord(plural[0]))
                     yield return new [] { gerund };
             }
-            else if (plural.Length == 2 && IsPreposition(plural[1]))
+            else if (plural.Length >= 2 && IsPreposition(plural.Last()))
             {
                 foreach (var gerund in RegularGerundsOfWord(plural[0]))
-                    yield return new [] { gerund, plural[1] };
+                    yield return new[] { gerund, plural.Last() };
             }
         }
 

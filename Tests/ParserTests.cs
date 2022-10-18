@@ -209,5 +209,30 @@ namespace Tests
             o.ParseAndExecute("a character can know at most 5 characters.",
                 "being friends with is a way of knowing.");
         }
+
+        [TestMethod]
+        public void MercedesTest2()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("characters can know each other.",
+                "characters can fight with each other.",
+                "fighting with is a way of knowing.");
+        }
+
+        [TestMethod]
+        public void MercedesTest3()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("a character can know other characters.",
+                "being happily married to is a way of knowing.");
+        }
+
+        [TestMethod]
+        public void MercedesTest4()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("a character can exist by other characters.",
+                "being on the side of is a way of existing by.");
+        }
     }
 }
