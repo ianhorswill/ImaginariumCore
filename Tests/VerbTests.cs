@@ -155,5 +155,22 @@ namespace Tests
             }
 
         }
+
+        [TestMethod]
+        public void MercedesDomainCardinality()
+        {
+            var o = new Ontology(nameof(MercedesDomainCardinality));
+            o.ParseAndExecute("a human can love other humans.",
+                "a pet must love one human.");
+        }
+        
+        [TestMethod]
+        public void MercedesCodomainCardinality()
+        {
+            var o = new Ontology(nameof(MercedesCodomainCardinality));
+            o.ParseAndExecute("a human can love other humans.",
+                "a human must love one pet.",
+                "a human must love one hobby.");
+        }
     }
 }
