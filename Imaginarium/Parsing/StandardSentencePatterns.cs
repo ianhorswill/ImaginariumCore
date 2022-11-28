@@ -181,6 +181,7 @@ namespace Imaginarium.Parsing
                     {
                         var sub = Verb.Verb;
                         var super = Verb2.Verb;
+                        // todo: help with changing this?
                         if (sub.SubjectKind == null)
                         {
                             sub.SubjectKind = super.SubjectKind;
@@ -674,6 +675,7 @@ namespace Imaginarium.Parsing
         /// <returns>The verb</returns>
         private static Verb ConfigureVerb(VerbSegment verbSegment, NP subjectNP, NP objectNP)
         {
+            // old
             var verb = verbSegment.Verb;
             var verbSubjectKind = CommonNoun.LeastUpperBound(verb.SubjectKind, subjectNP.CommonNoun);
             if (verbSubjectKind == null)
@@ -682,7 +684,7 @@ namespace Imaginarium.Parsing
             verb.SubjectKind = verbSubjectKind;
             if (verb.SubjectModifiers == null)
                 verb.SubjectModifiers = subjectNP.Modifiers.ToArray();
-
+            
             var verbObjectKind = CommonNoun.LeastUpperBound(verb.ObjectKind, objectNP.CommonNoun);
             if (verbObjectKind == null)
                 throw new ContradictionException(null,
@@ -690,6 +692,56 @@ namespace Imaginarium.Parsing
             verb.ObjectKind = verbObjectKind;
             if (verb.ObjectModifiers == null)
                 verb.ObjectModifiers = objectNP.Modifiers.ToArray();
+            return verb;
+            
+            // new
+            // modifiers?
+            // var verb = verbSegment.Verb;
+            // // int index = 0;
+            // foreach (var pair in verb.SubjectAndObjectKinds)
+            // {
+            //     var verbSubjectKind = CommonNoun.LeastUpperBound(pair.Item1, subjectNP.CommonNoun);
+            //     if (verbSubjectKind == null)
+            //         throw new ContradictionException(null,
+            //             $"Verb {verb.BaseForm.Untokenize()} was previously declared to take subjects that were {pair.Item1.PluralForm.Untokenize()}, but is now being declared to take subjects of the unrelated type {subjectNP.CommonNoun.SingularForm.Untokenize()}.");
+            //     // verb.SubjectAndObjectKinds[index] = new Tuple<CommonNoun, CommonNoun>(verbSubjectKind, pair.Item2);
+            //     if (verb.SubjectModifiers == null)
+            //         verb.SubjectModifiers = subjectNP.Modifiers.ToArray();
+            //
+            //     var verbObjectKind = CommonNoun.LeastUpperBound(pair.Item2, objectNP.CommonNoun);
+            //     if (verbObjectKind == null)
+            //         throw new ContradictionException(null,
+            //             $"Verb {verb.BaseForm.Untokenize()} was previously declared to take objects that were {pair.Item2.PluralForm.Untokenize()}, but is now being declared to take objects of the unrelated type {objectNP.CommonNoun.SingularForm.Untokenize()}.");
+            //      // verb.SubjectAndObjectKinds[index] = new Tuple<CommonNoun, CommonNoun>(pair.Item1, verbObjectKind);
+            //     if (verb.ObjectModifiers == null)
+            //         verb.ObjectModifiers = objectNP.Modifiers.ToArray();
+            //     verb.SubjectAndObjectKinds.Add(new Tuple<CommonNoun, CommonNoun>(verbSubjectKind, verbObjectKind));
+            //     // index++;
+            // }
+            // return verb;
+            
+            // newer
+            var verb = verbSegment.Verb;
+            foreach (var pair in verb.SubjectAndObjectKindsAndModifiers)
+            {
+                var verbSubjectKind = CommonNoun.LeastUpperBound(pair.Item1.Item1, subjectNP.CommonNoun);
+                if (verbSubjectKind == null)
+                    throw new ContradictionException(null,
+                        $"Verb {verb.BaseForm.Untokenize()} was previously declared to take subjects that were {pair.Item1.Item1.PluralForm.Untokenize()}, but is now being declared to take subjects of the unrelated type {subjectNP.CommonNoun.SingularForm.Untokenize()}.");
+                var subjectModifiers = pair.Item1.Item2 ?? subjectNP.Modifiers.ToArray();
+            
+                var verbObjectKind = CommonNoun.LeastUpperBound(pair.Item2.Item1, objectNP.CommonNoun);
+                if (verbObjectKind == null)
+                    throw new ContradictionException(null,
+                        $"Verb {verb.BaseForm.Untokenize()} was previously declared to take objects that were {pair.Item2.Item1.PluralForm.Untokenize()}, but is now being declared to take objects of the unrelated type {objectNP.CommonNoun.SingularForm.Untokenize()}.");
+                var objectModifiers = pair.Item2.Item2 ?? objectNP.Modifiers.ToArray();
+            
+                // todo: check for redundancy???
+                verb.SubjectAndObjectKindsAndModifiers.Add(new Tuple<Tuple<CommonNoun, MonadicConceptLiteral[]>, 
+                    Tuple<CommonNoun, MonadicConceptLiteral[]>>(new Tuple<CommonNoun, MonadicConceptLiteral[]>
+                    (verbSubjectKind, subjectModifiers), new Tuple<CommonNoun, MonadicConceptLiteral[]>(verbObjectKind, 
+                    objectModifiers)));
+            }
             return verb;
         }
     }

@@ -23,6 +23,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -202,7 +203,7 @@ namespace Imaginarium.Parsing
 
             if (EndingConsonant(s, out var terminalConsonant))
             {
-                yield return s + terminalConsonant.ToString() + "ing";
+                yield return s + terminalConsonant + "ing";
             }
             else
             {
@@ -215,16 +216,35 @@ namespace Imaginarium.Parsing
         /// </summary>
         public static string[] BaseFormOfGerund(string[] gerund)
         {
+            var gerundList = gerund.ToList();
             if (gerund.Contains("being"))
             {
                 return gerund.Replace("being", "be").ToArray();
             }
+
             if (gerund.Length == 1)
             {
                 // Cut trailing -ing
-                return new [] { BaseFormOfRegularGerundWord(gerund[0]) };
-            } else if (gerund.Length == 2 && IsPreposition(gerund[1]))
-                return new [] { BaseFormOfRegularGerundWord(gerund[0]), gerund[1] };
+                return new[] { BaseFormOfRegularGerundWord(gerund[0]) };
+                // old
+                // } else if (gerund.Length == 2 && IsPreposition(gerund[1])) {}
+                //     return new [] { BaseFormOfRegularGerundWord(gerund[0]), gerund[1] };
+            }
+            // new
+            else if (gerund.Length >= 2 && IsPreposition(gerund.Last()))
+            {
+                List<string> array = new List<string>();
+                var gerundWord = gerundList.Find(str => str.EndsWith("ing"));
+                // todo: use select to map baseformofregulargerundword on the one that ends with ing
+                foreach (var word in gerundList)
+                {
+                    array.Add(word == gerundWord ? BaseFormOfRegularGerundWord(word) : word);
+                }
+
+                return array.ToArray();
+
+                // return new[] { BaseFormOfRegularGerundWord(gerundWord), gerund.Last() };
+            }
 
             throw new SyntaxErrorException($"Can't determine the stem verb of gerund {gerund.Untokenize()}");
         }
