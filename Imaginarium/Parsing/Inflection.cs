@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using Imaginarium.Driver;
 using File = System.IO.File;
 
@@ -161,12 +162,15 @@ namespace Imaginarium.Parsing
                 return ReplaceCopula(singular, "are");
             return SingularOfNoun(singular);
         }
-
+        
         /// <summary>
         /// Heuristically guess if this verb is in gerund form
         /// </summary>
-        public static bool IsGerund(string[] verbal) =>
-            ContainsCopula(verbal) || verbal[0].EndsWith("ing");
+        public static bool IsGerund(string[] verbal)
+        {
+            var wordsWithIng = verbal.Where(w => w.EndsWith("ing")).ToArray();
+            return ContainsCopula(verbal) || wordsWithIng.Length > 0;
+        }
 
         /// <summary>
         /// Enumerate every potential gerund form of a (third person) plural verb
@@ -230,20 +234,14 @@ namespace Imaginarium.Parsing
                 // } else if (gerund.Length == 2 && IsPreposition(gerund[1])) {}
                 //     return new [] { BaseFormOfRegularGerundWord(gerund[0]), gerund[1] };
             }
+
             // new
-            else if (gerund.Length >= 2 && IsPreposition(gerund.Last()))
-            {
-                List<string> array = new List<string>();
-                var gerundWord = gerundList.Find(str => str.EndsWith("ing"));
-                // todo: use select to map baseformofregulargerundword on the one that ends with ing
-                foreach (var word in gerundList)
-                {
-                    array.Add(word == gerundWord ? BaseFormOfRegularGerundWord(word) : word);
-                }
-
-                return array.ToArray();
-
-                // return new[] { BaseFormOfRegularGerundWord(gerundWord), gerund.Last() };
+            else if (gerund.Length >= 2 && IsPreposition(gerund.Last())) {
+                // apply BaseFormOfRegularGerundWord to the item in gerund that ends with "ing"
+                return gerund.Where(word => word.EndsWith("ing"))
+                    .Select(word => BaseFormOfRegularGerundWord(word))
+                    .Concat(gerund.Where(word => !word.EndsWith("ing")))
+                    .ToArray();
             }
 
             throw new SyntaxErrorException($"Can't determine the stem verb of gerund {gerund.Untokenize()}");

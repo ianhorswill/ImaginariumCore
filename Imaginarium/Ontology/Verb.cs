@@ -357,25 +357,64 @@ namespace Imaginarium.Ontology
         /// Type/kind/noun of the object argument of the verb
         /// </summary>
         public CommonNoun ObjectKind { get; set; }
-
-        // /// <summary>
-        // /// A list of tuples of the type/kind/noun of the subject and object arguments of the verb
-        // /// </summary>
-        // public List<Tuple<CommonNoun, CommonNoun>> SubjectAndObjectKinds = new List<Tuple<CommonNoun, CommonNoun>>();
-        //
-        // /// <summary>
-        // /// A list of tuples of tuples where each element is of the form
-        // /// ((SubjectKind, SubjectModifiers>), (ObjectKind, ObjectModifiers)).
-        // /// </summary>
-        // public List<Tuple<Tuple<CommonNoun, MonadicConceptLiteral[]>, Tuple<CommonNoun, MonadicConceptLiteral[]>>>
-        //     SubjectAndObjectKindsAndModifiers =
-        //         new List<Tuple<Tuple<CommonNoun, MonadicConceptLiteral[]>,
-        //             Tuple<CommonNoun, MonadicConceptLiteral[]>>>();
-
         /// <summary>
         /// Modifiers that must also be true of the objects of the verb.
         /// </summary>
         public MonadicConceptLiteral[] ObjectModifiers { get; set; }
+
+        /// <summary>
+        /// A struct representing a verb's kind and modifiers.
+        /// </summary>
+        public struct ModifiedKind
+        {
+            /// <summary>
+            /// The verb's kind.
+            /// </summary>
+            public CommonNoun Kind;
+            
+            /// <summary>
+            /// The verb's modifiers.
+            /// </summary>
+            public MonadicConceptLiteral[] Modifiers;
+        
+            /// <summary>
+            /// Constructs a ModifiedKind.
+            /// </summary>
+            /// <param name="kind">The kind.</param>
+            /// <param name="modifiers">The list of modifiers.</param>
+            public ModifiedKind(CommonNoun kind, MonadicConceptLiteral[] modifiers)
+            {
+                Kind = kind;
+                Modifiers = modifiers;
+            }
+        
+            /// <summary>
+            /// Deconstructs a ModifiedKind.
+            /// </summary>
+            /// <param name="kind">The kind.</param>
+            /// <param name="modifiers">The modifiers.</param>
+            public void Deconstruct(out CommonNoun kind, out MonadicConceptLiteral[] modifiers)
+            {
+                kind = Kind;
+                modifiers = Modifiers;
+            }
+        }
+        
+        /// <summary>
+        /// The list of subject kinds (and modifiers) and object kinds (and modifiers).
+        /// </summary>
+        public List<Tuple<ModifiedKind, ModifiedKind>> SubjectAndObjectKindsAndModifiers =
+            new List<Tuple<ModifiedKind, ModifiedKind>>();
+        
+        /// <summary>
+        /// Adds a new tuple to SubjectAndObjectKindsAndModifiers.
+        /// </summary>
+        /// <param name="subj">The subject ModifiedKind.</param>
+        /// <param name="obj">The object ModifiedKind.</param>
+        public void AddSubjectObject(ModifiedKind subj, ModifiedKind obj)
+        {
+            SubjectAndObjectKindsAndModifiers.Add(new Tuple<ModifiedKind, ModifiedKind>(subj, obj));
+        }
 
         private void EnsurePluralForm()
         {

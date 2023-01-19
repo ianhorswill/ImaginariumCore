@@ -234,5 +234,21 @@ namespace Tests
             o.ParseAndExecute("a character can exist by other characters.",
                 "being on the side of is a way of existing by.");
         }
+
+        [TestMethod]
+        public void MercedesTest5()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("a character can know other characters.",
+                "happily getting married to is a way of knowing.");
+        }
+
+        [TestMethod]
+        public void HappilyMarriedTest()
+        {
+            var o = new Ontology("test");
+            o.ParseAndExecute("happily getting married to is a way of knowing");
+            Assert.IsTrue(o.Verb("happily", "getting", "married", "to") != null);
+        }
     }
 }

@@ -548,23 +548,19 @@ namespace Imaginarium.Generator
                         // old
                         if (Generator.CanBeA(i1, v.SubjectKind) && Generator.CanBeA(i2, v.ObjectKind) && Holds(v, i1, i2))
                             yield return new Tuple<Verb, Individual, Individual>(v, i1, i2);
-                        
+
                         // new
-                        // foreach (var pair in v.SubjectAndObjectKinds.Where(pair =>
-                        //              Generator.CanBeA(i1, pair.Item1) && Generator.CanBeA(i2, pair.Item2) &&
-                        //              Holds(v, i1, i2)))
+                        // foreach (var ((sKind, sModifier), 
+                        //              (oKind, oModifier)) in 
+                        //          v.SubjectAndObjectKindsAndModifiers)
                         // {
-                        //     yield return new Tuple<Verb, Individual, Individual>(v, i1, i2);
-                        // }
-                        // // newer
-                        // foreach (var pair in v.SubjectAndObjectKindsAndModifiers.Where(pair =>
-                        //              Generator.CanBeA(i1, pair.Item1.Item1) && Generator.CanBeA(i2, pair.Item2.Item1) &&
-                        //              Holds(v, i1, i2)))
-                        // {
-                        //     yield return new Tuple<Verb, Individual, Individual>(v, i1, i2);
+                        //     if (Generator.CanBeA(i1, sKind) && Generator.CanBeA(i2, oKind) && Holds(v, i1, i2))
+                        //     {
+                        //         yield return new Tuple<Verb, Individual, Individual>(v, i1, i2);
+                        //         break;
+                        //     }
                         // }
                     }
-                
             }
         }
 
