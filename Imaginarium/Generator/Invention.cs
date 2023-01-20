@@ -545,21 +545,17 @@ namespace Imaginarium.Generator
                 foreach (var v in verbs)
                     if (i1 <= i2 || !v.IsSymmetric)
                     {
-                        // old
-                        if (Generator.CanBeA(i1, v.SubjectKind) && Generator.CanBeA(i2, v.ObjectKind) && Holds(v, i1, i2))
-                            yield return new Tuple<Verb, Individual, Individual>(v, i1, i2);
-
                         // new
-                        // foreach (var ((sKind, sModifier), 
-                        //              (oKind, oModifier)) in 
-                        //          v.SubjectAndObjectKindsAndModifiers)
-                        // {
-                        //     if (Generator.CanBeA(i1, sKind) && Generator.CanBeA(i2, oKind) && Holds(v, i1, i2))
-                        //     {
-                        //         yield return new Tuple<Verb, Individual, Individual>(v, i1, i2);
-                        //         break;
-                        //     }
-                        // }
+                        foreach (var ((sKind, sModifier), 
+                                     (oKind, oModifier)) in 
+                                 v.SubjectAndObjectKindsAndModifiers)
+                        {
+                            if (Generator.CanBeA(i1, sKind) && Generator.CanBeA(i2, oKind) && Holds(v, i1, i2))
+                            {
+                                yield return new Tuple<Verb, Individual, Individual>(v, i1, i2);
+                                break;
+                            }
+                        }
                     }
             }
         }

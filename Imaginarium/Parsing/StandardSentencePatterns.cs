@@ -181,42 +181,17 @@ namespace Imaginarium.Parsing
                     {
                         var sub = Verb.Verb;
                         var super = Verb2.Verb;
-                        // old
-                        if (sub.SubjectKind == null)
-                        {
-                            sub.SubjectKind = super.SubjectKind;
-                            sub.SubjectModifiers = super.SubjectModifiers;
-                        }
-                        
-                        if (sub.ObjectKind == null)
-                        {
-                            sub.ObjectKind = super.ObjectKind;
-                            sub.ObjectModifiers = super.ObjectModifiers;
-                        }
-                        
-                        if (super.SubjectKind == null)
-                        {
-                            super.SubjectKind = sub.SubjectKind;
-                            super.SubjectModifiers = sub.SubjectModifiers;
-                        }
-                        
-                        if (super.ObjectKind == null)
-                        {
-                            super.ObjectKind = sub.ObjectKind;
-                            super.ObjectModifiers = sub.ObjectModifiers;
-                        }
-                        
                         // new
                         // note: this very well may be wrong. and not good. sorry.
-                        // if (sub.SubjectAndObjectKindsAndModifiers.Count == 0)
-                        // {
-                        //     sub.SubjectAndObjectKindsAndModifiers = super.SubjectAndObjectKindsAndModifiers;
-                        // }
-                        //
-                        // if (super.SubjectAndObjectKindsAndModifiers.Count == 0)
-                        // {
-                        //     super.SubjectAndObjectKindsAndModifiers = sub.SubjectAndObjectKindsAndModifiers;
-                        // }
+                        if (sub.SubjectAndObjectKindsAndModifiers.Count == 0)
+                        {
+                            sub.SubjectAndObjectKindsAndModifiers = super.SubjectAndObjectKindsAndModifiers;
+                        }
+                        
+                        if (super.SubjectAndObjectKindsAndModifiers.Count == 0)
+                        {
+                            super.SubjectAndObjectKindsAndModifiers = sub.SubjectAndObjectKindsAndModifiers;
+                        }
 
                         sub.Superspecies.AddNew(super);
                         super.Subspecies.AddNew(sub);

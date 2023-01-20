@@ -237,40 +237,24 @@ namespace Imaginarium.Generator
             foreach (var subj in Individuals)
             foreach (var obj in Individuals)
             foreach (var v in verbs)
-                // old 
-                // v can't hold of i1,i2 unless they're both in the v's domain
-                if (CanBeA(subj, v.SubjectKind) && CanBeA(obj, v.ObjectKind))
-                {
-                    var related = Holds(v, subj, obj);
-                    related.InitialProbability = v.Density;
-                    AddImplication(IsA(subj, v.SubjectKind), related);
-                    if (v.SubjectModifiers != null)
-                        foreach (var lit in v.SubjectModifiers)
-                            AddImplication(Satisfies(subj, lit), related);
-                    AddImplication(IsA(obj, v.ObjectKind), related);
-                    if (v.ObjectModifiers != null)
-                        foreach (var lit in v.ObjectModifiers)
-                            AddImplication(Satisfies(obj, lit), related);
-                }
-                
                 // new
-            // foreach (var ((sKind, sModifiers), 
-            //              (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
-            // {
-            //     if (CanBeA(subj, sKind) && CanBeA(obj, oKind))
-            //     {
-            //         var related = Holds(v, subj, obj);
-            //         related.InitialProbability = v.Density;
-            //         AddImplication(IsA(subj, sKind), related);
-            //         if (sModifiers != null) // todo: check for empty instead of check for null?
-            //             foreach (var lit in sModifiers)
-            //                 AddImplication(Satisfies(subj, lit), related);
-            //         AddImplication(IsA(obj, oKind), related);
-            //         if (oModifiers != null) // todo: check for empty instead of check for null?
-            //             foreach (var lit in oModifiers)
-            //                 AddImplication(Satisfies(obj, lit), related);
-            //     }
-            // }
+                foreach (var ((sKind, sModifiers), 
+                             (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
+                {
+                    if (CanBeA(subj, sKind) && CanBeA(obj, oKind))
+                    {
+                        var related = Holds(v, subj, obj);
+                        related.InitialProbability = v.Density;
+                        AddImplication(IsA(subj, sKind), related);
+                        if (sModifiers != null) // todo: check for empty instead of check for null?
+                            foreach (var lit in sModifiers)
+                                AddImplication(Satisfies(subj, lit), related);
+                        AddImplication(IsA(obj, oKind), related);
+                        if (oModifiers != null) // todo: check for empty instead of check for null?
+                            foreach (var lit in oModifiers)
+                                AddImplication(Satisfies(obj, lit), related);
+                    }
+                }
 
             foreach (var v in verbs)
             {
@@ -280,217 +264,113 @@ namespace Imaginarium.Generator
 
         private void BuildVerbClauses(Verb v)
         {
-            // old
-            // Domain axioms
-            foreach (var (s, o) in Domain(v))
-            {
-                var h = Holds(v, s, o);
-                AddImplication(IsA(s, v.SubjectKind), h);
-                foreach (var m in v.SubjectModifiers)
-                    AddImplication(Satisfies(s, m), h);
-                
-                AddImplication(IsA(o, v.ObjectKind), h);
-                foreach (var m in v.ObjectModifiers)
-                    AddImplication(Satisfies(o, m), h);
-            }
-            
-            var subjectDomain = Individuals.Where(i => CanBeA(i, v.SubjectKind)).ToArray();
-            var objectDomain = Individuals.Where(i => CanBeA(i, v.ObjectKind)).ToArray();
-            
-            // Bound instantiations
-            if (v.ObjectUpperBound < Verb.Unbounded || v.ObjectLowerBound > 0)
-                foreach (var i1 in subjectDomain)
-                {
-                    if (objectDomain.Length < v.ObjectLowerBound)
-                        throw new ContradictionException(Problem,
-                            $"Each {v.SubjectKind.SingularForm.Untokenize()} must {v.SingularForm.Untokenize()} at least {v.ObjectLowerBound} {v.ObjectKind.PluralForm.Untokenize()}, but there are only {objectDomain.Length} total {v.ObjectKind.PluralForm.Untokenize()}.");
-                    Problem.QuantifyIf(IsA(i1, v.SubjectKind), v.ObjectLowerBound, v.ObjectUpperBound, 
-                        objectDomain.Select(i2 => (Literal)Holds(v, i1, i2)).ToArray());
-                }
-            
-            if (v.SubjectUpperBound < Verb.Unbounded || v.SubjectLowerBound > 0)
-                foreach (var i1 in objectDomain)
-                {
-                    if (subjectDomain.Length < v.SubjectLowerBound)
-                        throw new ContradictionException(Problem,
-                            $"Each {v.SubjectKind.SingularForm.Untokenize()} must be {v.PassiveParticiple.Untokenize()} by at least {v.ObjectLowerBound} {v.ObjectKind.PluralForm.Untokenize()}, but there are only {subjectDomain.Length} total {v.ObjectKind.PluralForm.Untokenize()}.");
-                    Problem.QuantifyIf(IsA(i1, v.ObjectKind), v.SubjectLowerBound, v.SubjectUpperBound,
-                        subjectDomain.Select(i2 => (Literal)Holds(v, i2, i1)).ToArray());
-                }
-            
-            // Force diagonal values if (anti-)reflexive
-            if (v.AncestorIsAntiReflexive)
-                // No individuals can self-relate
-            {
-                foreach (var i in subjectDomain)
-                    Problem.Assert(Not(Holds(v, i, i)));
-            }
-            
-            if (v.AncestorIsReflexive)
-            {
-                // All eligible individuals must self-relate
-                foreach (var i in subjectDomain)
-                    Problem.Assert(Holds(v, i, i));
-            }
-            
-            if (v.IsAntiSymmetric)
-            {
-                for (int i = 0; i < subjectDomain.Length; i++)
-                {
-                    var i1 = subjectDomain[i];
-                    for (var j = i + 1; j < subjectDomain.Length; j++)
-                    {
-                        var i2 = subjectDomain[j];
-                        Problem.AtLeast(1, Not(Holds(v, i1, i2)), Not(Holds(v, i1, i2)));
-                    }
-                }
-            }
-            
-            // Implications and exclusions
-            if (v.Generalizations.Count > 0 || v.MutualExclusions.Count > 0)
-                foreach (var (s, o) in Domain(v))
-                {
-                    var vHolds = Holds(v, s, o);
-                    foreach (var g in v.Generalizations)
-                        AddImplication(Holds(g, s, o), vHolds);
-                    foreach (var e in v.MutualExclusions)
-                        Problem.AtMost(1, vHolds, Holds(e, s, o));
-                }
-            
-            // Link to super-species and subspecies
-            if (v.Superspecies.Count > 0 || v.Subspecies.Count > 0)
-                foreach (var (s, o) in Domain(v))
-                {
-                    var vHolds = Holds(v, s, o);
-                    foreach (var g in v.Superspecies)
-                        // Subspecies implies super-species
-                        AddImplication(Holds(g, s, o), vHolds);
-            
-                    if (v.Subspecies.Count > 0)
-                    {
-                        // Super-species implies some subspecies
-                        if (v.IsSymmetric)
-                        {
-                            var literals = v.Subspecies.Select(sub => Holds(sub, s, o))
-                                .Concat(v.Subspecies.Select(sub => Holds(sub, o, s)))
-                                .Append(Not(vHolds)).Distinct().ToArray();
-                            Problem.Exactly(1, literals);
-                        }
-                        else
-                        {
-                            var literals = v.Subspecies.Select(sub => Holds(sub, s, o)).Append(Not(vHolds)).ToArray();
-                            Problem.Exactly(1, literals);
-                        }
-                    }
-                }
-
             // new
-            // foreach (var ((sKind, sModifiers), (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
-            // {
-            //     foreach (var (s, o) in Domain(v))
-            //     {
-            //         var h = Holds(v, s, o);
-            //         AddImplication(IsA(s, sKind), h);
-            //         foreach (var m in sModifiers)
-            //             AddImplication(Satisfies(s, m), h);
-            //         
-            //         AddImplication(IsA(o, oKind), h);
-            //         foreach (var m in oModifiers)
-            //             AddImplication(Satisfies(o, m), h);
-            //     }
-            //     
-            //     var subjectDomain = Individuals.Where(i => CanBeA(i, sKind)).ToArray();
-            //     var objectDomain = Individuals.Where(i => CanBeA(i, oKind)).ToArray();
-            //     
-            //     // Bound instantiations
-            //     if (v.ObjectUpperBound < Verb.Unbounded || v.ObjectLowerBound > 0)
-            //         foreach (var i1 in subjectDomain)
-            //         {
-            //             if (objectDomain.Length < v.ObjectLowerBound)
-            //                 // todo: is this the problem with domain/codomain???
-            //                 throw new ContradictionException(Problem,
-            //                     $"Each {sKind.SingularForm.Untokenize()} must {v.SingularForm.Untokenize()} at least {v.ObjectLowerBound} {oKind.PluralForm.Untokenize()}, but there are only {objectDomain.Length} total {oKind.PluralForm.Untokenize()}.");
-            //             Problem.QuantifyIf(IsA(i1, sKind), v.ObjectLowerBound, v.ObjectUpperBound, 
-            //                 objectDomain.Select(i2 => (Literal)Holds(v, i1, i2)).ToArray());
-            //         }
-            //     
-            //     if (v.SubjectUpperBound < Verb.Unbounded || v.SubjectLowerBound > 0)
-            //         foreach (var i1 in objectDomain)
-            //         {
-            //             if (subjectDomain.Length < v.SubjectLowerBound)
-            //                 // todo: is this the problem with domain/codomain???
-            //                 throw new ContradictionException(Problem,
-            //                     $"Each {sKind.SingularForm.Untokenize()} must be {v.PassiveParticiple.Untokenize()} by at least {v.ObjectLowerBound} {oKind.PluralForm.Untokenize()}, but there are only {subjectDomain.Length} total {oKind.PluralForm.Untokenize()}.");
-            //             Problem.QuantifyIf(IsA(i1, oKind), v.SubjectLowerBound, v.SubjectUpperBound,
-            //                 subjectDomain.Select(i2 => (Literal)Holds(v, i2, i1)).ToArray());
-            //         }
-            //     
-            //     // Force diagonal values if (anti-)reflexive
-            //     if (v.AncestorIsAntiReflexive)
-            //         // No individuals can self-relate
-            //     {
-            //         foreach (var i in subjectDomain)
-            //             Problem.Assert(Not(Holds(v, i, i)));
-            //     }
-            //     
-            //     if (v.AncestorIsReflexive)
-            //     {
-            //         // All eligible individuals must self-relate
-            //         foreach (var i in subjectDomain)
-            //             Problem.Assert(Holds(v, i, i));
-            //     }
-            //     
-            //     if (v.IsAntiSymmetric)
-            //     {
-            //         for (int i = 0; i < subjectDomain.Length; i++)
-            //         {
-            //             var i1 = subjectDomain[i];
-            //             for (var j = i + 1; j < subjectDomain.Length; j++)
-            //             {
-            //                 var i2 = subjectDomain[j];
-            //                 Problem.AtLeast(1, Not(Holds(v, i1, i2)), Not(Holds(v, i1, i2)));
-            //             }
-            //         }
-            //     }
-            //     
-            //     // Implications and exclusions
-            //     if (v.Generalizations.Count > 0 || v.MutualExclusions.Count > 0)
-            //         foreach (var (s, o) in Domain(v))
-            //         {
-            //             var vHolds = Holds(v, s, o);
-            //             foreach (var g in v.Generalizations)
-            //                 AddImplication(Holds(g, s, o), vHolds);
-            //             foreach (var e in v.MutualExclusions)
-            //                 Problem.AtMost(1, vHolds, Holds(e, s, o));
-            //         }
-            //     
-            //     // Link to super-species and subspecies
-            //     if (v.Superspecies.Count > 0 || v.Subspecies.Count > 0)
-            //         foreach (var (s, o) in Domain(v))
-            //         {
-            //             var vHolds = Holds(v, s, o);
-            //             foreach (var g in v.Superspecies)
-            //                 // Subspecies implies super-species
-            //                 AddImplication(Holds(g, s, o), vHolds);
-            //     
-            //             if (v.Subspecies.Count > 0)
-            //             {
-            //                 // Super-species implies some subspecies
-            //                 if (v.IsSymmetric)
-            //                 {
-            //                     var literals = v.Subspecies.Select(sub => Holds(sub, s, o))
-            //                         .Concat(v.Subspecies.Select(sub => Holds(sub, o, s)))
-            //                         .Append(Not(vHolds)).Distinct().ToArray();
-            //                     Problem.Exactly(1, literals);
-            //                 }
-            //                 else
-            //                 {
-            //                     var literals = v.Subspecies.Select(sub => Holds(sub, s, o)).Append(Not(vHolds)).ToArray();
-            //                     Problem.Exactly(1, literals);
-            //                 }
-            //             }
-            //         }
-            // }
+            foreach (var ((sKind, sModifiers), (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
+            {
+                foreach (var (s, o) in Domain(v))
+                {
+                    var h = Holds(v, s, o);
+                    AddImplication(IsA(s, sKind), h);
+                    foreach (var m in sModifiers)
+                        AddImplication(Satisfies(s, m), h);
+                    
+                    AddImplication(IsA(o, oKind), h);
+                    foreach (var m in oModifiers)
+                        AddImplication(Satisfies(o, m), h);
+                }
+                
+                var subjectDomain = Individuals.Where(i => CanBeA(i, sKind)).ToArray();
+                var objectDomain = Individuals.Where(i => CanBeA(i, oKind)).ToArray();
+                
+                // Bound instantiations
+                if (v.ObjectUpperBound < Verb.Unbounded || v.ObjectLowerBound > 0)
+                    foreach (var i1 in subjectDomain)
+                    {
+                        if (objectDomain.Length < v.ObjectLowerBound)
+                            // todo: is this the problem with domain/codomain???
+                            throw new ContradictionException(Problem,
+                                $"Each {sKind.SingularForm.Untokenize()} must {v.SingularForm.Untokenize()} at least {v.ObjectLowerBound} {oKind.PluralForm.Untokenize()}, but there are only {objectDomain.Length} total {oKind.PluralForm.Untokenize()}.");
+                        Problem.QuantifyIf(IsA(i1, sKind), v.ObjectLowerBound, v.ObjectUpperBound, 
+                            objectDomain.Select(i2 => (Literal)Holds(v, i1, i2)).ToArray());
+                    }
+                
+                if (v.SubjectUpperBound < Verb.Unbounded || v.SubjectLowerBound > 0)
+                    foreach (var i1 in objectDomain)
+                    {
+                        if (subjectDomain.Length < v.SubjectLowerBound)
+                            // todo: is this the problem with domain/codomain???
+                            throw new ContradictionException(Problem,
+                                $"Each {sKind.SingularForm.Untokenize()} must be {v.PassiveParticiple.Untokenize()} by at least {v.ObjectLowerBound} {oKind.PluralForm.Untokenize()}, but there are only {subjectDomain.Length} total {oKind.PluralForm.Untokenize()}.");
+                        Problem.QuantifyIf(IsA(i1, oKind), v.SubjectLowerBound, v.SubjectUpperBound,
+                            subjectDomain.Select(i2 => (Literal)Holds(v, i2, i1)).ToArray());
+                    }
+                
+                // Force diagonal values if (anti-)reflexive
+                if (v.AncestorIsAntiReflexive)
+                    // No individuals can self-relate
+                {
+                    foreach (var i in subjectDomain)
+                        Problem.Assert(Not(Holds(v, i, i)));
+                }
+                
+                if (v.AncestorIsReflexive)
+                {
+                    // All eligible individuals must self-relate
+                    foreach (var i in subjectDomain)
+                        Problem.Assert(Holds(v, i, i));
+                }
+                
+                if (v.IsAntiSymmetric)
+                {
+                    for (int i = 0; i < subjectDomain.Length; i++)
+                    {
+                        var i1 = subjectDomain[i];
+                        for (var j = i + 1; j < subjectDomain.Length; j++)
+                        {
+                            var i2 = subjectDomain[j];
+                            Problem.AtLeast(1, Not(Holds(v, i1, i2)), Not(Holds(v, i1, i2)));
+                        }
+                    }
+                }
+                
+                // Implications and exclusions
+                if (v.Generalizations.Count > 0 || v.MutualExclusions.Count > 0)
+                    foreach (var (s, o) in Domain(v))
+                    {
+                        var vHolds = Holds(v, s, o);
+                        foreach (var g in v.Generalizations)
+                            AddImplication(Holds(g, s, o), vHolds);
+                        foreach (var e in v.MutualExclusions)
+                            Problem.AtMost(1, vHolds, Holds(e, s, o));
+                    }
+                
+                // Link to super-species and subspecies
+                if (v.Superspecies.Count > 0 || v.Subspecies.Count > 0)
+                    foreach (var (s, o) in Domain(v))
+                    {
+                        var vHolds = Holds(v, s, o);
+                        foreach (var g in v.Superspecies)
+                            // Subspecies implies super-species
+                            AddImplication(Holds(g, s, o), vHolds);
+                
+                        if (v.Subspecies.Count > 0)
+                        {
+                            // Super-species implies some subspecies
+                            if (v.IsSymmetric)
+                            {
+                                var literals = v.Subspecies.Select(sub => Holds(sub, s, o))
+                                    .Concat(v.Subspecies.Select(sub => Holds(sub, o, s)))
+                                    .Append(Not(vHolds)).Distinct().ToArray();
+                                Problem.Exactly(1, literals);
+                            }
+                            else
+                            {
+                                var literals = v.Subspecies.Select(sub => Holds(sub, s, o)).Append(Not(vHolds)).ToArray();
+                                Problem.Exactly(1, literals);
+                            }
+                        }
+                    }
+            }
         }
 
         private void AddParts(Individual i)
@@ -516,20 +396,13 @@ namespace Imaginarium.Generator
 
         IEnumerable<(Individual, Individual)> Domain(Verb v)
         {
-            // old
-            foreach (var i1 in Individuals)
-                if (CanBeA(i1, v.SubjectKind))
-                    foreach (var i2 in Individuals)
-                        if ((i1 != i2 || !v.IsAntiReflexive) && CanBeA(i1, v.ObjectKind))
-                            yield return (i1, i2);
-            
             // new
-            // foreach (var i1 in Individuals)
-            //     foreach (var ((sKind, sModifiers), (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
-            //         if (CanBeA(i1, sKind))
-            //             foreach (var i2 in Individuals)
-            //                 if ((i1 != i2 || !v.IsAntiReflexive) && CanBeA(i1, oKind))
-            //                     yield return (i1, i2);
+            foreach (var i1 in Individuals)
+                foreach (var ((sKind, sModifiers), (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
+                    if (CanBeA(i1, sKind))
+                        foreach (var i2 in Individuals)
+                            if ((i1 != i2 || !v.IsAntiReflexive) && CanBeA(i1, oKind))
+                                yield return (i1, i2);
         }
 
         /// <summary>
