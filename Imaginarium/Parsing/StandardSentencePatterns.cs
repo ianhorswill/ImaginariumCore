@@ -175,34 +175,22 @@ namespace Imaginarium.Parsing
                     .Check(VerbGerundForm, Verb2GerundForm)
                     .Documentation(
                         "States that two objects being related by the first verb means they must also be related by the second."),
-
+                // todo: is this the issue with "happily getting married to is a way of knowing"?
                 new SentencePattern(this, Verb, "is", "a", "way", "!", "of", Verb2)
                     .Action(() =>
                     {
                         var sub = Verb.Verb;
                         var super = Verb2.Verb;
-                        if (sub.SubjectKind == null)
+                        // new
+                        // note: this very well may be wrong. and not good. sorry.
+                        if (sub.SubjectAndObjectKindsAndModifiers.Count == 0)
                         {
-                            sub.SubjectKind = super.SubjectKind;
-                            sub.SubjectModifiers = super.SubjectModifiers;
+                            sub.SubjectAndObjectKindsAndModifiers = super.SubjectAndObjectKindsAndModifiers;
                         }
-
-                        if (sub.ObjectKind == null)
+                        
+                        if (super.SubjectAndObjectKindsAndModifiers.Count == 0)
                         {
-                            sub.ObjectKind = super.ObjectKind;
-                            sub.ObjectModifiers = super.ObjectModifiers;
-                        }
-
-                        if (super.SubjectKind == null)
-                        {
-                            super.SubjectKind = sub.SubjectKind;
-                            super.SubjectModifiers = sub.SubjectModifiers;
-                        }
-
-                        if (super.ObjectKind == null)
-                        {
-                            super.ObjectKind = sub.ObjectKind;
-                            super.ObjectModifiers = sub.ObjectModifiers;
+                            super.SubjectAndObjectKindsAndModifiers = sub.SubjectAndObjectKindsAndModifiers;
                         }
 
                         sub.Superspecies.AddNew(super);
@@ -674,22 +662,64 @@ namespace Imaginarium.Parsing
         /// <returns>The verb</returns>
         private static Verb ConfigureVerb(VerbSegment verbSegment, NP subjectNP, NP objectNP)
         {
+            // old
+            // var verb = verbSegment.Verb;
+            // var verbSubjectKind = CommonNoun.LeastUpperBound(verb.SubjectKind, subjectNP.CommonNoun);
+            // if (verbSubjectKind == null)
+            //     throw new ContradictionException(null,
+            //         $"Verb {verb.BaseForm.Untokenize()} was previously declared to take subjects that were {verb.SubjectKind.PluralForm.Untokenize()}, but is now being declared to take subjects of the unrelated type {subjectNP.CommonNoun.SingularForm.Untokenize()}.");
+            // verb.SubjectKind = verbSubjectKind;
+            // if (verb.SubjectModifiers == null)
+            //     verb.SubjectModifiers = subjectNP.Modifiers.ToArray();
+            //
+            // var verbObjectKind = CommonNoun.LeastUpperBound(verb.ObjectKind, objectNP.CommonNoun);
+            // if (verbObjectKind == null)
+            //     throw new ContradictionException(null,
+            //         $"Verb {verb.BaseForm.Untokenize()} was previously declared to take objects that were {verb.ObjectKind.PluralForm.Untokenize()}, but is now being declared to take objects of the unrelated type {objectNP.CommonNoun.SingularForm.Untokenize()}.");
+            // verb.ObjectKind = verbObjectKind;
+            // if (verb.ObjectModifiers == null)
+            //     verb.ObjectModifiers = objectNP.Modifiers.ToArray();
+            // return verb;
+            
+            // new
             var verb = verbSegment.Verb;
-            var verbSubjectKind = CommonNoun.LeastUpperBound(verb.SubjectKind, subjectNP.CommonNoun);
-            if (verbSubjectKind == null)
-                throw new ContradictionException(null,
-                    $"Verb {verb.BaseForm.Untokenize()} was previously declared to take subjects that were {verb.SubjectKind.PluralForm.Untokenize()}, but is now being declared to take subjects of the unrelated type {subjectNP.CommonNoun.SingularForm.Untokenize()}.");
-            verb.SubjectKind = verbSubjectKind;
-            if (verb.SubjectModifiers == null)
-                verb.SubjectModifiers = subjectNP.Modifiers.ToArray();
-
-            var verbObjectKind = CommonNoun.LeastUpperBound(verb.ObjectKind, objectNP.CommonNoun);
-            if (verbObjectKind == null)
-                throw new ContradictionException(null,
-                    $"Verb {verb.BaseForm.Untokenize()} was previously declared to take objects that were {verb.ObjectKind.PluralForm.Untokenize()}, but is now being declared to take objects of the unrelated type {objectNP.CommonNoun.SingularForm.Untokenize()}.");
-            verb.ObjectKind = verbObjectKind;
-            if (verb.ObjectModifiers == null)
-                verb.ObjectModifiers = objectNP.Modifiers.ToArray();
+            if (verb.SubjectAndObjectKindsAndModifiers.Count == 0)
+            {
+                Verb.ModifiedKind subj = new Verb.ModifiedKind(subjectNP.CommonNoun, subjectNP.Modifiers.ToArray());
+                Verb.ModifiedKind obj = new Verb.ModifiedKind(objectNP.CommonNoun, objectNP.Modifiers.ToArray());
+                verb.AddSubjectObject(subj, obj);
+                return verb;
+            }
+            
+            for (int i = 0; i < verb.SubjectAndObjectKindsAndModifiers.Count; i++)
+            {
+                var ((sKind, sModifiers), 
+                    (oKind, oModifiers)) = verb.SubjectAndObjectKindsAndModifiers[i];
+                // if the exact same subject and object kinds and modifiers are already in the list, do nothing
+                if (subjectNP.CommonNoun == sKind && subjectNP.Modifiers.ToArray() == sModifiers &&
+                    objectNP.CommonNoun == oKind && objectNP.Modifiers.ToArray() == oModifiers)
+                {
+                    return verb;
+                }
+                
+                // if the subject and object kinds are the same, but the modifiers are different, add the new modifiers to the list?
+                
+                // if the subject and object kinds subsume the existing kinds, replace the existing kinds with the new ones
+                // a subsumes b if a's modifier list is empty and a is the same or a superkind of b
+                if (subjectNP.CommonNoun.Superkinds.Contains(sKind) && objectNP.CommonNoun.Superkinds.Contains(oKind))
+                {
+                    verb.SubjectAndObjectKindsAndModifiers[i] = new Tuple<Verb.ModifiedKind, Verb.ModifiedKind>
+                        (new Verb.ModifiedKind(subjectNP.CommonNoun, subjectNP.Modifiers.ToArray()), 
+                            new Verb.ModifiedKind(objectNP.CommonNoun, objectNP.Modifiers.ToArray()));
+                    return verb;
+                }
+            }
+            
+            // otherwise, just add it to the list
+            Verb.ModifiedKind newSubj = new Verb.ModifiedKind(subjectNP.CommonNoun, subjectNP.Modifiers.ToArray());
+            Verb.ModifiedKind newObj = new Verb.ModifiedKind(objectNP.CommonNoun, objectNP.Modifiers.ToArray());
+            verb.AddSubjectObject(newSubj, newObj);
+            
             return verb;
         }
     }

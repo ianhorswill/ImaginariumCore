@@ -23,9 +23,11 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using Imaginarium.Driver;
 using File = System.IO.File;
 
@@ -60,7 +62,7 @@ namespace Imaginarium.Parsing
         {
             "on", "in", "at", "since", "for", "ago", "before", "to", "past", "til", "until", "by",
             "next", "beside", "over", "under", "above", "below", "across", "through", "into", "onto",
-            "towards", "toward", "from", "of",  "about"
+            "towards", "toward", "from", "of",  "about", "with"
         };
 
         /// <summary>
@@ -160,12 +162,15 @@ namespace Imaginarium.Parsing
                 return ReplaceCopula(singular, "are");
             return SingularOfNoun(singular);
         }
-
+        
         /// <summary>
         /// Heuristically guess if this verb is in gerund form
         /// </summary>
-        public static bool IsGerund(string[] verbal) =>
-            ContainsCopula(verbal) || verbal[0].EndsWith("ing");
+        public static bool IsGerund(string[] verbal)
+        {
+            var wordsWithIng = verbal.Where(w => w.EndsWith("ing")).ToArray();
+            return ContainsCopula(verbal) || wordsWithIng.Length > 0;
+        }
 
         /// <summary>
         /// Enumerate every potential gerund form of a (third person) plural verb
@@ -181,10 +186,10 @@ namespace Imaginarium.Parsing
                 foreach (var gerund in RegularGerundsOfWord(plural[0]))
                     yield return new [] { gerund };
             }
-            else if (plural.Length == 2 && IsPreposition(plural[1]))
+            else if (plural.Length >= 2 && IsPreposition(plural.Last()))
             {
                 foreach (var gerund in RegularGerundsOfWord(plural[0]))
-                    yield return new [] { gerund, plural[1] };
+                    yield return new[] { gerund, plural.Last() };
             }
         }
 
@@ -202,7 +207,7 @@ namespace Imaginarium.Parsing
 
             if (EndingConsonant(s, out var terminalConsonant))
             {
-                yield return s + terminalConsonant.ToString() + "ing";
+                yield return s + terminalConsonant + "ing";
             }
             else
             {
@@ -215,16 +220,29 @@ namespace Imaginarium.Parsing
         /// </summary>
         public static string[] BaseFormOfGerund(string[] gerund)
         {
+            var gerundList = gerund.ToList();
             if (gerund.Contains("being"))
             {
                 return gerund.Replace("being", "be").ToArray();
             }
+
             if (gerund.Length == 1)
             {
                 // Cut trailing -ing
-                return new [] { BaseFormOfRegularGerundWord(gerund[0]) };
-            } else if (gerund.Length == 2 && IsPreposition(gerund[1]))
-                return new [] { BaseFormOfRegularGerundWord(gerund[0]), gerund[1] };
+                return new[] { BaseFormOfRegularGerundWord(gerund[0]) };
+                // old
+                // } else if (gerund.Length == 2 && IsPreposition(gerund[1])) {}
+                //     return new [] { BaseFormOfRegularGerundWord(gerund[0]), gerund[1] };
+            }
+
+            // new
+            else if (gerund.Length >= 2 && IsPreposition(gerund.Last())) {
+                // apply BaseFormOfRegularGerundWord to the item in gerund that ends with "ing"
+                return gerund.Where(word => word.EndsWith("ing"))
+                    .Select(word => BaseFormOfRegularGerundWord(word))
+                    .Concat(gerund.Where(word => !word.EndsWith("ing")))
+                    .ToArray();
+            }
 
             throw new SyntaxErrorException($"Can't determine the stem verb of gerund {gerund.Untokenize()}");
         }

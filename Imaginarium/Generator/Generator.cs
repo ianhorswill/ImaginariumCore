@@ -1,4 +1,5 @@
 ﻿#region Copyright
+
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Generator.cs" company="Ian Horswill">
 // Copyright (C) 2019, 2020 Ian Horswill
@@ -21,11 +22,13 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
+
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.XPath;
 using CatSAT;
 using CatSAT.NonBoolean.SMT.MenuVariables;
 using Imaginarium.Ontology;
@@ -50,6 +53,7 @@ namespace Imaginarium.Generator
         public readonly Ontology.Ontology Ontology;
 
         #region Instance variables
+
         /// <summary>
         /// The object(s) being constructed by this generator
         /// </summary>
@@ -69,6 +73,7 @@ namespace Imaginarium.Generator
         /// How many objects the user requested
         /// </summary>
         public int Count;
+
         #endregion
 
         /// <summary>
@@ -77,8 +82,9 @@ namespace Imaginarium.Generator
         /// <param name="noun">Base common noun for the object</param>
         /// <param name="concepts">Other monadic concepts that must be true of the object</param>
         public Generator(CommonNoun noun, params MonadicConceptLiteral[] concepts) : this(noun,
-            (IEnumerable<MonadicConceptLiteral>) concepts)
-        { }
+            (IEnumerable<MonadicConceptLiteral>)concepts)
+        {
+        }
 
         /// <summary>
         /// Creates a generator for objects of the specified types
@@ -99,6 +105,7 @@ namespace Imaginarium.Generator
         /// The kind of object(s) to be generated
         /// </summary>
         public readonly CommonNoun Noun;
+
         /// <summary>
         /// Any other attributes they the generated object(s) should have, beyond Noun.
         /// </summary>
@@ -182,17 +189,18 @@ namespace Imaginarium.Generator
             if (k.Subkinds.Count == 0)
                 // Nothing to do
                 return;
-            
+
             foreach (var sub in k.Subkinds)
             {
                 SetIsA(i, sub, false);
                 DeselectSubkinds(i, sub);
             }
         }
-        
+
         private void SetIsA(Individual i, MonadicConcept n, bool truth) => Problem.Initialize(IsA(i, n), truth);
 
-        private void SetLiteral(Individual i, MonadicConceptLiteral l, bool truth) => SetIsA(i, l.Concept, l.IsPositive ? truth : !truth);
+        private void SetLiteral(Individual i, MonadicConceptLiteral l, bool truth) =>
+            SetIsA(i, l.Concept, l.IsPositive ? truth : !truth);
 
         /// <summary>
         /// Find all the individuals that need to exist in these inventions
@@ -229,19 +237,23 @@ namespace Imaginarium.Generator
             foreach (var subj in Individuals)
             foreach (var obj in Individuals)
             foreach (var v in verbs)
-                // v can't hold of i1,i2 unless they're both in the v's domain
-                if (CanBeA(subj, v.SubjectKind) && CanBeA(obj, v.ObjectKind))
+                // new
+                foreach (var ((sKind, sModifiers), 
+                             (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
                 {
-                    var related = Holds(v, subj, obj);
-                    related.InitialProbability = v.Density;
-                    AddImplication(IsA(subj, v.SubjectKind), related);
-                    if (v.SubjectModifiers != null)
-                        foreach (var lit in v.SubjectModifiers)
-                            AddImplication(Satisfies(subj, lit), related);
-                    AddImplication(IsA(obj, v.ObjectKind), related);
-                    if (v.ObjectModifiers != null)
-                        foreach (var lit in v.ObjectModifiers)
-                            AddImplication(Satisfies(obj, lit), related);
+                    if (CanBeA(subj, sKind) && CanBeA(obj, oKind))
+                    {
+                        var related = Holds(v, subj, obj);
+                        related.InitialProbability = v.Density;
+                        AddImplication(IsA(subj, sKind), related);
+                        if (sModifiers != null) // todo: check for empty instead of check for null?
+                            foreach (var lit in sModifiers)
+                                AddImplication(Satisfies(subj, lit), related);
+                        AddImplication(IsA(obj, oKind), related);
+                        if (oModifiers != null) // todo: check for empty instead of check for null?
+                            foreach (var lit in oModifiers)
+                                AddImplication(Satisfies(obj, lit), related);
+                    }
                 }
 
             foreach (var v in verbs)
@@ -252,108 +264,113 @@ namespace Imaginarium.Generator
 
         private void BuildVerbClauses(Verb v)
         {
-            // Domain axioms
-            foreach (var (s, o) in Domain(v))
+            // new
+            foreach (var ((sKind, sModifiers), (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
             {
-                var h = Holds(v, s, o);
-                AddImplication(IsA(s, v.SubjectKind), h);
-                foreach (var m in v.SubjectModifiers)
-                    AddImplication(Satisfies(s, m), h);
-
-                AddImplication(IsA(o, v.ObjectKind), h);
-                foreach (var m in v.ObjectModifiers)
-                    AddImplication(Satisfies(o, m), h);
-            }
-
-            var subjectDomain = Individuals.Where(i => CanBeA(i, v.SubjectKind)).ToArray();
-            var objectDomain = Individuals.Where(i => CanBeA(i, v.ObjectKind)).ToArray();
-
-            // Bound instantiations
-            if (v.ObjectUpperBound < Verb.Unbounded || v.ObjectLowerBound > 0)
-                foreach (var i1 in subjectDomain)
+                foreach (var (s, o) in Domain(v))
                 {
-                    if (objectDomain.Length < v.ObjectLowerBound)
-                        throw new ContradictionException(Problem,
-                            $"Each {v.SubjectKind.SingularForm.Untokenize()} must {v.SingularForm.Untokenize()} at least {v.ObjectLowerBound} {v.ObjectKind.PluralForm.Untokenize()}, but there are only {objectDomain.Length} total {v.ObjectKind.PluralForm.Untokenize()}.");
-                    Problem.QuantifyIf(IsA(i1, v.SubjectKind), v.ObjectLowerBound, v.ObjectUpperBound, 
-                        objectDomain.Select(i2 => (Literal)Holds(v, i1, i2)).ToArray());
+                    var h = Holds(v, s, o);
+                    AddImplication(IsA(s, sKind), h);
+                    foreach (var m in sModifiers)
+                        AddImplication(Satisfies(s, m), h);
+                    
+                    AddImplication(IsA(o, oKind), h);
+                    foreach (var m in oModifiers)
+                        AddImplication(Satisfies(o, m), h);
                 }
-
-            if (v.SubjectUpperBound < Verb.Unbounded || v.SubjectLowerBound > 0)
-                foreach (var i1 in objectDomain)
-                {
-                    if (subjectDomain.Length < v.SubjectLowerBound)
-                        throw new ContradictionException(Problem,
-                            $"Each {v.SubjectKind.SingularForm.Untokenize()} must be {v.PassiveParticiple.Untokenize()} by at least {v.ObjectLowerBound} {v.ObjectKind.PluralForm.Untokenize()}, but there are only {subjectDomain.Length} total {v.ObjectKind.PluralForm.Untokenize()}.");
-                    Problem.QuantifyIf(IsA(i1, v.ObjectKind), v.SubjectLowerBound, v.SubjectUpperBound,
-                        subjectDomain.Select(i2 => (Literal)Holds(v, i2, i1)).ToArray());
-                }
-
-            // Force diagonal values if (anti-)reflexive
-            if (v.AncestorIsAntiReflexive)
-                // No individuals can self-relate
-            {
-                foreach (var i in subjectDomain)
-                    Problem.Assert(Not(Holds(v, i, i)));
-            }
-
-            if (v.AncestorIsReflexive)
-            {
-                // All eligible individuals must self-relate
-                foreach (var i in subjectDomain)
-                    Problem.Assert(Holds(v, i, i));
-            }
-
-            if (v.IsAntiSymmetric)
-            {
-                for (int i = 0; i < subjectDomain.Length; i++)
-                {
-                    var i1 = subjectDomain[i];
-                    for (var j = i + 1; j < subjectDomain.Length; j++)
+                
+                var subjectDomain = Individuals.Where(i => CanBeA(i, sKind)).ToArray();
+                var objectDomain = Individuals.Where(i => CanBeA(i, oKind)).ToArray();
+                
+                // Bound instantiations
+                if (v.ObjectUpperBound < Verb.Unbounded || v.ObjectLowerBound > 0)
+                    foreach (var i1 in subjectDomain)
                     {
-                        var i2 = subjectDomain[j];
-                        Problem.AtLeast(1, Not(Holds(v, i1, i2)), Not(Holds(v, i1, i2)));
+                        if (objectDomain.Length < v.ObjectLowerBound)
+                            // todo: is this the problem with domain/codomain???
+                            throw new ContradictionException(Problem,
+                                $"Each {sKind.SingularForm.Untokenize()} must {v.SingularForm.Untokenize()} at least {v.ObjectLowerBound} {oKind.PluralForm.Untokenize()}, but there are only {objectDomain.Length} total {oKind.PluralForm.Untokenize()}.");
+                        Problem.QuantifyIf(IsA(i1, sKind), v.ObjectLowerBound, v.ObjectUpperBound, 
+                            objectDomain.Select(i2 => (Literal)Holds(v, i1, i2)).ToArray());
                     }
-                }
-            }
-
-            // Implications and exclusions
-            if (v.Generalizations.Count > 0 || v.MutualExclusions.Count > 0)
-                foreach (var (s, o) in Domain(v))
-                {
-                    var vHolds = Holds(v, s, o);
-                    foreach (var g in v.Generalizations)
-                        AddImplication(Holds(g, s, o), vHolds);
-                    foreach (var e in v.MutualExclusions)
-                        Problem.AtMost(1, vHolds, Holds(e, s, o));
-                }
-
-            // Link to super-species and subspecies
-            if (v.Superspecies.Count > 0 || v.Subspecies.Count > 0)
-                foreach (var (s, o) in Domain(v))
-                {
-                    var vHolds = Holds(v, s, o);
-                    foreach (var g in v.Superspecies)
-                        // Subspecies implies super-species
-                        AddImplication(Holds(g, s, o), vHolds);
-
-                    if (v.Subspecies.Count > 0)
+                
+                if (v.SubjectUpperBound < Verb.Unbounded || v.SubjectLowerBound > 0)
+                    foreach (var i1 in objectDomain)
                     {
-                        // Super-species implies some subspecies
-                        if (v.IsSymmetric)
+                        if (subjectDomain.Length < v.SubjectLowerBound)
+                            // todo: is this the problem with domain/codomain???
+                            throw new ContradictionException(Problem,
+                                $"Each {sKind.SingularForm.Untokenize()} must be {v.PassiveParticiple.Untokenize()} by at least {v.ObjectLowerBound} {oKind.PluralForm.Untokenize()}, but there are only {subjectDomain.Length} total {oKind.PluralForm.Untokenize()}.");
+                        Problem.QuantifyIf(IsA(i1, oKind), v.SubjectLowerBound, v.SubjectUpperBound,
+                            subjectDomain.Select(i2 => (Literal)Holds(v, i2, i1)).ToArray());
+                    }
+                
+                // Force diagonal values if (anti-)reflexive
+                if (v.AncestorIsAntiReflexive)
+                    // No individuals can self-relate
+                {
+                    foreach (var i in subjectDomain)
+                        Problem.Assert(Not(Holds(v, i, i)));
+                }
+                
+                if (v.AncestorIsReflexive)
+                {
+                    // All eligible individuals must self-relate
+                    foreach (var i in subjectDomain)
+                        Problem.Assert(Holds(v, i, i));
+                }
+                
+                if (v.IsAntiSymmetric)
+                {
+                    for (int i = 0; i < subjectDomain.Length; i++)
+                    {
+                        var i1 = subjectDomain[i];
+                        for (var j = i + 1; j < subjectDomain.Length; j++)
                         {
-                            var literals = v.Subspecies.Select(sub => Holds(sub, s, o))
-                                .Concat(v.Subspecies.Select(sub => Holds(sub, o, s)))
-                                .Append(Not(vHolds)).Distinct().ToArray();
-                            Problem.Exactly(1, literals);
-                        }
-                        else
-                        {
-                            var literals = v.Subspecies.Select(sub => Holds(sub, s, o)).Append(Not(vHolds)).ToArray();
-                            Problem.Exactly(1, literals);
+                            var i2 = subjectDomain[j];
+                            Problem.AtLeast(1, Not(Holds(v, i1, i2)), Not(Holds(v, i1, i2)));
                         }
                     }
                 }
+                
+                // Implications and exclusions
+                if (v.Generalizations.Count > 0 || v.MutualExclusions.Count > 0)
+                    foreach (var (s, o) in Domain(v))
+                    {
+                        var vHolds = Holds(v, s, o);
+                        foreach (var g in v.Generalizations)
+                            AddImplication(Holds(g, s, o), vHolds);
+                        foreach (var e in v.MutualExclusions)
+                            Problem.AtMost(1, vHolds, Holds(e, s, o));
+                    }
+                
+                // Link to super-species and subspecies
+                if (v.Superspecies.Count > 0 || v.Subspecies.Count > 0)
+                    foreach (var (s, o) in Domain(v))
+                    {
+                        var vHolds = Holds(v, s, o);
+                        foreach (var g in v.Superspecies)
+                            // Subspecies implies super-species
+                            AddImplication(Holds(g, s, o), vHolds);
+                
+                        if (v.Subspecies.Count > 0)
+                        {
+                            // Super-species implies some subspecies
+                            if (v.IsSymmetric)
+                            {
+                                var literals = v.Subspecies.Select(sub => Holds(sub, s, o))
+                                    .Concat(v.Subspecies.Select(sub => Holds(sub, o, s)))
+                                    .Append(Not(vHolds)).Distinct().ToArray();
+                                Problem.Exactly(1, literals);
+                            }
+                            else
+                            {
+                                var literals = v.Subspecies.Select(sub => Holds(sub, s, o)).Append(Not(vHolds)).ToArray();
+                                Problem.Exactly(1, literals);
+                            }
+                        }
+                    }
+            }
         }
 
         private void AddParts(Individual i)
@@ -365,7 +382,8 @@ namespace Imaginarium.Generator
         {
             foreach (var part in k.Parts)
             {
-                var partSet = Enumerable.Range(1, part.Count).Select(index => Ontology.EphemeralIndividual(part.MonadicConcepts, null, i, part)).ToArray();
+                var partSet = Enumerable.Range(1, part.Count)
+                    .Select(index => Ontology.EphemeralIndividual(part.MonadicConcepts, null, i, part)).ToArray();
                 i.Parts[part] = partSet;
                 EphemeralIndividuals.AddRange(partSet);
                 foreach (var p in partSet)
@@ -378,11 +396,13 @@ namespace Imaginarium.Generator
 
         IEnumerable<(Individual, Individual)> Domain(Verb v)
         {
+            // new
             foreach (var i1 in Individuals)
-                if (CanBeA(i1, v.SubjectKind))
-                    foreach (var i2 in Individuals)
-                        if ((i1 != i2 || !v.IsAntiReflexive) && CanBeA(i1, v.ObjectKind))
-                            yield return (i1, i2);
+                foreach (var ((sKind, sModifiers), (oKind, oModifiers)) in v.SubjectAndObjectKindsAndModifiers)
+                    if (CanBeA(i1, sKind))
+                        foreach (var i2 in Individuals)
+                            if ((i1 != i2 || !v.IsAntiReflexive) && CanBeA(i1, oKind))
+                                yield return (i1, i2);
         }
 
         /// <summary>
@@ -397,7 +417,8 @@ namespace Imaginarium.Generator
                 solution = Problem.Solve(false);
                 //Console.WriteLine(solution == null ? "fail" : "succeed");
             }
-            return solution == null? null:new Invention(Ontology, this, solution);
+
+            return solution == null ? null : new Invention(Ontology, this, solution);
         }
 
         /// <summary>
@@ -507,11 +528,12 @@ namespace Imaginarium.Generator
                     SolveForSubclass(ind, k);
             }
 
-            foreach (var a in ind.Modifiers) 
+            foreach (var a in ind.Modifiers)
                 MaybeAssert(Satisfies(ind, a));
         }
-    
+
         #region Predicate and Proposition tracking
+
         private void ResetPredicateTables()
         {
             predicates.Clear();
@@ -547,7 +569,7 @@ namespace Imaginarium.Generator
             asserted.Add(l);
             return true;
         }
-    
+
         /// <summary>
         /// The proposition representing that concept k applies to individual i
         /// </summary>
@@ -615,9 +637,9 @@ namespace Imaginarium.Generator
         /// <summary>
         /// The predicate used to represent concept in the CatSAT problem
         /// </summary>
-        private Func<Individual,Proposition> PredicateOf(MonadicConcept c)
+        private Func<Individual, Proposition> PredicateOf(MonadicConcept c)
         {
-            if (predicates.TryGetValue(c, out Func<Individual,Proposition> p))
+            if (predicates.TryGetValue(c, out Func<Individual, Proposition> p))
                 return p;
             return predicates[c] = Predicate<Individual>(c.StandardName.Untokenize());
         }
@@ -627,8 +649,9 @@ namespace Imaginarium.Generator
             if (relations.TryGetValue(v, out Func<Individual, Individual, Proposition> p))
                 return p;
             var name = v.StandardName.Untokenize();
-            return relations[v] = v.IsSymmetric?SymmetricPredicate<Individual>(name):
-                Predicate<Individual, Individual>(name);
+            return relations[v] = v.IsSymmetric
+                ? SymmetricPredicate<Individual>(name)
+                : Predicate<Individual, Individual>(name);
         }
 
         /// <summary>
@@ -645,13 +668,16 @@ namespace Imaginarium.Generator
         /// <summary>
         /// Predicates created within Problem
         /// </summary>
-        private readonly Dictionary<object, Func<Individual,Proposition>> predicates = new Dictionary<object, Func<Individual,Proposition>>();
-    
-        private readonly Dictionary<Verb, Func<Individual,Individual, Proposition>> relations = new Dictionary<Verb, Func<Individual,Individual, Proposition>>();
+        private readonly Dictionary<object, Func<Individual, Proposition>> predicates =
+            new Dictionary<object, Func<Individual, Proposition>>();
+
+        private readonly Dictionary<Verb, Func<Individual, Individual, Proposition>> relations =
+            new Dictionary<Verb, Func<Individual, Individual, Proposition>>();
 
         #endregion
 
         #region Clause generation
+
         /// <summary>
         /// Add clause to Problem stating that consequent(i) follow from antecedent(i)
         /// </summary>
@@ -682,7 +708,8 @@ namespace Imaginarium.Generator
         /// <param name="i">Individual for which this implication holds</param>
         /// <param name="antecedents">A set of conditions on i</param>
         /// <param name="consequent">A concept that must be true of i when the antecedents are true.</param>
-        void AddImplication(Individual i, IEnumerable<MonadicConceptLiteral> antecedents, MonadicConceptLiteral consequent)
+        void AddImplication(Individual i, IEnumerable<MonadicConceptLiteral> antecedents,
+            MonadicConceptLiteral consequent)
         {
             AddClause(antecedents.Select(a => Not(Satisfies(i, a))).Append(Satisfies(i, consequent)));
         }
@@ -699,7 +726,7 @@ namespace Imaginarium.Generator
             AddClause(antecedents.Select(a => Not(Satisfies(i, a))).Append(consequent));
         }
 
-    
+
         /// <summary>
         /// Assert that all antecedents being true implies consequent
         /// </summary>
@@ -743,6 +770,7 @@ namespace Imaginarium.Generator
 
             return result;
         }
+
         #endregion
     }
 }

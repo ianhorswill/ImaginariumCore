@@ -155,5 +155,26 @@ namespace Tests
             }
 
         }
+
+        [TestMethod]
+        public void MercedesDomainCardinality()
+        {
+            var o = new Ontology(nameof(MercedesDomainCardinality));
+            o.ParseAndExecute("a story has 1 human.",
+                "a story has 1 dog.",
+                "a story has 1 cat.",
+                "a human must love one dog.",
+                "a cat must love one dog.");
+            var invention = o.CommonNoun("story").MakeGenerator().Generate();
+        }
+        
+        [TestMethod]
+        public void MercedesCodomainCardinality()
+        {
+            var o = new Ontology(nameof(MercedesCodomainCardinality));
+            o.ParseAndExecute("a human can love other humans.",
+                "a human must love one pet.",
+                "a human must love one hobby.");
+        }
     }
 }
