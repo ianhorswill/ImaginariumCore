@@ -38,11 +38,62 @@ namespace Imaginarium.Parsing
     /// </summary>
     public static class Inflection
     {
+        private const string defaultRegularNounInflections = "man\tmen\nmouse\tmice\nlouse\tlice\ntooth\tteeth\ngoose\tgeese\nfoot\tfeet\nch\tches\nsh\tshes\nss\tsses\nay\tays\ney\teys\niy\tiys\noy\toys\nuy\tuys\ny\ties\n\ts";
+
+        private const string defaultIrregularNounPlurals = "person\tpeople\nhuman\thumans";
+
+        private const string defaultIrregularVerbInflections = @"Base form,Past tense,Passive participle
+bear,bore,borne
+become,became,become
+begin,began,begun
+bite,bit,bitten
+break,broke,broken
+bring,brought,brought
+catch,caught,caught
+choose,chose,chosen
+come,came,come
+do,did,done
+drink,drank,drunk
+drive,drove,driven
+eat,ate,eaten
+fall,fell,fallen
+feel,felt,felt
+fly,flew,flown
+freeze,froze,frozen
+get,got,got or gotten
+go,went,gone
+know,knew,known
+lay,laid,laid
+lead,led,led
+lend,lent,lent
+lie,lay,lain
+lose,lost,lost
+ride,rode,ridden
+ring,rang,rung
+rise,rose,risen
+run,ran,run
+say,said,said
+see,saw,seen
+set,set,set
+shake,shook,shaken
+sing,sang,sung
+sink,sank or sunk,sunk
+sit,sat,sat
+sleep,slept,slept
+speak,spoke,spoken
+steal,stole,stolen
+swim,swam,swum
+take,took,taken
+throw,threw,thrown
+wear,wore,worn
+win,won,won
+write,wrote,written";
+
         static Inflection()
         {
-            Inflections = InflectionProcess.FromFile(DataFiles.PathTo("Inflections", "Regular nouns"));
+            Inflections = InflectionProcess.FromFileContents(defaultRegularNounInflections.Split('\n'));
 
-            foreach (var entry in File.ReadAllLines(DataFiles.PathTo("Inflections", "Irregular nouns")))
+            foreach (var entry in defaultIrregularNounPlurals.Split('\n'))
             {
                 var split = entry.Split('\t');
                 var singular = split[0];
@@ -51,9 +102,7 @@ namespace Imaginarium.Parsing
                 IrregularSingulars[plural] = singular;
             }
 
-            IrregularVerbs = new Spreadsheet(DataFiles.PathTo(
-                    "Inflections", "Irregular verbs", ".csv"),
-                "Base form");
+            IrregularVerbs = new Spreadsheet(null, "Base form", defaultIrregularVerbInflections);
         }
 
         private static readonly Spreadsheet IrregularVerbs;
@@ -318,6 +367,11 @@ namespace Imaginarium.Parsing
             public static InflectionProcess[] FromFile(string path)
             {
                 var lines = File.ReadAllLines(path).Where(line => !line.StartsWith("#"));
+                return FromFileContents(lines);
+            }
+
+            public static InflectionProcess[] FromFileContents(IEnumerable<string> lines)
+            {
                 var columns = lines.Select(line => line.Split('\t'));
                 return columns.Select(line => new InflectionProcess(line[0], line[1])).ToArray();
             }

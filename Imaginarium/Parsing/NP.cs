@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Imaginarium.Driver;
 using Imaginarium.Ontology;
 using static Imaginarium.Parsing.Parser;
 

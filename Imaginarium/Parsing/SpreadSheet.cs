@@ -52,11 +52,12 @@ namespace Imaginarium.Parsing
         /// <summary>
         /// Make a Spreadsheet object from a CSV file
         /// </summary>
-        /// <param name="path">Path to the file</param>
+        /// <param name="path">Path to the file or null if to take data from contents string</param>
         /// <param name="idColumnName">Name of the column (as it appears in the header row) used for the names of rows</param>
-        public Spreadsheet(string path, string idColumnName)
+        /// <param name="contents">Data to parse if not reading from a file.</param>
+        public Spreadsheet(string path, string idColumnName, string contents=null)
         {
-            Data = Read(path);
+            Data = path == null? Read(new StringReader(contents)): Read(path);
             idColumnIndex = ColumnIndex(idColumnName);
             Path = path;
         }
@@ -112,44 +113,49 @@ namespace Imaginarium.Parsing
         {
             using (TextReader r = File.OpenText(path))
             {
-                StringBuilder b = new StringBuilder();
-                List<object[]> allRows = new List<object[]>();
-                List<object> currentRow = new List<object>();
-
-                int peek = r.Peek();
-                while (peek >= 0)
-                {
-                    if (peek == delimiter)
-                    {
-                        r.Read(); // Skip over delimiter
-                        currentRow.Add(ReadItem(r, delimiter, b));
-                    }
-                    else if (peek == '\r' || peek == '\n')
-                    {
-                        // end of line - swallow cr and/or lf
-                        r.Read();
-                        if (peek == '\r')
-                        {
-                            // Swallow LF if CRLF
-                            peek = r.Peek();
-                            if (peek == '\n')
-                                r.Read();
-                        }
-
-                        allRows.Add(currentRow.ToArray());
-                        currentRow.Clear();
-                    }
-                    else
-                        currentRow.Add(ReadItem(r, delimiter, b));
-
-                    peek = r.Peek();
-                }
-
-                if (currentRow.Count > 0)
-                    allRows.Add(currentRow.ToArray());
-                // End of file
-                return allRows.ToArray();
+                return Read(r, delimiter);
             }
+        }
+
+        private static object[][] Read(TextReader r, char delimiter = ',')
+        {
+            StringBuilder b = new StringBuilder();
+            List<object[]> allRows = new List<object[]>();
+            List<object> currentRow = new List<object>();
+
+            int peek = r.Peek();
+            while (peek >= 0)
+            {
+                if (peek == delimiter)
+                {
+                    r.Read(); // Skip over delimiter
+                    currentRow.Add(ReadItem(r, delimiter, b));
+                }
+                else if (peek == '\r' || peek == '\n')
+                {
+                    // end of line - swallow cr and/or lf
+                    r.Read();
+                    if (peek == '\r')
+                    {
+                        // Swallow LF if CRLF
+                        peek = r.Peek();
+                        if (peek == '\n')
+                            r.Read();
+                    }
+
+                    allRows.Add(currentRow.ToArray());
+                    currentRow.Clear();
+                }
+                else
+                    currentRow.Add(ReadItem(r, delimiter, b));
+
+                peek = r.Peek();
+            }
+
+            if (currentRow.Count > 0)
+                allRows.Add(currentRow.ToArray());
+            // End of file
+            return allRows.ToArray();
         }
 
         private static string ReadItem(TextReader input, char delimiter, StringBuilder b)

@@ -83,6 +83,17 @@ namespace Tests
         {
             Parser.ParseAndExecute("cats can be lovely");
             Assert.IsTrue(Parser.PredicateAP.Adjective.RelevantTo(Parser.Subject.CommonNoun));
+            Assert.AreEqual("cat", Parser.Subject.CommonNoun.SingularForm.Untokenize());
+            Assert.AreEqual("cats", Parser.Subject.CommonNoun.PluralForm.Untokenize());
+        }
+
+        [TestMethod]
+        public void AdjectiveDeclarationTestSingular()
+        {
+            Parser.ParseAndExecute("a cat can be lovely");
+            Assert.IsTrue(Parser.PredicateAP.Adjective.RelevantTo(Parser.Subject.CommonNoun));
+            Assert.AreEqual("cat", Parser.Subject.CommonNoun.SingularForm.Untokenize());
+            Assert.AreEqual("cats", Parser.Subject.CommonNoun.PluralForm.Untokenize());
         }
 
         [TestMethod]

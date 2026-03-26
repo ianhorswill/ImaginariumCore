@@ -128,6 +128,8 @@ namespace Imaginarium.Parsing
             // Load text
             Input.Clear();
             Input.AddRange(Tokenizer.Tokenize(sentence));
+            if (Input.Count == 0)
+                return false;
 
             RuleTriggeringException = null;
             var rule = SentencePatterns.FirstOrDefault(r =>
@@ -404,7 +406,16 @@ namespace Imaginarium.Parsing
         /// Token currently being processed.
         /// Fails if EndOfInput.
         /// </summary>
-        public string CurrentToken => Input[currentTokenIndex];
+        public string CurrentToken
+        {
+            get
+            {
+                if (EndOfInput)
+                    throw new InvalidOperationException($"Attempt to read past end of input on input \"{string.Join("/", Input)}\"");
+                return Input[currentTokenIndex];
+            }
+        }
+
         #endregion
 
         #region State maintenance
@@ -493,11 +504,8 @@ namespace Imaginarium.Parsing
         /// <summary>
         /// Returns the full path for the specified list file in the definition library.
         /// </summary>
-        public string ListFilePath(string fileName)
-        {
-            var definitionFilePath = Path.Combine(Ontology.DefinitionsDirectory, fileName + DataFiles.ListExtension);
-            return definitionFilePath;
-        }
+        public string ListFilePath(string fileName) =>
+            Driver.Driver.Resources.ListFilePath(Ontology.DefinitionsDirectory, fileName);
 
         /// <summary>
         /// Load definitions for noun, if there is a definition file for it.

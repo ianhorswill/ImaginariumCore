@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29201.188
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11612.150
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Imaginarium", "Imaginarium\Imaginarium.csproj", "{E61502D7-5525-4680-B9E0-38EBA370FAE4}"
 EndProject
@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{539B614A-373F-4D8B-9910-3054F4B5B8B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAssemblySandbox", "WebAssemblySandbox\WebAssemblySandbox.csproj", "{85B1140B-3945-4516-8903-48C6FB928E26}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{539B614A-373F-4D8B-9910-3054F4B5B8B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{539B614A-373F-4D8B-9910-3054F4B5B8B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{539B614A-373F-4D8B-9910-3054F4B5B8B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85B1140B-3945-4516-8903-48C6FB928E26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85B1140B-3945-4516-8903-48C6FB928E26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85B1140B-3945-4516-8903-48C6FB928E26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85B1140B-3945-4516-8903-48C6FB928E26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -47,6 +47,8 @@
   <ItemGroup>
     <Compile Include="Driver\DataFiles.cs" />
     <Compile Include="Driver\Driver.cs" />
+    <Compile Include="Driver\FileSystemResourceProvider.cs" />
+    <Compile Include="Driver\IResourceProvider.cs" />
     <Compile Include="Driver\LogFile.cs" />
     <Compile Include="Generator\Generator.cs" />
     <Compile Include="Generator\Invention.cs" />

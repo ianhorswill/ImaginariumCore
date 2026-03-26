@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using CatSAT;
 using CatSAT.NonBoolean.SMT.Float;
@@ -312,6 +311,7 @@ namespace Imaginarium.Parsing
                             Subject.CommonNoun.RelevantAdjectives.Add(PredicateAP.Adjective);
                     })
                     .Check(SubjectUnmodified)
+                    .Check(SubjectDefaultPlural)
                     .Documentation("Declares that Subjects can be Adjectives, but don't have to be."),
 
                 new SentencePattern(this, "Do", "not", "mention", "!", "being", PredicateAP)
@@ -469,9 +469,9 @@ namespace Imaginarium.Parsing
                     .Action(() =>
                     {
                         var menuName = ListName.Text.Untokenize();
-                        if (!NameIsValidFilename(menuName))
+                        if (!Driver.Driver.Resources.IsValidResourceName(menuName))
                             throw new Exception($"The list name \"{menuName}\" is not a valid file name.");
-                        var possibleValues = File.ReadAllLines(ListFilePath(menuName)).Select(s => s.Trim())
+                        var possibleValues = Driver.Driver.Resources.ReadAllLines(ListFilePath(menuName)).Select(s => s.Trim())
                             .Where(s => !String.IsNullOrEmpty(s)).ToArray();
                         if (possibleValues.Length == 0)
                             throw new ArgumentException($"The file {menuName} has no entries in it!");

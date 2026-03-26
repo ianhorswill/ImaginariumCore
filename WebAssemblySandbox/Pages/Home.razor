@@ -1,0 +1,249 @@
+﻿@page "/"
+@using System.Text.RegularExpressions
+@using Imaginarium.Driver
+@using Imaginarium.Ontology
+@using Imaginarium.Parsing
+@using Task = System.Threading.Tasks.Task
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
+<PageTitle>Imaginarium sandbox</PageTitle>
+
+
+<h3>Program</h3>
+
+<div id="codeEditor" class="language-imaginarium">A cat is a kind of person.
+Persian, tabby, Siamese, manx, Chartreux, and Maine coon are kinds of cat.
+Cats have an age between 1 and 20.
+Cats are male or female.
+A male cat has a name from male cat names
+A female cat has a name from female cat names
+Cats are long-haired or short-haired.
+Cats can be big or small.
+Cats can be cuddly or haughty.
+A cat can be staid or crazy.
+The plural of Chartreux is Chartreux.
+The plural of Siamese is Siamese.
+Chartreux are grey.
+Siamese are grey.
+Persians are long-haired.
+Siamese are short-haired.
+Maine coons are large.
+Cats are black, white, grey, or ginger.
+Cats can love one other cat.
+Cats can hate one other cat.
+Love and hate are mutually exclusive.
+</div>
+
+<script type="module">
+    import { CodeJar } from 'https://cdn.jsdelivr.net/npm/codejar@3.3.0/codejar.min.js';
+    import { withLineNumbers } from 'https://cdn.jsdelivr.net/npm/codejar@3.3.0/linenumbers.min.js';
+
+    const highlight = editor => {
+      // highlight.js does not trims old tags,
+      // let's do it by this hack.
+      editor.textContent = editor.textContent;
+      delete editor.dataset.highlighted;
+      hljs.highlightElement(editor);
+    };
+
+    const editor = document.querySelector(".language-imaginarium");
+    const jar = CodeJar(editor, withLineNumbers(highlight));
+
+    // Put jar someplace the non-module scripts can find it.
+    window.jar = jar;
+
+    let dirty = false;
+
+    window.addEventListener('message', function(event) {
+        if (event.source == window.opener)
+        {
+            jar.updateCode(DotNet.invokeMethod('WebAssemblySandbox', 'SetSource', event.data));
+            //jar.updateCode(event.data);
+            dirty = false;
+        } else
+            console.log("wrong message sender");
+    } );
+
+    window.addEventListener("beforeunload", function (event) {
+        if (dirty) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
+    });
+
+    document.getElementById('downloadButton').addEventListener('click', function() {
+        // Create a Blob object with the content
+        const blob = new Blob([jar.toString()], { type: "text/plain" });
+
+        // Create a temporary anchor element
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Saved.ndscript"; // Set the file name
+
+        // Append the anchor to the document, trigger the download, and remove it
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    if (window.opener != null)
+        window.opener.postMessage("_ready_", "*");
+</script>
+
+<script>
+    function GetUserCode() {
+        return jar.toString();
+    }
+
+    function replaceFilenameInUrl(urlStr, newFilename) {
+        try {
+            const url = new URL(urlStr); // Parse the URL
+            const pathParts = url.pathname.split("/");
+
+            if (pathParts.length > 0) {
+                pathParts[pathParts.length - 1] = newFilename; // Replace last segment
+                url.pathname = pathParts.join("/");
+            }
+
+            return url.toString();
+        } catch (error) {
+            console.error("Invalid URL:", error.message);
+            return urlStr; // Return original if parsing fails
+        }
+    }
+
+    function getResource(resourceName) {
+        const url = replaceFilenameInUrl(window.opener.location.href, resourceName);
+        return fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .catch(error => {
+                console.error("Error fetching resource:", error.message);
+                throw error; // Re-throw to be handled by caller
+            });
+    }
+</script>
+
+@* <textarea @bind="@source" id="sourceCode" style="width: 800px; height: 400px;" spellcheck="false"/> *@
+<br>
+<button class="btn btn-primary" id="downloadButton">Download program</button>
+
+<h3 style="padding-top: 2rem;">Command(s) to execute</h3>
+
+<input @bind="@command" style="width:400px;" spellcheck="false" @onkeydown="@Enter"/>
+
+<button class="btn btn-primary" @onclick="Run">Run</button>
+
+@code {
+    public string outputHeading = "No output";
+    private MarkupString output = (MarkupString)"";
+
+    private string command ="imagine a cat";
+
+    private async void Enter(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter")
+        {
+            StateHasChanged();
+            await Task.Delay(1);
+            Run();
+        }
+    }
+
+    [JSInvokable]
+    public static string SetSource(string sourceCode)
+    {
+        return sourceCode;
+    }
+
+    [JSInvokable]
+    public static void SetResource(string resource, string contents)
+    {
+        StubResourceProvider.ResourceCache[resource] = contents;
+    }
+
+    private string? previousInput = null;
+    private Parser? parser;
+
+    private async Task Run()
+    {
+        Driver.Resources = new StubResourceProvider();
+        try
+        {
+            Driver.ClearCommandBuffer();
+            var code = await JS.InvokeAsync<string>("GetUserCode");
+            if (parser == null || previousInput == null || code != previousInput)
+            {
+                previousInput = code;
+                Driver.Repl = new Repl(this);
+                var ontology = new Ontology("User");
+                parser = new Parser(ontology);
+                parser.SentencePatterns.AddRange(ReplCommands.Commands(parser));
+                parser.ParseAndExecute(code.Split('\n'));
+            }
+            parser.ParseAndExecute(command);
+            Driver.SetOutputWindow(Driver.CommandResponse.Replace("\n", "<br>"));
+            output = (MarkupString)Repl.Output;
+            outputHeading = "Output";
+        }
+
+        catch (Exception e)
+        {
+            output = (MarkupString)(e.Message+e.StackTrace);
+            outputHeading = "Error";
+        }
+
+        StateHasChanged();
+    }
+
+    private static Home singleton = null!;
+    protected override void OnInitialized()
+    {
+        singleton = this;
+    }
+
+    private class Repl(Home home) : IRepl
+    {
+        public static string Output = "";
+
+        public void AddButton(string buttonName, string command)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetOutputWindow(string contents)
+        {
+            Output = contents;
+        }
+    }
+
+    private class StubResourceProvider : IResourceProvider
+    {
+        public static readonly Dictionary<string, string> ResourceCache = new();
+
+        public bool IsValidResourceName(string path) => true;
+
+        public string[] ReadAllLines(string path)
+        {
+            return (path switch
+            {
+                "female cat names" => Resources.FemaleCatNames,
+                "male cat names" => Resources.MaleCatNames,
+                _ => throw new FileNotFoundException($"No such resource file: {path}", path)
+            }).Split('\n');
+            
+        }
+
+        public string ListFilePath(string directory, string filename) => filename;
+    }
+}
+<p></p>
+<h3>@outputHeading</h3>
+
+@output

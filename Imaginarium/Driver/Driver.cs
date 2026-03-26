@@ -35,6 +35,11 @@ namespace Imaginarium.Driver
     /// </summary>
     public static class Driver
     {
+        /// <summary>
+        /// Interface to use to access files
+        /// </summary>
+        public static IResourceProvider Resources = new FileSystemResourceProvider();
+
         #region Command output
         private static readonly StringBuilder CommandBuffer = new StringBuilder();
 
