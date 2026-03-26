@@ -75,7 +75,7 @@ public static class ReplCommands
                                 return;
                             walked.Add(i);
 
-                            inventionDescriptions.Add(Invention.Description(i, "<b><color=#808080>", "</color></b>"));
+                            inventionDescriptions.Add(Invention.Description(i, "<b><span style=\"color: #808080;\">", "</span></b>"));
                             foreach (var sub in Invention.Individuals)
                                 if (sub.Container == i)
                                     Walk(sub);
@@ -92,7 +92,7 @@ public static class ReplCommands
                 }
                 catch (ContradictionException e)
                 {
-                    Driver.AppendResponseLine("<color=red><b>Contradiction found.</b></color>");
+                    Driver.AppendResponseLine("<div style=\"color: red;\"><b>Contradiction found.</b></style>");
                     Driver.AppendResponseLine($"Internal error message: {e.Message}");
                 }
             })
@@ -111,8 +111,8 @@ public static class ReplCommands
                     if (!success) failed++;
                     Driver.AppendResponseLine(
                         success
-                            ? $"<b><color=green>{test.SucceedMessage}</color></b>"
-                            : $"<b><color=red>{test.FailMessage}</color></b>"
+                            ? $"<b><div style=\"color: green;\">{test.SucceedMessage}</div></b>"
+                            : $"<b><div style=\"color: red;\">{test.FailMessage}</div></b>"
                     );
                     if (example != null)
                         Driver.AppendResponseLine($"Example: {example.Description(example.Individuals[0])}");
@@ -122,8 +122,8 @@ public static class ReplCommands
                 {
                     Driver.PrependResponseLine(
                         failed == 0
-                            ? $"<color=green><b>All {total} tests passed.</b></color>\n\n"
-                            : $"<color=red><b>{failed} of {total} tests failed.</b></color>\n\n");
+                            ? $"<div style=\"color: green;\"><b>All {total} tests passed.</b></div>\n\n"
+                            : $"<div style=\"color: red;\"><b>{failed} of {total} tests failed.</b></div>\n\n");
                 }
                 else
                     Driver.AppendResponseLine("No tests have been defined.");

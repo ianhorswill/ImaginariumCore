@@ -185,7 +185,9 @@ Love and hate are mutually exclusive.
                 var ontology = new Ontology("User");
                 parser = new Parser(ontology);
                 parser.SentencePatterns.AddRange(ReplCommands.Commands(parser));
+                Driver.AppendResponseLine("<div style=\"color: grey;\">");
                 parser.ParseAndExecute(code.Split('\n'));
+                Driver.AppendResponseLine("</div>");
             }
             parser.ParseAndExecute(command);
             Driver.SetOutputWindow(Driver.CommandResponse.Replace("\n", "<br>"));
