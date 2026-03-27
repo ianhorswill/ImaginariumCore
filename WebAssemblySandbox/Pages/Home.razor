@@ -31,10 +31,27 @@ Persians are long-haired.
 Siamese are short-haired.
 Maine coons are large.
 Cats are black, white, grey, or ginger.
+
 Cats can love one other cat.
 Cats can hate one other cat.
 Love and hate are mutually exclusive.
 </div>
+
+<script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        window.mermaid = mermaid
+</script>
+
+<style>
+    /* Make Mermaid diagrams responsive */
+    .mermaid {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        overflow-x: auto;
+    }
+</style>
 
 <script type="module">
     import { CodeJar } from 'https://cdn.jsdelivr.net/npm/codejar@3.3.0/codejar.min.js';
@@ -128,6 +145,13 @@ Love and hate are mutually exclusive.
                 throw error; // Re-throw to be handled by caller
             });
     }
+
+    function ScheduleMermaidRenderAndScollToEnd() {
+        window.requestAnimationFrame(function() {
+            mermaid.run();
+            window.requestAnimationFrame(function() { window.scrollTo(0, document.body.scrollHeight); });
+        });
+    }    
 </script>
 
 @* <textarea @bind="@source" id="sourceCode" style="width: 800px; height: 400px;" spellcheck="false"/> *@
@@ -144,7 +168,9 @@ Love and hate are mutually exclusive.
     public string outputHeading = "No output";
     private MarkupString output = (MarkupString)"";
 
-    private string command ="imagine a cat";
+    private MarkupString graph = (MarkupString)"";
+
+    private string command ="imagine 10 cats";
 
     private async void Enter(KeyboardEventArgs e)
     {
@@ -176,7 +202,6 @@ Love and hate are mutually exclusive.
         Driver.Resources = new StubResourceProvider();
         try
         {
-            Driver.ClearCommandBuffer();
             var code = await JS.InvokeAsync<string>("GetUserCode");
             if (parser == null || previousInput == null || code != previousInput)
             {
@@ -189,25 +214,31 @@ Love and hate are mutually exclusive.
                 parser.ParseAndExecute(code.Split('\n'));
                 Driver.AppendResponseLine("</div>");
             }
+            Driver.ClearCommandBuffer();
             parser.ParseAndExecute(command);
             Driver.SetOutputWindow(Driver.CommandResponse.Replace("\n", "<br>"));
             output = (MarkupString)Repl.Output;
             outputHeading = "Output";
+            graph = (MarkupString)ReplCommands.GraphCode.ToString();
         }
 
         catch (Exception e)
         {
             output = (MarkupString)(e.Message+e.StackTrace);
             outputHeading = "Error";
+            graph = (MarkupString)"";
         }
 
         StateHasChanged();
+
+        await JS.InvokeVoidAsync("ScheduleMermaidRenderAndScollToEnd");
     }
 
     private static Home singleton = null!;
     protected override void OnInitialized()
     {
         singleton = this;
+        CatSAT.Random.SetSeed();
     }
 
     private class Repl(Home home) : IRepl
@@ -249,3 +280,5 @@ Love and hate are mutually exclusive.
 <h3>@outputHeading</h3>
 
 @output
+
+@graph

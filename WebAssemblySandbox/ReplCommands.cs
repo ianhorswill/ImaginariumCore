@@ -23,14 +23,19 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
+using System.Text;
 using CatSAT;
 using Imaginarium.Driver;
 using Imaginarium.Generator;
 using Imaginarium.Ontology;
 using Imaginarium.Parsing;
+using WebAssemblySandbox;
 
 public static class ReplCommands
 {
+    public static readonly StringBuilder GraphCode = new StringBuilder();
+    public static readonly string[] EdgeColors = new[] { "red", "green", "blue", "orange", "purple", "brown", "cyan", "magenta" };
+
     public static IEnumerable<SentencePattern> Commands(Parser p)
     {
         yield return new SentencePattern(p, "debug")
@@ -89,6 +94,45 @@ public static class ReplCommands
 
                     foreach (var s in inventionDescriptions)
                         Driver.AppendResponseLine(s);
+
+                    GraphCode.Clear();
+                    if (Invention.Relationships.Count() > 0)
+                    {
+                        GraphCode.AppendLine("<div style=\"padding-top: 50px;\" class=\"mermaid\">");
+                        GraphCode.AppendLine("---\r\nconfig:\r\n  layout: cose\r\n---");
+                        GraphCode.AppendLine("graph TD");
+                        var nodes = new Dictionary<Individual, string>();
+                        var uidCounter = 0;
+                        var verbColors = new Dictionary<Verb, string>();
+                        var verbCounter = 0;
+
+                        string NodeReference(Individual i)
+                        {
+                            if (nodes.TryGetValue(i, out var uid))
+                                return uid;
+                            uid = nodes[i] = $"n{uidCounter++}";
+                            return $"{uid}[{Invention.NameString(i)}]";
+                        }
+
+                        string VerbColor(Verb v)
+                        {
+                            if (verbColors.TryGetValue(v, out var color))
+                                return color;
+                            color = verbColors[v] = EdgeColors[verbCounter++ % EdgeColors.Length];
+                            return color;
+                        }
+
+                        var edgeCounter = 0;
+                        foreach (var (v, f, t) in Invention.Relationships)
+                        {
+                            var  edgeDef = $"   {NodeReference(f)} -- {v.BaseForm.Untokenize()} --> {NodeReference(t)}";
+                            var edgeStyle = $"   linkStyle {edgeCounter++} stroke-width:2px,fill:none,stroke:{VerbColor(v)};";
+                            GraphCode.AppendLine(edgeDef);
+                            GraphCode.AppendLine(edgeStyle);
+                        }
+
+                        GraphCode.AppendLine("</div>");
+                    }
                 }
                 catch (ContradictionException e)
                 {
@@ -99,6 +143,15 @@ public static class ReplCommands
             .Command()
             .Documentation(
                 "Generates one or more Objects.  For example, 'imagine a cat' or 'imagine 10 long-haired cats'.");
+
+        yield return new SentencePattern(p, "ontology")
+            .Action(() =>
+            {
+                GraphCode.Clear();
+                GraphCode.Append(OntologyVisualizer.Mermaid(p.Ontology));
+            })
+            .Documentation("Displays all concepts and their relationships.")
+            .Command();
 
         yield return new SentencePattern(p, "test")
             .Action(() =>
