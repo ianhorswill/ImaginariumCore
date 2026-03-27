@@ -36,6 +36,26 @@ namespace Imaginarium.Driver
     public static class Driver
     {
         /// <summary>
+        /// If true, generate Unity's version of HTML
+        /// </summary>
+        public static bool UnityMarkup = false;
+
+        /// <summary>
+        /// Return rich text with markup to place text in color
+        /// </summary>
+        public static string Colorize(string color, string text)
+        {
+            if (UnityMarkup)
+                return $"<color={color}>{text}</color>";
+            return $"<span style=\"color: {color};\">{text}</span>";
+        }
+
+        /// <summary>
+        /// Return rich text markup to place text in grey.
+        /// </summary>
+        public static string Grey(string text) => Colorize("grey", text);
+
+        /// <summary>
         /// Interface to use to access files
         /// </summary>
         public static IResourceProvider Resources = new FileSystemResourceProvider();

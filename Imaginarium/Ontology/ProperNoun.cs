@@ -48,7 +48,7 @@ namespace Imaginarium.Ontology
         {
             Name = name;
             Individual = Ontology.PermanentIndividual(new MonadicConceptLiteral[0], Name);
-            Driver.Driver.AppendResponseLine($"Learned the new proper name <b><i>{Name.Untokenize()}</i></b>.");
+            Driver.Driver.AppendResponseLine($"Learned proper name <b><i>{Name.Untokenize()}</i></b>.");
             Ontology.AllNouns[Name] = this;
         }
 

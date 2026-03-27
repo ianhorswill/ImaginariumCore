@@ -298,7 +298,7 @@ namespace Imaginarium.Parsing
                 // Note: this guarantees there is a singular form.
                 noun.PluralForm = text;
 
-            Driver.Driver.AppendResponseLine($"Learned the new common noun <b><i>{noun.SingularForm.Untokenize()}</i></b>.");
+            Driver.Driver.AppendResponseLine($"Learned common noun <b><i>{noun.SingularForm.Untokenize()}</i></b>.");
 
             Parser.MaybeLoadDefinitions(noun);
 

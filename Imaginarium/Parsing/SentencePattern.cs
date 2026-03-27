@@ -466,7 +466,7 @@ namespace Imaginarium.Parsing
                     return ccs.Name;
 
                 case Segment seg:
-                    return $"<i><color=grey>{seg.Name}</color></i>";
+                    return $"<i>{Driver.Driver.Colorize("grey", seg.Name)}</i>";
 
                 case Func<bool> f:
                     if (f == Parser.Is)
@@ -474,11 +474,11 @@ namespace Imaginarium.Parsing
                     if (f == Parser.Has)
                         return "have/has";
                     if (f == Parser.Count)
-                        return "<i><color=grey>Count</color></i>";
+                        return $"<i>{Driver.Driver.Grey("Count")}</i>";
                     if (f == Parser.LowerBound)
-                        return "<i><color=grey>LowerBound</color></i>";
+                        return $"<i>{Driver.Driver.Grey("LowerBound")}</i>";
                     if (f == Parser.UpperBound)
-                        return "<i><color=grey>UpperBound</color></i>";
+                        return $"<i>{Driver.Driver.Grey("UpperBound")}</i>";
                     return $"<i>{f}</i>";
 
                 default:

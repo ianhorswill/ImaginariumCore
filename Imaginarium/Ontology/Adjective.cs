@@ -51,7 +51,7 @@ namespace Imaginarium.Ontology
             Name = name;
             Ontology.AllAdjectives[name] = this;
             Ontology.Store(name, this);
-            Driver.Driver.AppendResponseLine($"Learned the adjective <b><i>{name.Untokenize()}</i></b>.");
+            Driver.Driver.AppendResponseLine($"Learned adjective <b><i>{name.Untokenize()}</i></b>.");
         }
 
         /// <summary>

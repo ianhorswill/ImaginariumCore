@@ -149,7 +149,7 @@ namespace Imaginarium.Parsing
                     break;
             }
 
-            Driver.Driver.AppendResponseLine($"Learned new verb <b><i>{verb.StandardName.Untokenize()}</i></b>.");
+            Driver.Driver.AppendResponseLine($"Learned verb <b><i>{verb.StandardName.Untokenize()}</i></b>.");
 
             Parser.MaybeLoadDefinitions(verb);
 
