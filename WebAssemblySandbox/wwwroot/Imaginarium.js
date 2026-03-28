@@ -1,19 +1,20 @@
 ﻿{
 
 const COMMA = {
-    scope: 'keyword',
+    scope: 'symbol',
     begin: ','
 };
 
 const PERIOD = {
-    scope: 'keyword',
+    scope: 'symbol',
     begin: '\\.'
 };
+
 
 hljs.registerLanguage('imaginarium', function () {
     return {
         keywords: {
-            keyword: ['and', 'or', 'not',
+            symbol: ['and', 'or', 'not',
                 'can', 'must', 'should',
                 'are', 'is', 'be', 'implies',
                 'exist',
@@ -29,12 +30,12 @@ hljs.registerLanguage('imaginarium', function () {
                 'always', 'itself',
                 'plural', 'singular',
                 'identified', 'described',
-                'mention', 'print', 
+                'mention', 'print',
                 'called', 'its',
                 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
             ]
         },
-        contains: [ COMMA, PERIOD ]
+        contains: [ COMMA, PERIOD, ]
     }
 })
 }
