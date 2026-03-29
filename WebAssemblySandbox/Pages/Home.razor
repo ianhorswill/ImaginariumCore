@@ -43,15 +43,7 @@ Love and hate are mutually exclusive.
         window.mermaid = mermaid
 </script>
 
-<style>
-    /* Make Mermaid diagrams responsive */
-    .mermaid {
-        max-width: 100%;
-        width: 100%;
-        height: auto;
-        overflow-x: auto;
-    }
-</style>
+
 
 <script type="module">
     import { CodeJar } from 'https://cdn.jsdelivr.net/npm/codejar@3.3.0/codejar.min.js';
@@ -163,6 +155,7 @@ Love and hate are mutually exclusive.
 <input @bind="@command" style="width:400px;" spellcheck="false" @onkeydown="@Enter"/>
 
 <button class="btn btn-primary" @onclick="Run">Run</button>
+<button class="btn btn-primary" @onclick="ShowOntology">Show concepts</button>
 
 @code {
     public string outputHeading = "No output";
@@ -199,6 +192,16 @@ Love and hate are mutually exclusive.
 
     private async Task Run()
     {
+        await RunCommand(command);
+    }
+
+    private async Task ShowOntology()
+    {
+        await RunCommand("ontology");
+    }
+
+    private async Task RunCommand(string commandToExecute)
+    {
         Driver.Resources = new StubResourceProvider();
         try
         {
@@ -215,7 +218,7 @@ Love and hate are mutually exclusive.
                 Driver.AppendResponseLine("</div>");
             }
             Driver.ClearCommandBuffer();
-            parser.ParseAndExecute(command);
+            parser.ParseAndExecute(commandToExecute);
             Driver.SetOutputWindow(Driver.CommandResponse.Replace("\n", "<br>"));
             output = (MarkupString)Repl.Output;
             outputHeading = "Output";

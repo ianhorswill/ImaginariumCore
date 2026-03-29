@@ -34,6 +34,7 @@ using WebAssemblySandbox;
 public static class ReplCommands
 {
     public static readonly StringBuilder GraphCode = new StringBuilder();
+    static readonly StringBuilder StyleCode = new StringBuilder();
     public static readonly string[] EdgeColors = new[] { "red", "green", "blue", "orange", "purple", "brown", "cyan", "magenta" };
 
     public static IEnumerable<SentencePattern> Commands(Parser p)
@@ -96,9 +97,11 @@ public static class ReplCommands
                         Driver.AppendResponseLine(s);
 
                     GraphCode.Clear();
+                    StyleCode.Clear();
+
                     if (Invention.Relationships.Count() > 0)
                     {
-                        GraphCode.AppendLine("<div style=\"padding-top: 50px;\" class=\"mermaid\">");
+                        GraphCode.AppendLine("<pre style=\"padding-top: 50px;\" class=\"mermaid\">");
                         GraphCode.AppendLine("---\r\nconfig:\r\n  layout: cose\r\n---");
                         GraphCode.AppendLine("graph TD");
                         var nodes = new Dictionary<Individual, string>();
@@ -111,6 +114,7 @@ public static class ReplCommands
                             if (nodes.TryGetValue(i, out var uid))
                                 return uid;
                             uid = nodes[i] = $"n{uidCounter++}";
+                            StyleCode.AppendLine($"click {uid} callback \"{Invention.Description(i)}\"");
                             return $"{uid}[{Invention.NameString(i)}]";
                         }
 
@@ -131,7 +135,9 @@ public static class ReplCommands
                             GraphCode.AppendLine(edgeStyle);
                         }
 
-                        GraphCode.AppendLine("</div>");
+                        GraphCode.Append(StyleCode);
+
+                        GraphCode.AppendLine("</pre>");
                     }
                 }
                 catch (ContradictionException e)
