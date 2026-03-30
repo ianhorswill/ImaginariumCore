@@ -328,11 +328,11 @@ namespace Tests
             Assert.IsTrue(face.Part("hair")[0].IsA("hair"));
         }
 
-        [TestMethod, ExpectedException(typeof(GrammaticalError))]
+        [TestMethod]
         public void ImagineNotKnowingTest()
         {
             var o = new Ontology("Not knowing test") { IsLocked = true};
-            o.ParseAndExecute("imagine not knowing what a car is");
+            Assert.ThrowsExactly<GrammaticalError>( () => o.ParseAndExecute("imagine not knowing what a car is"));
         }
 
         [TestMethod]

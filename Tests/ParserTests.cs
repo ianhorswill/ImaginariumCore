@@ -41,10 +41,10 @@ namespace Tests
             DataFiles.DataHome = "../../../Imaginarium/";
         }
 
-        [TestMethod, ExpectedException(typeof(GrammaticalError))]
+        [TestMethod]
         public void GibberishTest()
         {
-            Parser.ParseAndExecute("foo bar baz");
+            Assert.ThrowsExactly<GrammaticalError>(() => Parser.ParseAndExecute("foo bar baz"));
         }
 
         [TestMethod]
@@ -62,13 +62,13 @@ namespace Tests
             Assert.IsTrue(Parser.Subject.CommonNoun.IsImmediateSubKindOf(Parser.Object.CommonNoun));
         }
 
-        [TestMethod, ExpectedException(typeof(UnknownReferentException))]
+        [TestMethod]
         public void LockedOntologyTest()
         {
             var o = new Ontology("LockedOntologyTest");
             o.ParseAndExecute("a cat is a kind of person");
             o.IsLocked = true;
-            o.ParseAndExecute("an alligator is a kind of cat");
+            Assert.ThrowsExactly<UnknownReferentException>(() => o.ParseAndExecute("an alligator is a kind of cat"));
         }
 
         [TestMethod]
