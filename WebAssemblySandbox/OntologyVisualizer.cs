@@ -129,6 +129,7 @@ namespace WebAssemblySandbox
             var verbs = ontology.AllVerbs.ToArray();
             var vocabulary = nouns.Concat(verbs);
 
+            GraphCode.Clear();
             StyleCode.Clear();
             GraphCode.AppendLine("<pre style=\"padding-top: 50px;\" class=\"mermaid\">");
             GraphCode.AppendLine("---\r\nconfig:\r\n  layout: dagre\r\n---");
@@ -151,10 +152,14 @@ namespace WebAssemblySandbox
             }
 
             var edgeCounter = 0;
+            var existingEdges = new HashSet<(object, object, string)>();
             foreach (var n in ontology.AllNouns.Values)
             foreach (var (from, to, label, style) in Edges(n))
             {
-                var edgeDef = $"   {NodeReference(from)} -- {label} --> {NodeReference(to)}";
+                if (existingEdges.Contains((from, to, label)))
+                    continue;
+                existingEdges.Add((from, to, label));
+                    var edgeDef = $"   {NodeReference(from)} -- {label} --> {NodeReference(to)}";
                 var edgeStyle = $"   linkStyle {edgeCounter++} stroke-width:2px,fill:none,stroke:{style};";
                 GraphCode.AppendLine(edgeDef);
                 GraphCode.AppendLine(edgeStyle);
@@ -163,7 +168,10 @@ namespace WebAssemblySandbox
             foreach (var v in ontology.AllVerbs)
             foreach (var (from, to, label, style) in Edges(v))
             {
-                var edgeDef = $"   {NodeReference(from)} -- {label} --> {NodeReference(to)}";
+                if (existingEdges.Contains((from, to, label)))
+                    continue;
+                existingEdges.Add((from, to, label));
+                    var edgeDef = $"   {NodeReference(from)} -- {label} --> {NodeReference(to)}";
                 var edgeStyle = $"   linkStyle {edgeCounter++} stroke-width:2px,fill:none,stroke:{style};";
                 GraphCode.AppendLine(edgeDef);
                 GraphCode.AppendLine(edgeStyle);

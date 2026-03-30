@@ -1,11 +1,8 @@
 ﻿@page "/"
-@using System.Text.RegularExpressions
 @using Imaginarium.Driver
 @using Imaginarium.Ontology
 @using Imaginarium.Parsing
 @using Task = System.Threading.Tasks.Task
-@using Microsoft.AspNetCore.Components.Web
-@using Microsoft.JSInterop
 @inject IJSRuntime JS
 
 <PageTitle>Imaginarium sandbox</PageTitle>
@@ -13,28 +10,9 @@
 
 <h3>Program</h3>
 
-<div id="codeEditor" class="language-imaginarium">A cat is a kind of person.
-Persian, tabby, Siamese, manx, Chartreux, and Maine coon are kinds of cat.
-Cats have an age between 1 and 20.
-Cats are male or female.
-A male cat has a name from male cat names
-A female cat has a name from female cat names
-Cats are long-haired or short-haired.
-Cats can be big or small.
-Cats can be cuddly or haughty.
-A cat can be staid or crazy.
-The plural of Chartreux is Chartreux.
-The plural of Siamese is Siamese.
-Chartreux are grey.
-Siamese are grey.
-Persians are long-haired.
-Siamese are short-haired.
-Maine coons are large.
-Cats are black, white, grey, or ginger.
+Describe the things you want to generate:
+<div id="codeEditor" class="language-imaginarium">
 
-Cats can love one other cat.
-Cats can hate one other cat.
-Love and hate are mutually exclusive.
 </div>
 
 <script type="module">
@@ -163,7 +141,7 @@ Love and hate are mutually exclusive.
 
     private MarkupString graph = (MarkupString)"";
 
-    private string command ="imagine 10 cats";
+    private string command ="";
 
     private async void Enter(KeyboardEventArgs e)
     {
@@ -175,9 +153,21 @@ Love and hate are mutually exclusive.
         }
     }
 
+    const string CommandCommentPrefix = "# Try:";
+
     [JSInvokable]
     public static string SetSource(string sourceCode)
     {
+        if (sourceCode.StartsWith(CommandCommentPrefix))
+        {
+            var commandStart = CommandCommentPrefix.Length;
+            var commandEnd = sourceCode.IndexOf('\n');
+            singleton.command = sourceCode.Substring(commandStart, commandEnd-commandStart).Trim();
+            sourceCode = sourceCode.Substring(commandEnd+1);
+        }
+
+        singleton.StateHasChanged();
+
         return sourceCode;
     }
 
@@ -227,7 +217,7 @@ Love and hate are mutually exclusive.
 
         catch (Exception e)
         {
-            output = (MarkupString)(e.Message+e.StackTrace);
+            output = (MarkupString)(e.Message); // +e.StackTrace);
             outputHeading = "Error";
             graph = (MarkupString)"";
         }
