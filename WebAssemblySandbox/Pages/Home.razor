@@ -257,10 +257,13 @@ Describe the things you want to generate:
 
         public string[] ReadAllLines(string path)
         {
-            return (path switch
+            return (path.ToLower() switch
             {
                 "female cat names" => Resources.FemaleCatNames,
                 "male cat names" => Resources.MaleCatNames,
+                "english surnames" => Resources.EnglishSurnames,
+                "female names" => Resources.FemaleNames,
+                "male names" => Resources.MaleNames,
                 _ => throw new FileNotFoundException($"No such resource file: {path}", path)
             }).Split('\n');
             
