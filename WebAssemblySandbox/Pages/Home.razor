@@ -264,6 +264,9 @@ Describe the things you want to generate:
                 "english surnames" => Resources.EnglishSurnames,
                 "female names" => Resources.FemaleNames,
                 "male names" => Resources.MaleNames,
+                "bear names" => Resources.BearNames,
+                "prizes" => Resources.Prizes,
+                "surprises" => Resources.Surprises,
                 _ => throw new FileNotFoundException($"No such resource file: {path}", path)
             }).Split('\n');
             
