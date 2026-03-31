@@ -36,6 +36,7 @@ public static class ReplCommands
     public static readonly StringBuilder GraphCode = new StringBuilder();
     static readonly StringBuilder StyleCode = new StringBuilder();
     public static readonly string[] EdgeColors = new[] { "red", "green", "blue", "orange", "purple", "brown", "cyan", "magenta" };
+    public static bool ShowMermaidCode = false;
 
     public static IEnumerable<SentencePattern> Commands(Parser p)
     {
@@ -101,7 +102,7 @@ public static class ReplCommands
 
                     if (Invention.Relationships.Count() > 0)
                     {
-                        GraphCode.AppendLine("<pre style=\"padding-top: 50px;\" class=\"mermaid\">");
+                        GraphCode.AppendLine(ShowMermaidCode?"<pre>":"<pre style=\"padding-top: 50px;\" class=\"mermaid\">");
                         GraphCode.AppendLine("---\r\nconfig:\r\n  layout: cose\r\n---");
                         GraphCode.AppendLine("graph TD");
                         var nodes = new Dictionary<Individual, string>();
@@ -214,6 +215,14 @@ public static class ReplCommands
                 }
             })
             .Documentation("Dump the clauses of the compiled SAT problem")
+            .Command();
+
+        yield return new SentencePattern(p, "show", "mermaid")
+            .Action(() =>
+            {
+                ShowMermaidCode = !ShowMermaidCode;
+            })
+            .Documentation("Toggles between rendering diagrams and showing their Mermaid source code.")
             .Command();
     }
 }

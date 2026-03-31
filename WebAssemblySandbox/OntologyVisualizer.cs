@@ -131,7 +131,7 @@ namespace WebAssemblySandbox
 
             GraphCode.Clear();
             StyleCode.Clear();
-            GraphCode.AppendLine("<pre style=\"padding-top: 50px;\" class=\"mermaid\">");
+            GraphCode.AppendLine(ReplCommands.ShowMermaidCode?"<pre>":"<pre style=\"padding-top: 50px;\" class=\"mermaid\">");
             GraphCode.AppendLine("---\r\nconfig:\r\n  layout: dagre\r\n---");
             GraphCode.AppendLine("graph LR");
             var nodes = new Dictionary<object, string>();
