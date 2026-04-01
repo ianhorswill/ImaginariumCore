@@ -30,7 +30,7 @@ hljs.registerLanguage('imaginarium', function () {
                 'rare', 'common',
                 'always', 'itself',
                 'plural', 'singular',
-                'identified', 'described',
+                'identified', 'described', 'mention',
                 'mention', 'print',
                 'called', 'its', 'themselves', 'themself',
                 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',

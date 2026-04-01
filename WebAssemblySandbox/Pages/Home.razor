@@ -204,7 +204,7 @@ Describe the things you want to generate:
                 parser = new Parser(ontology);
                 parser.SentencePatterns.AddRange(ReplCommands.Commands(parser));
                 Driver.AppendResponseLine("<div style=\"color: grey;\">");
-                parser.ParseAndExecute(code.Split('\n'));
+                parser.ParseAndExecute(code.Split('\n').Where(line => !line.StartsWith("#")).ToArray());
                 Driver.AppendResponseLine("</div>");
             }
             Driver.ClearCommandBuffer();
@@ -217,7 +217,7 @@ Describe the things you want to generate:
 
         catch (Exception e)
         {
-            output = (MarkupString)(e.Message); // +e.StackTrace);
+            output = (MarkupString)(e.Message+e.StackTrace);
             outputHeading = "Error";
             graph = (MarkupString)"";
         }
