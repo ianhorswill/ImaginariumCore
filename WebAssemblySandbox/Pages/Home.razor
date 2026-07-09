@@ -149,7 +149,9 @@ Describe the things you want to generate:
         {
             StateHasChanged();
             await Task.Delay(1);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             Run();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
     }
 
@@ -235,7 +237,9 @@ Describe the things you want to generate:
         CatSAT.Random.SetSeed();
     }
 
+#pragma warning disable CS9113 // Parameter is unread.
     private class Repl(Home home) : IRepl
+#pragma warning restore CS9113 // Parameter is unread.
     {
         public static string Output = "";
 

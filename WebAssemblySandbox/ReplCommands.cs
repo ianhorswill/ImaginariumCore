@@ -63,7 +63,7 @@ public static class ReplCommands
                 {
                     Generator.Current = new Generator(p.Object.CommonNoun, p.Object.Modifiers, count);
                     var Invention = Generator.Current.Generate();
-                    List<string> inventionDescriptions = null;
+                    List<string> inventionDescriptions = null!;
 
                     if (Invention == null)
                     {
@@ -100,7 +100,7 @@ public static class ReplCommands
                     GraphCode.Clear();
                     StyleCode.Clear();
 
-                    if (Invention.Relationships.Count() > 0)
+                    if (Invention!.Relationships.Count() > 0)
                     {
                         GraphCode.AppendLine(ShowMermaidCode?"<pre>":"<pre style=\"padding-top: 50px;\" class=\"mermaid\">");
                         GraphCode.AppendLine("---\r\nconfig:\r\n  layout: cose\r\n---");
