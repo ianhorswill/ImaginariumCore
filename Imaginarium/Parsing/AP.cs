@@ -23,6 +23,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 #endregion
 
+using System.Collections.Generic;
 using Imaginarium.Ontology;
 
 namespace Imaginarium.Parsing
@@ -55,9 +56,10 @@ namespace Imaginarium.Parsing
         /// <inheritdoc />
         protected override Adjective GetConcept()
         {
-            var (text, relativeFrequency) = Parser.ParseRelativeFrequencyFromText(Text);
+            var (text, relativeFrequency, frequencySpecified) = Parser.ParseRelativeFrequencyFromText(Text);
             RelativeFrequency = relativeFrequency;
-            return Ontology.Adjective(text) ?? new Adjective(Ontology, text);
+            return Ontology.Adjective(text) ??
+                   new Adjective(Ontology, text) { InitialProbability = frequencySpecified ? relativeFrequency : 0.5f };
         }
 
         /// <inheritdoc />
@@ -67,6 +69,7 @@ namespace Imaginarium.Parsing
         public override void ParseModifiers()
         {
             var tok = CurrentToken.ToLower();
+
             if (tok == "not" || tok == "non" || tok == "never")
             {
                 IsNegated = true;

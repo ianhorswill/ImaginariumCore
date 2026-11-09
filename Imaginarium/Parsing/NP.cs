@@ -256,7 +256,7 @@ namespace Imaginarium.Parsing
         /// <returns></returns>
         protected override Noun GetConcept()
         {
-            var (text, relativeFrequency) = Parser.ParseRelativeFrequencyFromText(Text);
+            var (text, relativeFrequency, _) = Parser.ParseRelativeFrequencyFromText(Text);
             RelativeFrequency = relativeFrequency;
 
             if (Number == Parser.Number.Plural || BeginsWithDeterminer || ForceCommonNoun)

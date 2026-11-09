@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using Imaginarium.Driver;
 using Imaginarium.Ontology;
@@ -601,18 +600,25 @@ namespace Imaginarium.Parsing
         /// text and the number.  If there is no number at the end, just return the original
         /// text and 1.
         /// </summary>
-        internal (string[] strippedText, float relativeFrequency) ParseRelativeFrequencyFromText(string[] text)
+        internal (string[] strippedText, float relativeFrequency, bool frequencySpecified) ParseRelativeFrequencyFromText(string[] text)
         {
             var length = text.Length;
-            if (length > 2 && text[length - 3] == "(")
+            if (length > 2 && text[length - 1] == ")")
             {
-                if (text[length - 1] != ")" || !float.TryParse(text[length - 2], out var relativeFrequency))
+                var number = text[length-2];
+                var parentheticalLength = 3;
+                if (length > 5 && text[length - 5] == "(")
+                {
+                    number = text[length-4] + text[length-3] + number;
+                    parentheticalLength = 5;
+                }
+                if (!float.TryParse(number, out var relativeFrequency))
                     throw new GrammaticalError($"I don't understand the noun phrase {text.Untokenize()}.");
-                var stripped = text.Take(length - 3).ToArray();
-                return (stripped, relativeFrequency);
+                var stripped = text.Take(length-parentheticalLength).ToArray();
+                return (stripped, relativeFrequency, true);
             }
 
-            return (text, 1);
+            return (text, 1, false);
         }
 
         /// <summary>

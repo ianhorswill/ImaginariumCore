@@ -71,6 +71,39 @@ namespace Tests
         }
 
         [TestMethod]
+        public void AdjectiveFrequencyTest()
+        {
+            Ontology.EraseConcepts();
+            SentencePattern.LogAllParsing = true;
+            Parser.ParseAndExecute("a cat is a kind of person",
+                "a cat can be haughty (0.1)",
+                "a cat can be cuddly (0.9)",
+                "a cat can be crazy");
+            Console.WriteLine(Imaginarium.Driver.Driver.CommandResponse);
+            var cat = Ontology.CommonNoun("cat");
+            var g = new Generator(cat);
+            var haughty = Ontology.Adjective("haughty");
+            var cuddly = Ontology.Adjective("cuddly");
+            var crazy = Ontology.Adjective("crazy");
+            var haughtyCount = 0;
+            var cuddlyCount = 0;
+            var crazyCount = 0;
+            for (var n = 0; n < 100; n++)
+            {
+                var i = g.Generate();
+                var description = i.Description();
+                if (i.IsA(i.Individuals[0], haughty))
+                    haughtyCount++;
+                if (i.IsA(i.Individuals[0], cuddly))
+                    cuddlyCount++;
+                if (i.IsA(i.Individuals[0], crazy))
+                    crazyCount++;
+            }
+            Assert.IsTrue(haughtyCount < crazyCount);
+            Assert.IsTrue(cuddlyCount > crazyCount);
+        }
+
+        [TestMethod]
         public void RelativeFrequencyTest()
         {
             Ontology.EraseConcepts();

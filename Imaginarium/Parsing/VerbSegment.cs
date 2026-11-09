@@ -27,6 +27,7 @@ using System;
 using System.Diagnostics;
 using Imaginarium.Ontology;
 using static Imaginarium.Parsing.Parser;
+using System.Linq;
 
 namespace Imaginarium.Parsing
 {
@@ -154,6 +155,11 @@ namespace Imaginarium.Parsing
             Parser.MaybeLoadDefinitions(verb);
 
             return verb;
+        }
+
+        protected override bool SanityCheck()
+        {
+            return !Text.Contains("(");
         }
 
         /// <inheritdoc />

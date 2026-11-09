@@ -58,6 +58,12 @@ namespace Imaginarium.Parsing
         public bool AllowListConjunctions;
 
         /// <summary>
+        /// Check Text to make sure it seems valid
+        /// </summary>
+        /// <returns>True if Text is valid</returns>
+        protected virtual bool SanityCheck() => true;
+
+        /// <summary>
         /// Scan forward from current position to the occurence of token.
         /// Text will not include token, and terminating token will not be skipped.
         /// </summary>
@@ -78,7 +84,9 @@ namespace Imaginarium.Parsing
                 {
                     SetText(beginning);
                     if (start < end) // Must have consumed at least one token
-                        return true;
+                    {
+                        return SanityCheck();
+                    }
                     else
                         goto fail;
                 }
@@ -112,7 +120,7 @@ namespace Imaginarium.Parsing
                     if (start == end)
                         // Empty segment
                         goto giveUp;
-                    return true;
+                    return SanityCheck();
                 }
                 else if (Parser.ListConjunction(CurrentToken))
                 {
@@ -160,7 +168,7 @@ namespace Imaginarium.Parsing
                 ResetTo(beginning);
                 return false;
             }
-            return true;
+            return SanityCheck();
         }
 
         /// <summary>
