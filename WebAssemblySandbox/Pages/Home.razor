@@ -176,12 +176,12 @@ Describe the things you want to generate:
     [JSInvokable]
     public static void SetResource(string resource, string contents)
     {
-        StubResourceProvider.ResourceCache[resource] = contents;
+        ResourceProvider.ResourceCache[resource] = contents;
     }
 
     private string? previousInput = null;
     private Parser? parser;
-
+    
     private async Task Run()
     {
         await RunCommand(command);
@@ -194,7 +194,7 @@ Describe the things you want to generate:
 
     private async Task RunCommand(string commandToExecute)
     {
-        Driver.Resources = new StubResourceProvider();
+        Driver.Resources = new ResourceProvider();
         try
         {
             var code = await JS.InvokeAsync<string>("GetUserCode");
@@ -206,20 +206,24 @@ Describe the things you want to generate:
                 parser = new Parser(ontology);
                 parser.SentencePatterns.AddRange(ReplCommands.Commands(parser));
                 Driver.AppendResponseLine("<div style=\"color: grey;\">");
-                parser.ParseAndExecute(code.Split('\n').Where(line => !line.StartsWith("#")).ToArray());
+                var loader = new OntologyLoader(parser);
+                //Driver.AppendResponseLine("starting...");
+                await loader.SplitAndLoad(code);
+                //Driver.AppendResponseLine("done...");
+                //parser.ParseAndExecute(code.Split('\n').Where(line => !line.StartsWith("#")).ToArray());
                 Driver.AppendResponseLine("</div>");
+                Driver.ClearCommandBuffer();
             }
-            Driver.ClearCommandBuffer();
             parser.ParseAndExecute(commandToExecute);
             Driver.SetOutputWindow(Driver.CommandResponse.Replace("\n", "<br>"));
             output = (MarkupString)Repl.Output;
             outputHeading = "Output";
             graph = (MarkupString)ReplCommands.GraphCode.ToString();
         }
-
         catch (Exception e)
         {
-            output = (MarkupString)(e.Message+e.StackTrace);
+            Driver.SetOutputWindow(Driver.CommandResponse.Replace("\n", "<br>"));
+            output = (MarkupString)(Repl.Output+"\n"+e.Message+e.StackTrace);
             outputHeading = "Error";
             graph = (MarkupString)"";
             previousInput = "";
@@ -245,40 +249,13 @@ Describe the things you want to generate:
 
         public void AddButton(string buttonName, string command)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void SetOutputWindow(string contents)
         {
             Output = contents;
         }
-    }
-
-    private class StubResourceProvider : IResourceProvider
-    {
-        public static readonly Dictionary<string, string> ResourceCache = new();
-
-        public bool IsValidResourceName(string path) => true;
-
-        public string[] ReadAllLines(string path)
-        {
-            return (path.ToLower() switch
-            {
-                "female cat names" => Resources.FemaleCatNames,
-                "male cat names" => Resources.MaleCatNames,
-                "english surnames" => Resources.EnglishSurnames,
-                "female names" => Resources.FemaleNames,
-                "male names" => Resources.MaleNames,
-                "bear names" => Resources.BearNames,
-                "prizes" => Resources.Prizes,
-                "surprises" => Resources.Surprises,
-                "dog names" => Resources.DogNames,
-                _ => throw new FileNotFoundException($"No such resource file: {path}", path)
-            }).Split('\n');
-            
-        }
-
-        public string ListFilePath(string directory, string filename) => filename;
     }
 }
 <p></p>

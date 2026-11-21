@@ -19,6 +19,5 @@
         /// Return the internal path to use for a list file.
         /// </summary>
         string ListFilePath(string directory, string filename);
-
     }
 }
